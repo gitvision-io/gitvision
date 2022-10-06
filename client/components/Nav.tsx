@@ -1,16 +1,11 @@
 import Link from "next/link";
 import React, { useState } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import Button from "./common/Button";
+import { Variant } from "./common/Variant";
 
-function Nav({}) {
-  const dark = () => {
-    if (localStorage.theme === "light") {
-      document.documentElement.classList.add("dark");
-      localStorage.theme = "dark";
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.theme = "light";
-    }
-  };
+function Nav() {
+  const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <div className="px-4 py-5 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
@@ -81,12 +76,14 @@ function Nav({}) {
               About us
             </a>
           </li>
+          {session && <li>Signed in as {session?.user?.email}</li>}
           <li>
-            <Link href="/signin">
-              <a className="inline-flex items-center justify-center h-12 px-6 font-medium tracking-wide text-white transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none">
+            {session && <Button onClick={() => signOut()}>Sign out</Button>}
+            {!session && (
+              <Button variant={Variant.Success} onClick={() => signIn()}>
                 Sign in
-              </a>
-            </Link>
+              </Button>
+            )}
           </li>
         </ul>
         <div className="lg:hidden">
@@ -201,11 +198,20 @@ function Nav({}) {
                       </a>
                     </li>
                     <li>
-                      <Link href="/signin">
-                        <a className="inline-flex items-center justify-center h-12 px-6 font-medium tracking-wide text-white transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none">
+                      {session && (
+                        <>
+                          Signed in as {session?.user?.email} <br />
+                          <Button onClick={() => signOut()}>Sign out</Button>
+                        </>
+                      )}
+                      {!session && (
+                        <Button
+                          variant={Variant.Success}
+                          onClick={() => signIn()}
+                        >
                           Sign in
-                        </a>
-                      </Link>
+                        </Button>
+                      )}
                     </li>
                   </ul>
                 </nav>
