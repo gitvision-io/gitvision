@@ -5,7 +5,6 @@ import { Fragment, useState } from "react";
 
 export const Navbar = () => {
   const { data: session } = useSession();
-  console.log(session);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   function classNames(...classes: any[]) {
