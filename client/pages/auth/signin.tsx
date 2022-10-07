@@ -25,17 +25,15 @@ export default function Signin({
 
               {Object.values(providers).map((provider) => (
                 <div className="flex gap-4 item-center" key={provider.id}>
-                  <Link href="/home">
-                    <button
-                      type="button"
-                      className="py-2 px-4 flex justify-center items-center  bg-gray-600 hover:bg-gray-800 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                      onClick={() =>
-                        signIn(provider.id, { callbackUrl: "/dashboard" })
-                      }
-                    >
-                      Github
-                    </button>
-                  </Link>
+                  <button
+                    type="button"
+                    className="py-2 px-4 flex justify-center items-center  bg-gray-600 hover:bg-gray-800 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    onClick={() =>
+                      signIn(provider.id, { callbackUrl: "/dashboard" })
+                    }
+                  >
+                    Github
+                  </button>
                 </div>
               ))}
             </div>
