@@ -78,7 +78,11 @@ function Nav() {
           </li>
           {session && <li>Signed in as {session?.user?.email}</li>}
           <li>
-            {session && <Button onClick={() => signOut()}>Sign out</Button>}
+            {session && (
+              <Button onClick={() => signOut({ callbackUrl: "/auth/signin" })}>
+                Sign out
+              </Button>
+            )}
             {!session && (
               <Button variant={Variant.Success} onClick={() => signIn()}>
                 Sign in
@@ -201,7 +205,11 @@ function Nav() {
                       {session && (
                         <>
                           Signed in as {session?.user?.email} <br />
-                          <Button onClick={() => signOut()}>Sign out</Button>
+                          <Button
+                            onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+                          >
+                            Sign out
+                          </Button>
                         </>
                       )}
                       {!session && (

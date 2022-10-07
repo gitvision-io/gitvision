@@ -1,66 +1,76 @@
-import React from "react";
-import Example from "../components/Dropdown";
+import React, { useEffect, useState } from "react";
+import Dropdown from "../components/Dropdown";
 import Footer from "../components/Footer";
 import { Navbar } from "../components/Navbar";
+import { getInstance } from "../services/api";
 
-function home() {
-  const organizations = [
-    {
-      name: "flagshipio",
-    },
-    {
-      name: "chadi",
-    },
-  ];
+const times = [
+  { label: "last hour" },
+  { label: "last 5 hour" },
+  { label: "yesterday" },
+  { label: "last week" },
+];
 
-  const time = [
-    { name: "last hour" },
-    { name: "last 5 hour" },
-    { name: "yesterday" },
-    { name: "last week" },
-  ];
+const repositories = [
+  {
+    label: "flagship-js-sdk",
+    contributors: 5,
+    activeRepository: 10,
+    openIssues: 50,
+  },
+  {
+    label: "flagship-ts-sdk",
+    contributors: 5,
+    activeRepository: 10,
+    openIssues: 50,
+  },
+  {
+    label: "flagship-go-sdk",
+    contributors: 5,
+    activeRepository: 10,
+    openIssues: 50,
+  },
+];
 
-  const repositories = [
-    {
-      name: "flagship-js-sdk",
-      contributors: 5,
-      activeRepository: 10,
-      openIssues: 50,
-    },
-    {
-      name: "flagship-ts-sdk",
-      contributors: 5,
-      activeRepository: 10,
-      openIssues: 50,
-    },
-    {
-      name: "flagship-go-sdk",
-      contributors: 5,
-      activeRepository: 10,
-      openIssues: 50,
-    },
-  ];
+const contributors = [
+  {
+    username: "guillaume.jaquart",
+    numberOfCommits: "100",
+    lineOfCodeChanges: "5000",
+    commitActivity: "20",
+  },
+  {
+    username: "Chadiii",
+    numberOfCommits: "50",
+    lineOfCodeChanges: "2000",
+    commitActivity: "10",
+  },
+  {
+    username: "John.Doe",
+    numberOfCommits: "5",
+    lineOfCodeChanges: "400",
+    commitActivity: "2",
+  },
+];
 
-  const contributors = [
-    {
-      username: "guillaume.jaquart",
-      numberOfCommits: "100",
-      lineOfCodeChanges: "5000",
-      commitActivity: "20",
-    },
-    {
-      username: "Chadiii",
-      numberOfCommits: "50",
-      lineOfCodeChanges: "2000",
-      commitActivity: "10",
-    },
-    {
-      username: "John.Doe",
-      numberOfCommits: "5",
-      lineOfCodeChanges: "400",
-      commitActivity: "2",
-    },
-  ];
+function Dashboard() {
+  const [organizations, setOrganization] = useState([]);
+  const [filters, setFilters] = useState<
+    Record<string, string | number | (string | number)[]>
+  >({});
+
+  useEffect(() => {
+    getInstance()
+      .get("/api/dashboard/orgs")
+      .then((res) =>
+        setOrganization(
+          res.data.map((o: { id: number; login: string }) => ({
+            label: o.login,
+            value: o.id,
+          }))
+        )
+      );
+  }, []);
 
   return (
     <div>
@@ -68,13 +78,31 @@ function home() {
       <div className="px-4 py-10 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-10">
         <div className="grid row-gap-8 sm:grid-cols-5">
           <div className="text-center pr-8">
-            <Example label={"Organization"} information={organizations} />
+            <Dropdown
+              label={"Organization"}
+              items={organizations}
+              value={filters.organization}
+              onChange={(v) => setFilters({ ...filters, organization: v })}
+            />
           </div>
           <div className="text-center pr-8">
-            <Example label={"Time"} information={time} />
+            <Dropdown
+              label={"Time"}
+              items={times.map((t) => ({ ...t, value: t.label }))}
+              value={filters.time}
+              onChange={(v) => setFilters({ ...filters, time: v })}
+            />
           </div>
           <div className="text-center">
-            <Example label={"Repositories"} information={repositories} />
+            <Dropdown
+              label={"Repositories"}
+              items={repositories.map((t) => ({ ...t, value: t.label }))}
+              value={filters.repositories}
+              onChange={(v: string | number | (string | number)[]) =>
+                setFilters({ ...filters, repositories: v })
+              }
+              multiple
+            />
           </div>
         </div>
       </div>
@@ -125,7 +153,10 @@ function home() {
             <tbody>
               {contributors.map((item) => {
                 return (
-                  <tr className="bg-white border-b  hover:bg-gray-50 ">
+                  <tr
+                    key={item.username}
+                    className="bg-white border-b  hover:bg-gray-50 "
+                  >
                     <th
                       scope="row"
                       className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap "
@@ -147,4 +178,4 @@ function home() {
   );
 }
 
-export default home;
+export default Dashboard;
