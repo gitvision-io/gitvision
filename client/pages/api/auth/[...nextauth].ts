@@ -12,6 +12,18 @@ export const authOptions: NextAuthOptions = {
     }),
     // ...add more providers here
   ],
+  callbacks: {
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
+      return session;
+    },
+  },
   jwt: {
     encode(params: JWTEncodeParams): Promise<string> {
       // return a custom encoded JWT string
@@ -28,9 +40,11 @@ export const authOptions: NextAuthOptions = {
         picture: jwt.picture,
         sub: jwt.sub,
         state: jwt.state,
-        iat: jwt.iat
+        iat: jwt.iat,
+        accessToken: jwt.accessToken,
       } as JWT);
     },
   },
+  debug: true,
 };
 export default NextAuth(authOptions);
