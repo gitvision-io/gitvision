@@ -53,7 +53,7 @@ const contributors = [
   },
 ];
 
-function Home() {
+function Dashboard() {
   const [organizations, setOrganization] = useState([]);
   const [filters, setFilters] = useState<
     Record<string, string | number | (string | number)[]>
@@ -178,4 +178,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Dashboard;
