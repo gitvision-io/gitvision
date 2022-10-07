@@ -82,9 +82,7 @@ function Home() {
               label={"Organization"}
               items={organizations}
               value={filters.organization}
-              onChange={(v: string | number) =>
-                setFilters({ ...filters, organization: v })
-              }
+              onChange={(v) => setFilters({ ...filters, organization: v })}
             />
           </div>
           <div className="text-center pr-8">
@@ -92,9 +90,7 @@ function Home() {
               label={"Time"}
               items={times.map((t) => ({ ...t, value: t.label }))}
               value={filters.time}
-              onChange={(v: string | number) =>
-                setFilters({ ...filters, time: v })
-              }
+              onChange={(v) => setFilters({ ...filters, time: v })}
             />
           </div>
           <div className="text-center">
@@ -102,10 +98,9 @@ function Home() {
               label={"Repositories"}
               items={repositories.map((t) => ({ ...t, value: t.label }))}
               value={filters.repositories}
-              onChange={(v: string | number | (string | number)[]) => {
-                console.log(v);
-                setFilters({ ...filters, repositories: v });
-              }}
+              onChange={(v: string | number | (string | number)[]) =>
+                setFilters({ ...filters, repositories: v })
+              }
               multiple
             />
           </div>
