@@ -4,12 +4,52 @@ import Link from "next/link";
 import { Fragment, useState } from "react";
 
 export const Navbar = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
   function classNames(...classes: any[]) {
     return classes.filter(Boolean).join(" ");
   }
+
+  const mainMenuItems = session
+    ? [
+        {
+          label: "Dashboard",
+          link: "/dashboard",
+        },
+      ]
+    : [
+        {
+          label: "Product",
+          link: "/#product",
+        },
+        {
+          label: "Features",
+          link: "/#features",
+        },
+        {
+          label: "Pricing",
+          link: "/#pricing",
+        },
+        {
+          label: "About us",
+          link: "/#about-us",
+        },
+      ];
+
+  const userMenuItems = [
+    {
+      label: "Profile",
+      link: "/profile",
+    },
+    {
+      label: "Settings",
+      link: "/settings",
+    },
+  ];
+
   return (
     <div className="px-4 py-5 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
       <div className="relative flex items-center justify-between">
@@ -39,48 +79,22 @@ export const Navbar = () => {
               Company
             </span>
           </a>
-          <ul className="flex items-center hidden space-x-8 lg:flex">
-            <li>
-              <a
-                href="/"
-                aria-label="Our product"
-                title="Our product"
-                className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-              >
-                Product
-              </a>
-            </li>
-            <li>
-              <a
-                href="/"
-                aria-label="Our product"
-                title="Our product"
-                className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-              >
-                Features
-              </a>
-            </li>
-            <li>
-              <a
-                href="/"
-                aria-label="Product pricing"
-                title="Product pricing"
-                className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-              >
-                Pricing
-              </a>
-            </li>
-            <li>
-              <a
-                href="/"
-                aria-label="About us"
-                title="About us"
-                className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-              >
-                About us
-              </a>
-            </li>
-          </ul>
+          {status !== "loading" && (
+            <ul className="flex items-center hidden space-x-8 lg:flex">
+              {mainMenuItems.map((item) => (
+                <li key={item.link}>
+                  <a
+                    href={item.link}
+                    aria-label={item.label}
+                    title={item.label}
+                    className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         {session && (
           <ul className="flex items-center hidden space-x-8 lg:flex">
@@ -92,11 +106,13 @@ export const Navbar = () => {
                 <div>
                   <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="h-8 w-8 rounded-full"
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                      alt=""
-                    />
+                    {session.user?.image && (
+                      <img
+                        className="h-8 w-8 rounded-full"
+                        src={session.user?.image}
+                        alt=""
+                      />
+                    )}
                   </Menu.Button>
                 </div>
                 <Transition
@@ -109,48 +125,22 @@ export const Navbar = () => {
                   leaveTo="transform opacity-0 scale-95"
                 >
                   <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link href="/dashboard">
-                          <a
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            )}
-                          >
-                            Your Dashboard
-                          </a>
-                        </Link>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link href="/profile">
-                          <a
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            )}
-                          >
-                            Your Profile
-                          </a>
-                        </Link>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link href="/settings">
-                          <a
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            )}
-                          >
-                            Settings
-                          </a>
-                        </Link>
-                      )}
-                    </Menu.Item>
+                    {userMenuItems.map((mi) => (
+                      <Menu.Item key={mi.label}>
+                        {({ active }) => (
+                          <Link href={mi.link}>
+                            <a
+                              className={classNames(
+                                active ? "bg-gray-100" : "",
+                                "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              )}
+                            >
+                              {mi.label}
+                            </a>
+                          </Link>
+                        )}
+                      </Menu.Item>
+                    ))}
                     <Menu.Item>
                       {({ active }) => (
                         <a
@@ -196,7 +186,7 @@ export const Navbar = () => {
             </svg>
           </button>
           {isMenuOpen && (
-            <div className="absolute top-0 left-0 w-full">
+            <div className="absolute top-0 left-0 w-full z-10">
               <div className="p-5 bg-white border rounded shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -244,67 +234,59 @@ export const Navbar = () => {
                 </div>
                 <nav>
                   <ul className="space-y-4">
-                    <li>
-                      <a
-                        href="/"
-                        aria-label="Our product"
-                        title="Our product"
-                        className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-                      >
-                        Product
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/"
-                        aria-label="Our product"
-                        title="Our product"
-                        className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-                      >
-                        Features
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/"
-                        aria-label="Product pricing"
-                        title="Product pricing"
-                        className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-                      >
-                        Pricing
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/"
-                        aria-label="About us"
-                        title="About us"
-                        className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-                      >
-                        About us
-                      </a>
-                    </li>
-                    <li>
-                      <div className="inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide text-white transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none">
-                        <button
-                          type="button"
-                          className="flex items-center focus:outline-none"
-                          aria-label="toggle profile dropdown"
+                    {mainMenuItems.map((item) => (
+                      <li key={item.link}>
+                        <a
+                          href={item.link}
+                          aria-label={item.label}
+                          title={item.label}
+                          className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
                         >
-                          <div className="w-8 h-8 overflow-hidden border-2 border-gray-400 rounded-full">
-                            <img
-                              src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
-                              className="object-cover w-full h-full"
-                              alt="avatar"
-                            />
-                          </div>
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                    {session && (
+                      <>
+                        <li>
+                          <div className="inline-flex items-center justify-center w-full h-12 px-6 font-medium tracking-wide text-white transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none">
+                            <button
+                              type="button"
+                              className="flex items-center focus:outline-none"
+                              aria-label="toggle profile dropdown"
+                              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                            >
+                              <div className="w-8 h-8 overflow-hidden border-2 border-gray-400 rounded-full">
+                                {session.user?.image && (
+                                  <img
+                                    src={session.user?.image}
+                                    className="object-cover w-full h-full"
+                                    alt="avatar"
+                                  />
+                                )}
+                              </div>
 
-                          <h3 className="mx-2 text-gray-700 dark:text-gray-200 lg:hidden">
-                            John Doe
-                          </h3>
-                        </button>
-                      </div>
-                    </li>
+                              <h3 className="mx-2 text-white dark:text-gray-200 lg:hidden">
+                                {session.user?.email}
+                              </h3>
+                            </button>
+                          </div>
+                        </li>
+                        {isUserMenuOpen &&
+                          userMenuItems.map((item) => (
+                            <li key={item.link}>
+                              <a
+                                href={item.link}
+                                aria-label={item.label}
+                                title={item.label}
+                                className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
+                              >
+                                {item.label}
+                              </a>
+                            </li>
+                          ))}
+                      </>
+                    )}
                   </ul>
                 </nav>
               </div>

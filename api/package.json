@@ -26,6 +26,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
+    "@octokit/auth-oauth-app": "^5.0.3",
     "@octokit/rest": "^19.0.4",
     "cookie-parser": "^1.4.6",
     "jsonwebtoken": "^8.5.1",

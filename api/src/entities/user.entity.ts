@@ -6,10 +6,25 @@ export class User {
   id: string;
 
   @Column()
-  githubId: string;
+  email: string;
 
   @Column()
-  githubToken: string;
+  name: string;
+
+  @Column()
+  avatarUrl: string;
+
+  @Column({
+    type: String,
+    nullable: true,
+  })
+  githubId: string | null;
+
+  @Column({
+    type: String,
+    nullable: true,
+  })
+  githubToken: string | null;
 
   @Column({ default: true })
   isActive: boolean;

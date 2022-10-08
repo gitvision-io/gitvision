@@ -3,6 +3,7 @@ import GithubProvider from "next-auth/providers/github";
 import { sign, verify } from "jsonwebtoken";
 import { JWT, JWTDecodeParams, JWTEncodeParams } from "next-auth/jwt";
 import { getInstance, setToken } from "../../../services/api";
+import { SESSION_COOKIE_NAME } from "../../../common/constants";
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
@@ -26,7 +27,10 @@ export const authOptions: NextAuthOptions = {
 
       // Persist the OAuth access_token and or the user id to the token right after signin
       if (account) {
-        await getInstance().put(`/api/users/${profile?.id}/token`, {
+        await getInstance().put(`/api/users/me`, {
+          avatarUrl: profile?.avatar_url,
+          email: profile?.email,
+          name: profile?.name,
           githubToken: account.access_token,
           githubId: profile?.id,
         });
@@ -54,7 +58,7 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: "next-auth.session-token",
+      name: SESSION_COOKIE_NAME,
       options: {
         domain: "localhost",
         httpOnly: true,
