@@ -24,7 +24,9 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      location.href = "/login";
+      if (typeof location !== "undefined") {
+        location.href = "/login";
+      }
     }
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error

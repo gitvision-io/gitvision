@@ -9,7 +9,7 @@ export default function Signin({
   return (
     <>
       <div className="grid lg:grid-cols-2 min-h-screen dark:bg-deep-purple-900 dark:text-white">
-        <div className="bg-gray-100 dark:bg-deep-purple-600 hidden lg:grid place-items-center">
+        <div className="bg-gray-100 dark:bg-deep-purple-600 hidden lg:grid place-items-center relative">
           <div className="h-64 w-64 dark:bg-white bg-gray-900 rounded-full" />
           <div className="absolute bottom-0 h-1/2 w-1/2 dark:bg-gray-800/50 bg-gray-100/50 backdrop-blur-lg" />
         </div>
@@ -47,6 +47,6 @@ export default function Signin({
 export async function getServerSideProps() {
   const providers = await getProviders();
   return {
-    props: { providers },
+    props: { providers, disableLayout: true },
   };
 }
