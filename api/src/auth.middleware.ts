@@ -2,14 +2,14 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { verify } from 'jsonwebtoken';
 import { SESSION_COOKIE_NAME } from './common/constants';
-import { DashboardService } from './modules/dashboard/dashboard.service';
+import { GithubService } from './modules/github/github.service';
 import { UsersService } from './modules/users/users.service';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   constructor(
     private readonly usersService: UsersService,
-    private readonly dashboardService: DashboardService,
+    private readonly githubService: GithubService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -31,7 +31,7 @@ export class AuthMiddleware implements NestMiddleware {
     req['user'] = user;
 
     if (user) {
-      this.dashboardService.auth(user.githubToken);
+      this.githubService.auth(user.githubToken);
     }
     next();
   }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getInstance } from "../../services/api";
+import Button from "../common/Button";
 import Dropdown from "../common/Dropdown";
 import Loader from "../common/Loader";
 
@@ -34,14 +35,20 @@ function DashboardFilters({
   const [filters, setFilters] = useState<Filters>({});
 
   useEffect(() => {
+    if (!filters.organization && organizations.length) {
+      setFilters({ ...filters, organization: organizations[0].id });
+    }
+  }, [filters, organizations]);
+
+  useEffect(() => {
     if (filters.organization) {
       setIsLoadingRepos(true);
       const org = organizations.find((o) => o.id === filters.organization);
       getInstance()
         .get(
           org?.isMain
-            ? "/api/dashboard/repos"
-            : `/api/dashboard/orgs/${filters.organization}/repos`
+            ? "/api/github/repos"
+            : `/api/github/orgs/${filters.organization}/repos`
         )
         .then((res) => {
           setRepositories(
@@ -55,18 +62,16 @@ function DashboardFilters({
     }
   }, [filters.organization, organizations]);
 
-  useEffect(() => onChange(filters), [filters, onChange]);
-
   useEffect(() => {
     getInstance()
-      .get("/api/dashboard/orgs")
+      .get("/api/github/orgs")
       .then((res) => setOrganization(res.data));
   }, []);
 
   return (
     <>
-      <div className="grid row-gap-8 sm:grid-cols-5">
-        <div className="text-center pr-8">
+      <div className="grid row-gap-8 sm:grid-cols-5 items-end">
+        <div className="pr-8">
           <Dropdown
             label={"Organization"}
             items={organizations.map(
@@ -81,7 +86,7 @@ function DashboardFilters({
             }
           />
         </div>
-        <div className="text-center pr-8">
+        <div className="pr-8">
           <Dropdown
             label={"Time"}
             items={times.map((t) => ({ ...t, value: t.label }))}
@@ -89,8 +94,8 @@ function DashboardFilters({
             onChange={(v) => setFilters({ ...filters, time: v as string })}
           />
         </div>
-        <div className="text-center">
-          {isLoadingRepos && <Loader color="blue-600" className="mt-7" />}
+        <div className="pr-8">
+          {isLoadingRepos && <Loader color="blue-600" className="mb-2" />}
           {!isLoadingRepos && (
             <Dropdown
               label={"Repositories"}
@@ -100,9 +105,18 @@ function DashboardFilters({
                 setFilters({ ...filters, repositories: v as number[] })
               }
               multiple
+              disabled={!repositories.length}
             />
           )}
         </div>
+        <Button
+          variant="success"
+          size="sm"
+          className="w-24"
+          onClick={() => onChange(filters)}
+        >
+          Apply
+        </Button>
       </div>
     </>
   );

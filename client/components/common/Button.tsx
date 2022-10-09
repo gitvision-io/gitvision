@@ -1,11 +1,13 @@
 import Link from "next/link";
 import Loader from "./Loader";
-import { Variant } from "./Variant";
+import { Size, Variant } from "./Variant";
 
 interface ButtonProps {
   children?: React.ReactNode;
   variant: Variant;
+  size: Size;
   isLink: boolean;
+  className?: string;
   href?: string;
   onClick?: React.MouseEventHandler<HTMLElement>;
   type?: "button" | "submit";
@@ -22,22 +24,31 @@ const variantClasses: Record<Variant, string> = {
   danger: "text-white bg-red-600 hover:bg-red-800",
 };
 
+const sizeClasses: Record<Size, string> = {
+  sm: "h-9 px-4 py-1",
+  md: "h-12 px-6",
+  lg: "",
+  xl: "",
+};
+
 const Button = ({
   children,
   variant,
   isLink,
   href,
+  className,
   onClick,
   isLoading,
   isDisabled,
+  size,
 }: ButtonProps) => {
   const computedChildren = isLoading ? <Loader /> : children;
 
-  const className = `inline-flex items-center justify-center h-12 px-6 font-medium tracking-wide transition duration-200 rounded shadow-md focus:shadow-outline focus:outline-none ${variantClasses[variant]}`;
+  const computedClassName = `inline-flex items-center justify-center h-12 px-6 font-medium tracking-wide transition duration-200 rounded shadow-md focus:shadow-outline focus:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
   if (isLink) {
     return (
       <Link href={href!}>
-        <a className={className} onClick={onClick}>
+        <a className={computedClassName} onClick={onClick}>
           {computedChildren}
         </a>
       </Link>
@@ -45,7 +56,11 @@ const Button = ({
   }
 
   return (
-    <button className={className} onClick={onClick} disabled={isDisabled}>
+    <button
+      className={computedClassName}
+      onClick={onClick}
+      disabled={isDisabled}
+    >
       {computedChildren}
     </button>
   );
@@ -53,6 +68,7 @@ const Button = ({
 
 Button.defaultProps = {
   variant: "default",
+  size: "md",
   isLink: false,
   type: "button",
   isLoading: false,

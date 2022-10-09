@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import DashboardFilters, { Filters } from "../components/dashboard/Filters";
+import { getInstance } from "../services/api";
 
 const contributors = [
   {
@@ -23,12 +24,17 @@ const contributors = [
 ];
 
 function Dashboard() {
-  const [filters, setFilters] = useState<Filters>({});
-  console.log(filters);
+  const onApplyFilters = (filters: Record<string, any>) => {
+    getInstance().get("/api/dashboard/analytics", {
+      params: {
+        filters,
+      },
+    });
+  };
 
   return (
     <>
-      <DashboardFilters onChange={(filters) => setFilters(filters)} />
+      <DashboardFilters onChange={(filters) => onApplyFilters(filters)} />
 
       <div className="py-16 grid row-gap-8 sm:grid-cols-3">
         <div className="text-center">

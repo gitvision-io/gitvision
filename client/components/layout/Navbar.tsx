@@ -2,7 +2,26 @@ import { Menu, Transition } from "@headlessui/react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Fragment, useState } from "react";
+import { ForwardedRef, forwardRef, Fragment, useState } from "react";
+
+// This component is to forward onClick event from Menu.Item to close the menu on item click
+const CustomLink = forwardRef(
+  (
+    props: { href: string; children: React.ReactNode; className: string },
+    ref: ForwardedRef<HTMLAnchorElement>
+  ) => {
+    const { href, children, className, ...rest } = props;
+    return (
+      <Link href={href}>
+        <a ref={ref} className={className} {...rest}>
+          {children}
+        </a>
+      </Link>
+    );
+  }
+);
+
+CustomLink.displayName = "CustomLink";
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
@@ -135,16 +154,15 @@ export const Navbar = () => {
                     {userMenuItems.map((mi) => (
                       <Menu.Item key={mi.label}>
                         {({ active }) => (
-                          <Link href={mi.link}>
-                            <a
-                              className={classNames(
-                                active ? "bg-gray-100" : "",
-                                "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              )}
-                            >
-                              {mi.label}
-                            </a>
-                          </Link>
+                          <CustomLink
+                            href={mi.link}
+                            className={classNames(
+                              active ? "bg-gray-100" : "",
+                              "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            )}
+                          >
+                            {mi.label}
+                          </CustomLink>
                         )}
                       </Menu.Item>
                     ))}
