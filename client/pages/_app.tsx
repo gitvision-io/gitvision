@@ -2,8 +2,8 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { Session } from "next-auth/core/types";
-import { Navbar } from "../components/Navbar";
-import Footer from "../components/Footer";
+import { Navbar } from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 
 function MyApp({
   Component,

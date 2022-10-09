@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
-import {
-  createOAuthAppAuth,
-  createOAuthUserAuth,
-} from '@octokit/auth-oauth-app';
+import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 
 @Injectable()
 export class DashboardService {
@@ -19,7 +16,21 @@ export class DashboardService {
     return (await this.#octokit.rest.orgs.listForAuthenticatedUser()).data;
   }
 
+  async getProfile(): Promise<{ id: number; login: string }> {
+    return (await this.#octokit.rest.users.getAuthenticated()).data;
+  }
+
   async getRepositories(
+    type: 'public' | 'private' | 'all',
+  ): Promise<{ id: number; name: string }[]> {
+    return (
+      await this.#octokit.rest.repos.listForAuthenticatedUser({
+        type,
+      })
+    ).data;
+  }
+
+  async getOrgRepositories(
     org: string,
     type: 'public' | 'private',
   ): Promise<{ id: number; name: string }[]> {

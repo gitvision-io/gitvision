@@ -1,10 +1,12 @@
 import { Menu, Transition } from "@headlessui/react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { Fragment, useState } from "react";
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -13,33 +15,38 @@ export const Navbar = () => {
     return classes.filter(Boolean).join(" ");
   }
 
-  const mainMenuItems = session
-    ? [
-        {
-          label: "Dashboard",
-          link: "/dashboard",
-        },
-      ]
-    : [
-        {
-          label: "Product",
-          link: "/#product",
-        },
-        {
-          label: "Features",
-          link: "/#features",
-        },
-        {
-          label: "Pricing",
-          link: "/#pricing",
-        },
-        {
-          label: "About us",
-          link: "/#about-us",
-        },
-      ];
+  const mainMenuItems =
+    session && router.pathname != "/"
+      ? [
+          {
+            label: "Dashboard",
+            link: "/dashboard",
+          },
+        ]
+      : [
+          {
+            label: "Product",
+            link: "/#product",
+          },
+          {
+            label: "Features",
+            link: "/#features",
+          },
+          {
+            label: "Pricing",
+            link: "/#pricing",
+          },
+          {
+            label: "About us",
+            link: "/#about-us",
+          },
+        ];
 
   const userMenuItems = [
+    {
+      label: "Dashboard",
+      link: "/dashboard",
+    },
     {
       label: "Profile",
       link: "/profile",
