@@ -138,7 +138,7 @@ function DashboardFilters({
                 onChange={(v) => {
                   setFilters({ ...filters, branches: v as string[] });
                 }}
-                //disabled={!selectedRepositories?.branches?.length}
+                disabled={!filters.repositories?.length}
                 multiple
               />
             )}
