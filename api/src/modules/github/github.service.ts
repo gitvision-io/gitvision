@@ -1,19 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
 import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
+import { ApolloService } from '../apollo-client/apollo.service';
+import {
+  GetAllOrganizations,
+  GetAllOrganizationsQuery,
+  GetAllRepositoriesOfOrganization,
+  GetAllRepositoriesOfOrganizationQuery,
+} from 'src/generated/graphql';
 
 @Injectable()
 export class GithubService {
+  apolloService: ApolloService;
   #octokit: Octokit;
 
   auth(token: string): void {
     this.#octokit = new Octokit({
       auth: token,
     });
+    this.apolloService = new ApolloService(token);
   }
 
-  async getOrgs(): Promise<{ id: number; login: string }[]> {
-    return (await this.#octokit.rest.orgs.listForAuthenticatedUser()).data;
+  async getAllOrganizations(): Promise<{ id: number; login: string }[]> {
+    const result = await this.apolloService
+      .githubClient()
+      .query<GetAllOrganizationsQuery>({
+        query: GetAllOrganizations,
+      });
+    return result.data.viewer.organizations.edges.map((organization) => ({
+      id: organization.node.databaseId,
+      login: organization.node.login,
+    }));
   }
 
   async getProfile(): Promise<{ id: number; login: string }> {
@@ -34,12 +51,20 @@ export class GithubService {
     org: string,
     type: 'public' | 'private',
   ): Promise<{ id: number; name: string }[]> {
-    return (
-      await this.#octokit.rest.repos.listForOrg({
-        org,
-        type,
-      })
-    ).data;
+    const result = await this.apolloService
+      .githubClient()
+      .query<GetAllRepositoriesOfOrganizationQuery>({
+        query: GetAllRepositoriesOfOrganization,
+        variables: {
+          login: org,
+        },
+      });
+    return result.data.viewer.organization.repositories.edges.map(
+      (repository) => ({
+        id: repository.node.databaseId,
+        name: repository.node.name,
+      }),
+    );
   }
 
   async revokeAccess(token: string): Promise<{ id: number; name: string }[]> {

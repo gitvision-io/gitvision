@@ -38623,6 +38623,7 @@ export const GetAllOrganizations = gql`
       edges {
         node {
           id
+          databaseId
           login
         }
       }
@@ -38639,6 +38640,7 @@ export const GetAllRepositoriesOfOrganization = gql`
           node {
             name
             id
+            databaseId
             visibility
           }
         }
@@ -38650,11 +38652,11 @@ export const GetAllRepositoriesOfOrganization = gql`
 export type GetAllOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllOrganizationsQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string } | null } | null> | null } } };
+export type GetAllOrganizationsQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, databaseId?: number | null, login: string } | null } | null> | null } } };
 
 export type GetAllRepositoriesOfOrganizationQueryVariables = Exact<{
   login: Scalars['String'];
 }>;
 
 
-export type GetAllRepositoriesOfOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', name: string, id: string, visibility: RepositoryVisibility } | null } | null> | null } } | null } };
+export type GetAllRepositoriesOfOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', name: string, id: string, databaseId?: number | null, visibility: RepositoryVisibility } | null } | null> | null } } | null } };

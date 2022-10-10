@@ -6,6 +6,7 @@ query GetAllRepositoriesOfOrganization($login: String!) {
           node {
             name
             id
+            databaseId
             visibility
           }
         }

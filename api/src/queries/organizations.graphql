@@ -5,6 +5,7 @@ query GetAllOrganizations {
       edges {
         node {
           id
+          databaseId
           login
         }
       }

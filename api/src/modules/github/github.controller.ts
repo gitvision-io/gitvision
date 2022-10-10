@@ -7,7 +7,7 @@ export class GithubController {
 
   @Get('orgs')
   async getOrgs(): Promise<{ id: number; login: string; isMain: boolean }[]> {
-    const orgs = await this.dashboardService.getOrgs();
+    const orgs = await this.dashboardService.getAllOrganizations();
     const profile = await this.dashboardService.getProfile();
     return [
       { ...profile, isMain: true },
