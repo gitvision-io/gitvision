@@ -15,6 +15,7 @@ interface DropdownProps {
   value?: DropdownValue;
   onChange: (value: DropdownValue) => void;
   multiple: boolean;
+  disabled: boolean;
 }
 
 const Dropdown = ({
@@ -23,6 +24,7 @@ const Dropdown = ({
   value,
   onChange,
   multiple,
+  disabled,
 }: DropdownProps) => {
   const selected = items.find((i) => i.value === value);
   const selectedMultiple = multiple
@@ -44,6 +46,7 @@ const Dropdown = ({
         )
       }
       multiple={multiple}
+      disabled={disabled}
     >
       {({ open }) => (
         <>
@@ -51,7 +54,9 @@ const Dropdown = ({
             {label}
           </Listbox.Label>
           <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+            <Listbox.Button
+              className={`relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-200`}
+            >
               <span className="flex items-center">
                 <span className="ml-3 block truncate">
                   {multiple && `${selectedMultiple.length} selected`}
@@ -123,6 +128,7 @@ const Dropdown = ({
 
 Dropdown.defaultProps = {
   multiple: false,
+  disabled: false,
 };
 
 export default Dropdown;

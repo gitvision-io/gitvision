@@ -1,15 +1,6 @@
-import React, { useEffect, useState } from "react";
-import Dropdown from "../components/common/Dropdown";
-import Footer from "../components/Footer";
-import { Navbar } from "../components/Navbar";
+import React, { useState } from "react";
+import DashboardFilters, { Filters } from "../components/dashboard/Filters";
 import { getInstance } from "../services/api";
-
-const times = [
-  { label: "last hour" },
-  { label: "last 5 hour" },
-  { label: "yesterday" },
-  { label: "last week" },
-];
 
 const contributors = [
   {
@@ -33,72 +24,17 @@ const contributors = [
 ];
 
 function Dashboard() {
-  const [organizations, setOrganization] = useState([]);
-  const [repositories, setRepositories] = useState([]);
-
-  const [filters, setFilters] = useState<
-    Record<string, string | number | (string | number)[]>
-  >({});
-
-  useEffect(() => {
-    if (filters.organization) {
-      getInstance()
-        .get(`/api/dashboard/orgs/${filters.organization}/repos`)
-        .then((res) =>
-          setRepositories(
-            res.data.map((o: { id: number; name: string }) => ({
-              label: o.name,
-              value: o.id,
-            }))
-          )
-        );
-    }
-  }, [filters]);
-
-  useEffect(() => {
-    getInstance()
-      .get("/api/dashboard/orgs")
-      .then((res) =>
-        setOrganization(
-          res.data.map((o: { id: string; login: string }) => ({
-            label: o.login,
-            value: o.login,
-          }))
-        )
-      );
-  }, []);
+  const onApplyFilters = (filters: Record<string, any>) => {
+    getInstance().get("/api/dashboard/analytics", {
+      params: {
+        filters,
+      },
+    });
+  };
 
   return (
     <>
-      <div className="grid row-gap-8 sm:grid-cols-5">
-        <div className="text-center pr-8">
-          <Dropdown
-            label={"Organization"}
-            items={organizations}
-            value={filters.organization}
-            onChange={(v) => setFilters({ ...filters, organization: v })}
-          />
-        </div>
-        <div className="text-center pr-8">
-          <Dropdown
-            label={"Time"}
-            items={times.map((t) => ({ ...t, value: t.label }))}
-            value={filters.time}
-            onChange={(v) => setFilters({ ...filters, time: v })}
-          />
-        </div>
-        <div className="text-center">
-          <Dropdown
-            label={"Repositories"}
-            items={repositories}
-            value={filters.repositories}
-            onChange={(v: string | number | (string | number)[]) =>
-              setFilters({ ...filters, repositories: v })
-            }
-            multiple
-          />
-        </div>
-      </div>
+      <DashboardFilters onChange={(filters) => onApplyFilters(filters)} />
 
       <div className="py-16 grid row-gap-8 sm:grid-cols-3">
         <div className="text-center">

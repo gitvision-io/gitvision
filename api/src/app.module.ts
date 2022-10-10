@@ -5,6 +5,7 @@ import { AuthMiddleware } from './auth.middleware';
 import { User } from './entities/user.entity';
 import { UsersModule } from './modules/users/users.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { GithubModule } from './modules/github/github.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     }),
     UsersModule,
     DashboardModule,
+    GithubModule,
   ],
 })
 export class AppModule implements NestModule {

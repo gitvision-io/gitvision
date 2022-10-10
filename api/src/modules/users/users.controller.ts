@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Put, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { User } from 'src/entities/user.entity';
-import { DashboardService } from '../dashboard/dashboard.service';
+import { GithubService } from '../github/github.service';
 import { USER } from './users.decorator';
 import { UserDTO, UserProfileDTO } from './users.dto';
 import { UsersService } from './users.service';
@@ -10,7 +10,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly dashboardService: DashboardService,
+    private readonly githubService: GithubService,
   ) {}
 
   @Get('me')
@@ -41,7 +41,7 @@ export class UsersController {
     @USER() user: User,
     @Req() request: Request,
   ): Promise<{ status: string }> {
-    await this.dashboardService.revokeAccess(user.githubToken);
+    await this.githubService.revokeAccess(user.githubToken);
     await this.usersService.update(request['token'].sub, {
       githubId: null,
       githubToken: null,
