@@ -1,0 +1,12 @@
+query GetAllRepositoriesForUser {
+  viewer {
+    repositories(first: 20) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+}

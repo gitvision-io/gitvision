@@ -38615,6 +38615,28 @@ export type DirectiveResolvers<ContextType = any> = {
 };
 
 
+export const GetAllRepositoriesOfOrganization = gql`
+    query GetAllRepositoriesOfOrganization($login: String!) {
+  viewer {
+    organization(login: $login) {
+      repositories(first: 100) {
+        edges {
+          node {
+            refs(refPrefix: "refs/heads/", first: 100) {
+              nodes {
+                name
+              }
+            }
+            name
+            id
+            visibility
+          }
+        }
+      }
+    }
+  }
+}
+    `;
 export const GetAllOrganizations = gql`
     query GetAllOrganizations {
   viewer {
@@ -38631,37 +38653,33 @@ export const GetAllOrganizations = gql`
   }
 }
     `;
-export const GetAllRepositoriesOfOrganization = gql`
-    query GetAllRepositoriesOfOrganization($login: String!) {
+export const GetAllRepositoriesForUser = gql`
+    query GetAllRepositoriesForUser {
   viewer {
-    organization(login: $login) {
-      repositories(first: 100) {
-        edges {
-          node {
-            refs(refPrefix: "refs/heads/", first: 100) {
-              nodes {
-                name
-              }
-            }
-            name
-            id
-            databaseId
-            visibility
-          }
+    repositories(first: 20) {
+      edges {
+        node {
+          id
+          name
         }
       }
     }
   }
 }
     `;
-export type GetAllOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetAllOrganizationsQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, databaseId?: number | null, login: string } | null } | null> | null } } };
-
 export type GetAllRepositoriesOfOrganizationQueryVariables = Exact<{
   login: Scalars['String'];
 }>;
 
 
-export type GetAllRepositoriesOfOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', name: string, id: string, databaseId?: number | null, visibility: RepositoryVisibility, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } | null } };
+export type GetAllRepositoriesOfOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', name: string, id: string, visibility: RepositoryVisibility, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } | null } };
+
+export type GetAllOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllOrganizationsQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, databaseId?: number | null, login: string } | null } | null> | null } } };
+
+export type GetAllRepositoriesForUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } };

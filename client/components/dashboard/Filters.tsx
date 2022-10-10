@@ -14,7 +14,7 @@ const times = [
 export interface Filters {
   organization?: string;
   time?: string;
-  repositories?: number[];
+  repositories?: string[];
 }
 
 function DashboardFilters({
@@ -24,15 +24,23 @@ function DashboardFilters({
 }) {
   const [organizations, setOrganization] = useState<
     {
-      id: number;
+      id: string;
       login: string;
-      isMain: boolean;
+      isUser: boolean;
     }[]
   >([]);
   const [repositories, setRepositories] = useState([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({});
+
+  const applyFilters = () => {
+    const org = organizations.find((o) => o.login === filters.organization);
+    onChange({
+      ...filters,
+      organization: org?.isUser ? "user" : filters.organization,
+    });
+  };
 
   useEffect(() => {
     if (!filters.organization && organizations.length) {
@@ -46,7 +54,7 @@ function DashboardFilters({
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(
-          org?.isMain
+          org?.isUser
             ? "/api/github/repos"
             : `/api/github/orgs/${filters.organization}/repos`
         )
@@ -74,12 +82,10 @@ function DashboardFilters({
         <div className="pr-8">
           <Dropdown
             label={"Organization"}
-            items={organizations.map(
-              (o: { id: number; login: string; isMain: boolean }) => ({
-                label: o.login,
-                value: o.login,
-              })
-            )}
+            items={organizations.map((o: { login: string }) => ({
+              label: o.login,
+              value: o.login,
+            }))}
             value={filters.organization}
             onChange={(v) =>
               setFilters({ ...filters, organization: v as string })
@@ -101,8 +107,8 @@ function DashboardFilters({
               label={"Repositories"}
               items={repositories}
               value={filters.repositories}
-              onChange={(v: string | number | (string | number)[]) =>
-                setFilters({ ...filters, repositories: v as number[] })
+              onChange={(v) =>
+                setFilters({ ...filters, repositories: v as string[] })
               }
               multiple
               disabled={!repositories.length}
@@ -113,7 +119,7 @@ function DashboardFilters({
           variant="success"
           size="sm"
           className="w-24"
-          onClick={() => onChange(filters)}
+          onClick={applyFilters}
         >
           Apply
         </Button>

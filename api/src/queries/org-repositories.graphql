@@ -11,7 +11,6 @@ query GetAllRepositoriesOfOrganization($login: String!) {
             }
             name
             id
-            databaseId
             visibility
           }
         }

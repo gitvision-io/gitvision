@@ -7,6 +7,8 @@ import {
   GetAllOrganizationsQuery,
   GetAllRepositoriesOfOrganization,
   GetAllRepositoriesOfOrganizationQuery,
+  GetAllRepositoriesForUser,
+  GetAllRepositoriesForUserQuery,
 } from 'src/generated/graphql';
 
 @Injectable()
@@ -39,18 +41,21 @@ export class GithubService {
 
   async getRepositories(
     type: 'public' | 'private' | 'all',
-  ): Promise<{ id: number; name: string }[]> {
-    return (
-      await this.#octokit.rest.repos.listForAuthenticatedUser({
-        type,
-      })
-    ).data;
+  ): Promise<{ id: string; name: string }[]> {
+    const result = await this.apolloService
+      .githubClient()
+      .query<GetAllRepositoriesForUserQuery>({
+        query: GetAllRepositoriesForUser,
+      });
+    return result.data.viewer.repositories.edges.map(
+      (repository) => repository.node,
+    );
   }
 
   async getOrgRepositories(
     org: string,
-    type: 'public' | 'private',
-  ): Promise<{ id: number; name: string; branches: { name: string }[] }[]> {
+    type: 'public' | 'private' | 'all',
+  ): Promise<{ id: string; name: string; branches: { name: string }[] }[]> {
     const result = await this.apolloService
       .githubClient()
       .query<GetAllRepositoriesOfOrganizationQuery>({
@@ -61,14 +66,14 @@ export class GithubService {
       });
     return result.data.viewer.organization.repositories.edges.map(
       (repository) => ({
-        id: repository.node.databaseId,
+        id: repository.node.id,
         name: repository.node.name,
         branches: repository.node.refs.nodes,
       }),
     );
   }
 
-  async revokeAccess(token: string): Promise<{ id: number; name: string }[]> {
+  async revokeAccess(token: string): Promise<void> {
     const appOctokit = new Octokit({
       authStrategy: createOAuthAppAuth,
       auth: {
@@ -76,11 +81,10 @@ export class GithubService {
         clientSecret: process.env.GITHUB_SECRET,
       },
     });
-    return (
-      await appOctokit.rest.apps.deleteAuthorization({
-        client_id: process.env.GITHUB_ID,
-        access_token: token,
-      })
-    ).data;
+
+    await appOctokit.rest.apps.deleteAuthorization({
+      client_id: process.env.GITHUB_ID,
+      access_token: token,
+    });
   }
 }
