@@ -14,7 +14,14 @@ const times = [
 export interface Filters {
   organization?: string;
   time?: string;
-  repositories?: string[];
+  repository?: string;
+  branch?: string;
+}
+
+export interface Repository {
+  id: string;
+  name: string;
+  branches: { name: string }[];
 }
 
 function DashboardFilters({
@@ -29,8 +36,10 @@ function DashboardFilters({
       isUser: boolean;
     }[]
   >([]);
-  const [repositories, setRepositories] = useState([]);
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [repository, setRepository] = useState<Repository>();
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({});
 
@@ -39,6 +48,7 @@ function DashboardFilters({
     onChange({
       ...filters,
       organization: org?.isUser ? "user" : filters.organization,
+      branch: filters.branch,
     });
   };
 
@@ -51,6 +61,7 @@ function DashboardFilters({
   useEffect(() => {
     if (filters.organization) {
       setIsLoadingRepos(true);
+      setIsLoadingBranches(true);
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(
@@ -59,12 +70,7 @@ function DashboardFilters({
             : `/api/github/orgs/${filters.organization}/repos`
         )
         .then((res) => {
-          setRepositories(
-            res.data.map((o: { id: number; name: string }) => ({
-              label: o.name,
-              value: o.name,
-            }))
-          );
+          setRepositories(res.data);
           setIsLoadingRepos(false);
         });
     }
@@ -105,13 +111,36 @@ function DashboardFilters({
           {!isLoadingRepos && (
             <Dropdown
               label={"Repositories"}
-              items={repositories}
-              value={filters.repositories}
-              onChange={(v) =>
-                setFilters({ ...filters, repositories: v as string[] })
-              }
-              multiple
+              items={repositories.map((r) => ({
+                label: r.name,
+                value: r.name,
+              }))}
+              value={filters.repository}
+              onChange={(v) => {
+                setFilters({ ...filters, repository: v as string });
+                setRepository(
+                  repositories.find((r) => r.name === v.toString())
+                );
+                setIsLoadingBranches(false);
+              }}
               disabled={!repositories.length}
+            />
+          )}
+        </div>
+        <div className="pr-8">
+          {isLoadingBranches && <Loader color="blue-600" className="mb-2" />}
+          {repository && !isLoadingBranches && (
+            <Dropdown
+              label={"Branches"}
+              items={repository.branches?.map((b) => ({
+                label: b.name,
+                value: b.name,
+              }))}
+              value={filters.branch}
+              onChange={(v) => {
+                setFilters({ ...filters, branch: v as string });
+              }}
+              disabled={!repository?.branches?.length}
             />
           )}
         </div>
