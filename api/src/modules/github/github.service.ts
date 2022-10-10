@@ -51,7 +51,7 @@ export class GithubService {
       id: repository.node.id,
       name: repository.node.name,
       branches: repository.node.refs.nodes.map((branch) => ({
-        name: `${repository.node.name};${branch.name}`,
+        name: branch.name,
       })),
     }));
   }
@@ -73,7 +73,7 @@ export class GithubService {
         id: repository.node.id,
         name: repository.node.name,
         branches: repository.node.refs.nodes.map((branch) => ({
-          name: `${repository.node.name};${branch.name}`,
+          name: branch.name,
         })),
       }),
     );

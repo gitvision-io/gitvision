@@ -7,7 +7,7 @@ function classNames(...classes: any[]) {
 }
 
 type DropdownSingleValue = string | number;
-type DropdownValue = DropdownSingleValue | DropdownSingleValue[];
+export type DropdownValue = DropdownSingleValue | DropdownSingleValue[];
 
 interface DropdownProps {
   label: string;
@@ -98,6 +98,7 @@ const Dropdown = ({
                               selected ? "font-semibold" : "font-normal",
                               "ml-3 block truncate"
                             )}
+                            title={item.label}
                           >
                             {item.label}
                           </span>

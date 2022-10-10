@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getInstance } from "../../services/api";
 import Button from "../common/Button";
-import Dropdown from "../common/Dropdown";
+import Dropdown, { DropdownValue } from "../common/Dropdown";
 import Loader from "../common/Loader";
 
 const times = [
@@ -37,12 +37,7 @@ function DashboardFilters({
     }[]
   >([]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
-  const [repository, setRepository] = useState<Repository>();
-  const [selectedRepositories, setSelectedRepositories] = useState<
-    Repository[]
-  >([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
-  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({});
 
@@ -64,7 +59,6 @@ function DashboardFilters({
   useEffect(() => {
     if (filters.organization) {
       setIsLoadingRepos(true);
-      setIsLoadingBranches(true);
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(
@@ -119,17 +113,8 @@ function DashboardFilters({
                 value: r.name,
               }))}
               value={filters.repositories}
-              onChange={(v: string[]) => {
+              onChange={(v: DropdownValue) => {
                 setFilters({ ...filters, repositories: v as string[] });
-                setSelectedRepositories([
-                  ...selectedRepositories.filter((r) => v.includes(r.name)),
-                  ...repositories.filter(
-                    (r) =>
-                      v.includes(r.name) &&
-                      !selectedRepositories.find((item) => item.name === r.name)
-                  ),
-                ]);
-                setIsLoadingBranches(false);
               }}
               disabled={!repositories.length}
               multiple
@@ -138,16 +123,17 @@ function DashboardFilters({
         </div>
         <div className="pr-8">
           <>
-            {isLoadingBranches && <Loader color="blue-600" className="mb-2" />}
-            {selectedRepositories && !isLoadingBranches && (
+            {isLoadingRepos && <Loader color="blue-600" className="mb-2" />}
+            {!isLoadingRepos && (
               <Dropdown
                 label={"Branches"}
-                items={selectedRepositories.map((repo) =>
-                  repo.branches.map((b) => ({
-                    label: b.name,
-                    value: b.name,
-                  }))
-                )}
+                items={repositories
+                  .filter((r) => filters.repositories?.includes(r.name))
+                  .flatMap((repo) => repo.branches.map((b) => ({ ...b, repo })))
+                  .map((b) => ({
+                    label: `${b.repo.name} - ${b.name}`,
+                    value: `${b.repo.name} - ${b.name}`,
+                  }))}
                 value={filters.branches}
                 onChange={(v) => {
                   setFilters({ ...filters, branches: v as string[] });
