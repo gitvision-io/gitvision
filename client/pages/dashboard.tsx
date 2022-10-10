@@ -60,9 +60,9 @@ function Dashboard() {
       .get("/api/dashboard/orgs")
       .then((res) =>
         setOrganization(
-          res.data.map((o: { id: number; login: string }) => ({
+          res.data.map((o: { id: string; login: string }) => ({
             label: o.login,
-            value: o.id,
+            value: o.login,
           }))
         )
       );
