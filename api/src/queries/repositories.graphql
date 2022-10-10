@@ -1,0 +1,15 @@
+query GetAllRepositoriesOfOrganization($login: String!) {
+  viewer {
+    organization(login: $login) {
+      repositories(first: 10) {
+        edges {
+          node {
+            name
+            id
+            visibility
+          }
+        }
+      }
+    }
+  }
+}

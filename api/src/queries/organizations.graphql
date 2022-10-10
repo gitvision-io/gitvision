@@ -1,0 +1,13 @@
+query GetAllOrganizations {
+  viewer {
+    login
+    organizations(first: 10) {
+      edges {
+        node {
+          id
+          login
+        }
+      }
+    }
+  }
+}

@@ -5,13 +5,22 @@ export class User {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column({
+    type: String,
+    nullable: true,
+  })
   email: string;
 
-  @Column()
+  @Column({
+    type: String,
+    nullable: true,
+  })
   name: string;
 
-  @Column()
+  @Column({
+    type: String,
+    nullable: true,
+  })
   avatarUrl: string;
 
   @Column({
