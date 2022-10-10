@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
-import { Content } from "../components/Content";
-import { Content1 } from "../components/Content1";
-import { Content2 } from "../components/Content2";
+import { Content } from "../components/index/Content";
+import { Content1 } from "../components/index/Content1";
+import { Content2 } from "../components/index/Content2";
 
 const Home: NextPage = () => {
   return (
