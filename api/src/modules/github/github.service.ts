@@ -50,7 +50,7 @@ export class GithubService {
   async getOrgRepositories(
     org: string,
     type: 'public' | 'private',
-  ): Promise<{ id: number; name: string }[]> {
+  ): Promise<{ id: number; name: string; branches: { name: string }[] }[]> {
     const result = await this.apolloService
       .githubClient()
       .query<GetAllRepositoriesOfOrganizationQuery>({
@@ -63,6 +63,7 @@ export class GithubService {
       (repository) => ({
         id: repository.node.databaseId,
         name: repository.node.name,
+        branches: repository.node.refs.nodes,
       }),
     );
   }

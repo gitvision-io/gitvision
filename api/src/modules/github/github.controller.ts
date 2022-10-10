@@ -23,7 +23,7 @@ export class GithubController {
   @Get('orgs/:org/repos')
   async getOrgRepositories(
     @Param('org') org: string,
-  ): Promise<{ id: number; name: string }[]> {
+  ): Promise<{ id: number; name: string; branches: { name: string }[] }[]> {
     return await this.dashboardService.getOrgRepositories(org, 'public');
   }
 }

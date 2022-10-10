@@ -1,7 +1,7 @@
 query GetAllOrganizations {
   viewer {
     login
-    organizations(first: 10) {
+    organizations(first: 100) {
       edges {
         node {
           id

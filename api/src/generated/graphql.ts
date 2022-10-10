@@ -38619,7 +38619,7 @@ export const GetAllOrganizations = gql`
     query GetAllOrganizations {
   viewer {
     login
-    organizations(first: 10) {
+    organizations(first: 100) {
       edges {
         node {
           id
@@ -38635,9 +38635,14 @@ export const GetAllRepositoriesOfOrganization = gql`
     query GetAllRepositoriesOfOrganization($login: String!) {
   viewer {
     organization(login: $login) {
-      repositories(first: 10) {
+      repositories(first: 100) {
         edges {
           node {
+            refs(refPrefix: "refs/heads/", first: 100) {
+              nodes {
+                name
+              }
+            }
             name
             id
             databaseId
@@ -38659,4 +38664,4 @@ export type GetAllRepositoriesOfOrganizationQueryVariables = Exact<{
 }>;
 
 
-export type GetAllRepositoriesOfOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', name: string, id: string, databaseId?: number | null, visibility: RepositoryVisibility } | null } | null> | null } } | null } };
+export type GetAllRepositoriesOfOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', name: string, id: string, databaseId?: number | null, visibility: RepositoryVisibility, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } | null } };

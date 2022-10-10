@@ -1,9 +1,14 @@
 query GetAllRepositoriesOfOrganization($login: String!) {
   viewer {
     organization(login: $login) {
-      repositories(first: 10) {
+      repositories(first: 100) {
         edges {
           node {
+            refs(refPrefix: "refs/heads/", first: 100) {
+              nodes {
+                name
+              }
+            }
             name
             id
             databaseId
