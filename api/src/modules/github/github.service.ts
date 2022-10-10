@@ -50,7 +50,9 @@ export class GithubService {
     return result.data.viewer.repositories.edges.map((repository) => ({
       id: repository.node.id,
       name: repository.node.name,
-      branches: repository.node.refs.nodes,
+      branches: repository.node.refs.nodes.map((branch) => ({
+        name: `${repository.node.name};${branch.name}`,
+      })),
     }));
   }
 
@@ -70,7 +72,9 @@ export class GithubService {
       (repository) => ({
         id: repository.node.id,
         name: repository.node.name,
-        branches: repository.node.refs.nodes,
+        branches: repository.node.refs.nodes.map((branch) => ({
+          name: `${repository.node.name};${branch.name}`,
+        })),
       }),
     );
   }
