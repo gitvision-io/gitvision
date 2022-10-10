@@ -44,7 +44,7 @@ const Button = ({
 }: ButtonProps) => {
   const computedChildren = isLoading ? <Loader /> : children;
 
-  const computedClassName = `inline-flex items-center justify-center h-12 px-6 font-medium tracking-wide transition duration-200 rounded shadow-md focus:shadow-outline focus:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+  const computedClassName = `inline-flex items-center justify-center font-medium tracking-wide transition duration-200 rounded shadow-md focus:shadow-outline focus:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
   if (isLink) {
     return (
       <Link href={href!}>

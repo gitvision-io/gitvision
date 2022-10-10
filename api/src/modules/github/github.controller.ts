@@ -3,27 +3,27 @@ import { GithubService } from './github.service';
 
 @Controller('/api/github')
 export class GithubController {
-  constructor(private readonly dashboardService: GithubService) {}
+  constructor(private readonly githubService: GithubService) {}
 
   @Get('orgs')
-  async getOrgs(): Promise<{ id: number; login: string; isMain: boolean }[]> {
-    const orgs = await this.dashboardService.getAllOrganizations();
-    const profile = await this.dashboardService.getProfile();
+  async getOrgs(): Promise<{ id: number; login: string; isUser: boolean }[]> {
+    const orgs = await this.githubService.getAllOrganizations();
+    const profile = await this.githubService.getProfile();
     return [
-      { ...profile, isMain: true },
-      ...orgs.map((o) => ({ ...o, isMain: false })),
+      { ...profile, isUser: true },
+      ...orgs.map((o) => ({ ...o, isUser: false })),
     ];
   }
 
   @Get('repos')
-  async getMainRepositories(): Promise<{ id: number; name: string }[]> {
-    return await this.dashboardService.getRepositories('all');
+  async getMainRepositories(): Promise<{ id: string; name: string }[]> {
+    return await this.githubService.getRepositories('all');
   }
 
   @Get('orgs/:org/repos')
   async getOrgRepositories(
     @Param('org') org: string,
-  ): Promise<{ id: number; name: string }[]> {
-    return await this.dashboardService.getOrgRepositories(org, 'public');
+  ): Promise<{ id: string; name: string }[]> {
+    return await this.githubService.getOrgRepositories(org, 'public');
   }
 }
