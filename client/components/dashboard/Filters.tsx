@@ -12,7 +12,7 @@ const times = [
 ];
 
 export interface Filters {
-  organization?: number;
+  organization?: string;
   time?: string;
   repositories?: number[];
 }
@@ -36,14 +36,14 @@ function DashboardFilters({
 
   useEffect(() => {
     if (!filters.organization && organizations.length) {
-      setFilters({ ...filters, organization: organizations[0].id });
+      setFilters({ ...filters, organization: organizations[0].login });
     }
   }, [filters, organizations]);
 
   useEffect(() => {
     if (filters.organization) {
       setIsLoadingRepos(true);
-      const org = organizations.find((o) => o.id === filters.organization);
+      const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(
           org?.isMain
@@ -54,7 +54,7 @@ function DashboardFilters({
           setRepositories(
             res.data.map((o: { id: number; name: string }) => ({
               label: o.name,
-              value: o.id,
+              value: o.name,
             }))
           );
           setIsLoadingRepos(false);
@@ -77,12 +77,12 @@ function DashboardFilters({
             items={organizations.map(
               (o: { id: number; login: string; isMain: boolean }) => ({
                 label: o.login,
-                value: o.id,
+                value: o.login,
               })
             )}
             value={filters.organization}
             onChange={(v) =>
-              setFilters({ ...filters, organization: v as number })
+              setFilters({ ...filters, organization: v as string })
             }
           />
         </div>
