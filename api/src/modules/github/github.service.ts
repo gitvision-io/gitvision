@@ -41,15 +41,17 @@ export class GithubService {
 
   async getRepositories(
     type: 'public' | 'private' | 'all',
-  ): Promise<{ id: string; name: string }[]> {
+  ): Promise<{ id: string; name: string; branches: { name: string }[] }[]> {
     const result = await this.apolloService
       .githubClient()
       .query<GetAllRepositoriesForUserQuery>({
         query: GetAllRepositoriesForUser,
       });
-    return result.data.viewer.repositories.edges.map(
-      (repository) => repository.node,
-    );
+    return result.data.viewer.repositories.edges.map((repository) => ({
+      id: repository.node.id,
+      name: repository.node.name,
+      branches: repository.node.refs.nodes,
+    }));
   }
 
   async getOrgRepositories(

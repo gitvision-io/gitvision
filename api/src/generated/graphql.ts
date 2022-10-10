@@ -38659,6 +38659,11 @@ export const GetAllRepositoriesForUser = gql`
     repositories(first: 20) {
       edges {
         node {
+          refs(refPrefix: "refs/heads/", first: 100) {
+            nodes {
+              name
+            }
+          }
           id
           name
         }
@@ -38682,4 +38687,4 @@ export type GetAllOrganizationsQuery = { __typename?: 'Query', viewer: { __typen
 export type GetAllRepositoriesForUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } };
+export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } };

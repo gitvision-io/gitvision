@@ -3,6 +3,11 @@ query GetAllRepositoriesForUser {
     repositories(first: 20) {
       edges {
         node {
+          refs(refPrefix: "refs/heads/", first: 100) {
+            nodes {
+              name
+            }
+          }
           id
           name
         }
