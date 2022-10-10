@@ -14,8 +14,8 @@ const times = [
 export interface Filters {
   organization?: string;
   time?: string;
-  repository?: string;
-  branch?: string;
+  repositories?: string[];
+  branches?: string[];
 }
 
 export interface Repository {
@@ -38,6 +38,9 @@ function DashboardFilters({
   >([]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [repository, setRepository] = useState<Repository>();
+  const [selectedRepositories, setSelectedRepositories] = useState<
+    Repository[]
+  >([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
 
@@ -48,7 +51,7 @@ function DashboardFilters({
     onChange({
       ...filters,
       organization: org?.isUser ? "user" : filters.organization,
-      branch: filters.branch,
+      branches: filters.branches,
     });
   };
 
@@ -115,34 +118,45 @@ function DashboardFilters({
                 label: r.name,
                 value: r.name,
               }))}
-              value={filters.repository}
-              onChange={(v) => {
-                setFilters({ ...filters, repository: v as string });
-                setRepository(
-                  repositories.find((r) => r.name === v.toString())
-                );
+              value={filters.repositories}
+              onChange={(v: string[]) => {
+                setFilters({ ...filters, repositories: v as string[] });
+                setSelectedRepositories([
+                  ...selectedRepositories.filter((r) => v.includes(r.name)),
+                  ...repositories.filter(
+                    (r) =>
+                      v.includes(r.name) &&
+                      !selectedRepositories.find((item) => item.name === r.name)
+                  ),
+                ]);
                 setIsLoadingBranches(false);
               }}
               disabled={!repositories.length}
+              multiple
             />
           )}
         </div>
         <div className="pr-8">
-          {isLoadingBranches && <Loader color="blue-600" className="mb-2" />}
-          {repository && !isLoadingBranches && (
-            <Dropdown
-              label={"Branches"}
-              items={repository.branches?.map((b) => ({
-                label: b.name,
-                value: b.name,
-              }))}
-              value={filters.branch}
-              onChange={(v) => {
-                setFilters({ ...filters, branch: v as string });
-              }}
-              disabled={!repository?.branches?.length}
-            />
-          )}
+          <>
+            {isLoadingBranches && <Loader color="blue-600" className="mb-2" />}
+            {selectedRepositories && !isLoadingBranches && (
+              <Dropdown
+                label={"Branches"}
+                items={selectedRepositories.map((repo) =>
+                  repo.branches.map((b) => ({
+                    label: b.name,
+                    value: b.name,
+                  }))
+                )}
+                value={filters.branches}
+                onChange={(v) => {
+                  setFilters({ ...filters, branches: v as string[] });
+                }}
+                //disabled={!selectedRepositories?.branches?.length}
+                multiple
+              />
+            )}
+          </>
         </div>
         <Button
           variant="success"
