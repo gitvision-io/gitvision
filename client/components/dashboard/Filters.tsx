@@ -132,7 +132,7 @@ function DashboardFilters({
                   .flatMap((repo) => repo.branches.map((b) => ({ ...b, repo })))
                   .map((b) => ({
                     label: `${b.repo.name} - ${b.name}`,
-                    value: `${b.repo.name} - ${b.name}`,
+                    value: `${b.repo.name};${b.name}`,
                   }))}
                 value={filters.branches}
                 onChange={(v) => {
