@@ -1,9 +1,14 @@
-import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 import { RepoStats } from './repoStats.entity';
 
 @Entity()
 export class UserRepoStats {
   @PrimaryColumn()
+  commitId: string;
+
+  @Column({
+    type: String,
+  })
   repoId: string;
 
   @Column({
@@ -11,12 +16,6 @@ export class UserRepoStats {
     nullable: true,
   })
   author: string;
-
-  @Column({
-    type: Number,
-    nullable: true,
-  })
-  numberOfCommit: number | 0;
 
   @Column({
     type: Date,
@@ -27,19 +26,19 @@ export class UserRepoStats {
     type: Number,
     nullable: true,
   })
-  numberOfLineAdded: number | 0;
+  numberOfLineAdded: number;
 
   @Column({
     type: Number,
     nullable: true,
   })
-  numberOfLineRemoved: number | 0;
+  numberOfLineRemoved: number;
 
   @Column({
     type: Number,
     nullable: true,
   })
-  numberOfLineModified: number | 0;
+  numberOfLineModified: number;
 
   @OneToOne(() => RepoStats, (repoStats) => repoStats.usersRepoStats)
   repoStats: RepoStats;

@@ -1,14 +1,9 @@
-import { Entity, Column, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, OneToMany, PrimaryColumn } from 'typeorm';
 import { UserRepoStats } from './userRepoStats.entity';
 
 @Entity()
 export class RepoStats {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({
-    type: String,
-  })
+  @PrimaryColumn()
   repoId: string;
 
   @Column({
@@ -16,6 +11,12 @@ export class RepoStats {
     nullable: true,
   })
   repoName: string;
+
+  @Column({
+    type: Number,
+    nullable: true,
+  })
+  numberOfCommits: number;
 
   @Column({
     type: String,

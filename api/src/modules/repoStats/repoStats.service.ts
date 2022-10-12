@@ -39,7 +39,7 @@ export class RepoStatsService {
         repoId: id,
         ...repoStatsDTO,
       },
-      ['id'],
+      ['repoId'],
     );
   }
 
@@ -49,10 +49,10 @@ export class RepoStatsService {
   ): Promise<void> {
     await this.userRepoStatsRepository.upsert(
       {
-        repoId: id,
+        commitId: id,
         ...userRepoStatsDTO,
       },
-      ['repoId'],
+      ['commitId'],
     );
   }
 
@@ -133,9 +133,12 @@ export class RepoStatsService {
 
         switch (r.node.defaultBranchRef.target.__typename) {
           case 'Commit':
+            repoStats.numberOfCommits =
+              r.node.defaultBranchRef.target.history.edges.length;
             usersRepoStats = r.node.defaultBranchRef.target.history.edges.map(
               (c) => {
                 const userRepoStats = new UserRepoStats();
+                userRepoStats.commitId = c.node.id;
                 userRepoStats.repoId = repoStats.repoId;
                 userRepoStats.author = c.node.author.name;
                 userRepoStats.date = c.node.committedDate;
@@ -144,7 +147,7 @@ export class RepoStatsService {
                 userRepoStats.numberOfLineModified =
                   c.node.additions - c.node.deletions;
 
-                this.upsertUserStats(userRepoStats.repoId, userRepoStats);
+                this.upsertUserStats(userRepoStats.commitId, userRepoStats);
                 return userRepoStats;
               },
             );
