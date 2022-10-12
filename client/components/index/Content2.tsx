@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const Content2 = () => {
   return (
     <div className="relative px-4 pt-16 mx-auto lg:py-32 md:px-8 xl:px-20 sm:max-w-xl md:max-w-full">
@@ -24,19 +26,19 @@ export const Content2 = () => {
             </p>
           </div>
           <div className="flex items-center">
-            <a
+            <Link
               href="/"
               className="inline-flex items-center justify-center h-12 px-6 mr-6 font-medium tracking-wide text-white transition duration-200 rounded shadow-md bg-deep-purple-accent-400 hover:bg-deep-purple-accent-700 focus:shadow-outline focus:outline-none"
             >
               Get started
-            </a>
-            <a
+            </Link>
+            <Link
               href="/"
               aria-label=""
               className="inline-flex items-center font-semibold transition-colors duration-200 text-deep-purple-accent-400 hover:text-deep-purple-800"
             >
               Learn more
-            </a>
+            </Link>
           </div>
         </div>
       </div>

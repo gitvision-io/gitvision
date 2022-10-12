@@ -36,10 +36,10 @@ export const Content = () => {
                 </svg>
               </div>
               <h6 className="mb-2 font-semibold leading-5">
-                I'll be sure to note that in my log
+                I&apos;ll be sure to note that in my log
               </h6>
               <p className="text-sm text-gray-900">
-                Dingy I'm tellin' you rhubaahb Bangah Jo-Jeezly got in a gaum
+                Dingy I&apos;m tellin&apos; you rhubaahb Bangah Jo-Jeezly got in a gaum
                 Powrtland stove up dooryahd
               </p>
             </div>

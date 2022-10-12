@@ -1,0 +1,37 @@
+version: "3.9" # optional since v1.27.0
+services:
+  api:
+    build:
+      context: api
+      dockerfile: ../Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+
+  client:
+    build:
+      context: client
+      dockerfile: ../Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  queue_admin:
+    build:
+      context: queue-admin
+      dockerfile: ../Dockerfile
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+    ports:
+      - "3002:3002"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
