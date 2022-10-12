@@ -1,0 +1,21 @@
+scalar Date
+
+schema {
+  query: Query
+}
+
+type Query {
+  me: Organization!
+  organization(id: ID!): Organization
+  allOrganizations: [Organization]
+}
+
+interface Node {
+  id: ID!
+}
+
+type Organization implements Node {
+  id: ID!
+  databaseId: Int
+  login: String!
+}

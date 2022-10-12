@@ -6,6 +6,9 @@ import { User } from './entities/user.entity';
 import { UsersModule } from './modules/users/users.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { GithubModule } from './modules/github/github.module';
+import { RepoStatsModule } from './modules/repoStats/repoStats.module';
+import { RepoStats } from './entities/repoStats.entity';
+import { UserRepoStats } from './entities/userRepoStats.entity';
 
 @Module({
   imports: [
@@ -15,12 +18,13 @@ import { GithubModule } from './modules/github/github.module';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './data.db',
-      entities: [User],
+      entities: [User, RepoStats, UserRepoStats],
       synchronize: true,
     }),
     UsersModule,
     DashboardModule,
     GithubModule,
+    RepoStatsModule,
   ],
 })
 export class AppModule implements NestModule {

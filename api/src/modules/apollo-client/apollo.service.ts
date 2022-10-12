@@ -7,15 +7,17 @@ export class ApolloService {
   constructor(private token: string) {}
 
   githubClient() {
+    //const persistedQueriesLink = createPersistedQueryLink({ sha256 });
+    const httplink = new HttpLink({
+      uri: 'https://api.github.com/graphql',
+      headers: {
+        authorization: `token ${this.token}`,
+      },
+      fetch,
+    });
     return new ApolloClient({
-      link: new HttpLink({
-        uri: 'https://api.github.com/graphql',
-        headers: {
-          authorization: `token ${this.token}`,
-        },
-        fetch,
-      }),
       cache: new InMemoryCache(),
+      link: httplink,
     });
   }
 }
