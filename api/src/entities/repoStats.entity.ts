@@ -4,7 +4,7 @@ import { UserRepoStats } from './userRepoStats.entity';
 @Entity()
 export class RepoStats {
   @PrimaryColumn()
-  repoId: string;
+  id: string;
 
   @Column({
     type: String,

@@ -1,9 +1,11 @@
+import { UserRepoStats } from 'src/entities/userRepoStats.entity';
+
 export class RepoStatsDTO {
   repoId?: string;
   repoName?: string;
   organization?: string;
   numberOfCommits?: number;
-  userRepoStats?: UserRepoStatsDTO[];
+  userRepoStats?: UserRepoStats[];
 }
 
 export class UserRepoStatsDTO {

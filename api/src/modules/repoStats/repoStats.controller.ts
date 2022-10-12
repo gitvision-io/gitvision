@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Put, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { RepoStats } from 'src/entities/repoStats.entity';
 import { User } from 'src/entities/user.entity';
@@ -14,20 +23,30 @@ export class RepoStatsController {
     private readonly reposStatsService: RepoStatsService /* private readonly githubService: GithubService, */,
   ) {}
 
-  @Get('repo/:id')
-  async getUser(@Param('id') id: string): Promise<RepoStats> {
-    return await this.reposStatsService.findOne(id);
+  @Get('/')
+  async getAllRepoStat(): Promise<RepoStats[]> {
+    return await this.reposStatsService.findAll();
   }
 
-  /*   @Get('org/:org/reponame/:reponame')
+  @Get('/org/:org')
+  async getAllRepoStatByOrg(@Param('org') org: string): Promise<RepoStats[]> {
+    return await this.reposStatsService.findAllByOrg(org);
+  }
+
+  @Get('/repo/:repo')
+  async getRepoStatByRepo(@Param('repo') repo: string): Promise<RepoStats[]> {
+    return await this.reposStatsService.findAllByRepo(repo);
+  }
+
+  @Get('org/:org/repo/:repo')
   async getRepoStat(
     @Param('org') org: string,
-    @Param('reponame') reponame: string,
+    @Param('repo') repo: string,
   ): Promise<RepoStats> {
-    return await this.reposStatsService.getCommitsOfRepo(org, reponame);
-  } */
+    return await this.reposStatsService.findAllByOrgByRepo(org, repo);
+  }
 
-  @Get('/')
+  @Post('/graphql')
   async getAllRepoStatOfAllOrg(): Promise<RepoStats[]> {
     return await this.reposStatsService.getCommitsOfAllRepoOfAllOrg();
   }

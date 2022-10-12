@@ -26,31 +26,65 @@ export class RepoStatsService {
   }
 
   findAll(): Promise<RepoStats[]> {
-    return this.reposStatsRepository.find();
+    return this.reposStatsRepository.find({
+      relations: {
+        usersRepoStats: true,
+      },
+    });
   }
 
-  findOne(id: string): Promise<RepoStats> {
-    return this.reposStatsRepository.findOneBy({ repoId: id });
+  findAllByOrg(organization: string): Promise<RepoStats[]> {
+    return this.reposStatsRepository.find({
+      relations: {
+        usersRepoStats: true,
+      },
+      where: {
+        organization,
+      },
+    });
   }
 
-  async upsert(id: string, repoStatsDTO: RepoStatsDTO): Promise<void> {
+  findAllByRepo(repoName: string): Promise<RepoStats[]> {
+    return this.reposStatsRepository.find({
+      relations: {
+        usersRepoStats: true,
+      },
+      where: {
+        repoName,
+      },
+    });
+  }
+
+  findAllByOrgByRepo(organization, repoName: string): Promise<RepoStats> {
+    return this.reposStatsRepository.findOne({
+      relations: {
+        usersRepoStats: true,
+      },
+      where: {
+        repoName,
+        organization,
+      },
+    });
+  }
+
+  async upsert(id: string, repoStats: RepoStats): Promise<void> {
     await this.reposStatsRepository.upsert(
       {
-        repoId: id,
-        ...repoStatsDTO,
+        id,
+        ...repoStats,
       },
-      ['repoId'],
+      ['id'],
     );
   }
 
   async upsertUserStats(
     id: string,
-    userRepoStatsDTO: UserRepoStatsDTO,
+    userRepoStats: UserRepoStats,
   ): Promise<void> {
     await this.userRepoStatsRepository.upsert(
       {
         commitId: id,
-        ...userRepoStatsDTO,
+        ...userRepoStats,
       },
       ['commitId'],
     );
@@ -61,59 +95,9 @@ export class RepoStatsService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.reposStatsRepository.delete({ repoId: id });
+    await this.reposStatsRepository.delete({ id });
   }
 
-  /*   async getCommitsOfRepo(
-    organization: string,
-    repoName: string,
-  ): Promise<RepoStats> {
-    const repoStats: RepoStats = new RepoStats();
-    let usersRepoStats;
-
-    const graphQLResult = await this.apolloService
-      .githubClient()
-      .query<GetAllCommitsOfRepoQuery>({
-        query: GetAllCommitsOfRepo,
-        variables: {
-          login: organization,
-          repoName: repoName,
-        },
-      });
-
-    repoStats.organization = organization;
-    repoStats.repoName = graphQLResult.data.organization.repository.name;
-    repoStats.repoId = graphQLResult.data.organization.repository.id;
-
-    const resTarget =
-      graphQLResult.data.organization.repository.defaultBranchRef.target;
-
-    switch (resTarget.__typename) {
-      case 'Commit':
-        usersRepoStats = resTarget.history.edges.map((c) => {
-          const userRepoStats = new UserRepoStats();
-          userRepoStats.id = c.node.id;
-          userRepoStats.repoId = repoStats.repoId;
-          userRepoStats.author = c.node.author.name;
-          userRepoStats.date = c.node.committedDate;
-          userRepoStats.numberOfLineAdded = c.node.additions;
-          userRepoStats.numberOfLineRemoved = c.node.deletions;
-          userRepoStats.numberOfLineModified =
-            c.node.additions - c.node.deletions;
-
-          this.upsertUserStats(userRepoStats.id, userRepoStats);
-
-          return userRepoStats;
-        });
-    }
-
-    repoStats.usersRepoStats = usersRepoStats;
-
-    this.upsert(repoStats.repoId, repoStats);
-
-    return repoStats;
-  }
- */
   async getCommitsOfAllRepoOfAllOrg(): Promise<RepoStats[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
@@ -125,21 +109,20 @@ export class RepoStatsService {
 
     graphQLResult.data.viewer.organizations.edges.map((o) => {
       reposStats = o.node.repositories.edges.map((r) => {
-        let usersRepoStats;
         const repoStats: RepoStats = new RepoStats();
         repoStats.organization = o.node.login;
         repoStats.repoName = r.node.name;
-        repoStats.repoId = r.node.id;
+        repoStats.id = r.node.id;
 
         switch (r.node.defaultBranchRef.target.__typename) {
           case 'Commit':
             repoStats.numberOfCommits =
               r.node.defaultBranchRef.target.history.edges.length;
-            usersRepoStats = r.node.defaultBranchRef.target.history.edges.map(
-              (c) => {
+            let usersRepoStats: UserRepoStats[] =
+              r.node.defaultBranchRef.target.history.edges.map((c) => {
                 const userRepoStats = new UserRepoStats();
                 userRepoStats.commitId = c.node.id;
-                userRepoStats.repoId = repoStats.repoId;
+                userRepoStats.repoId = repoStats.id;
                 userRepoStats.author = c.node.author.name;
                 userRepoStats.date = c.node.committedDate;
                 userRepoStats.numberOfLineAdded = c.node.additions;
@@ -147,14 +130,13 @@ export class RepoStatsService {
                 userRepoStats.numberOfLineModified =
                   c.node.additions - c.node.deletions;
 
-                this.upsertUserStats(userRepoStats.commitId, userRepoStats);
+                this.userRepoStatsRepository.save(userRepoStats);
                 return userRepoStats;
-              },
-            );
+              });
+            repoStats.usersRepoStats = usersRepoStats;
         }
-        repoStats.usersRepoStats = usersRepoStats;
 
-        this.upsert(repoStats.repoId, repoStats);
+        this.reposStatsRepository.save(repoStats);
         return repoStats;
       });
     });

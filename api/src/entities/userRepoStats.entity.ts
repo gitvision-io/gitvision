@@ -40,6 +40,6 @@ export class UserRepoStats {
   })
   numberOfLineModified: number;
 
-  @OneToOne(() => RepoStats, (repoStats) => repoStats.usersRepoStats)
+  @ManyToOne(() => RepoStats, (repoStats) => repoStats.usersRepoStats)
   repoStats: RepoStats;
 }
