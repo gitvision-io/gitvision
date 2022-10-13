@@ -55,7 +55,7 @@ export class RepoStatsService {
     });
   }
 
-  findAllByOrgByRepo(organization, repoName: string): Promise<RepoStats> {
+  findByOrgByRepo(organization, repoName: string): Promise<RepoStats> {
     return this.reposStatsRepository.findOne({
       relations: {
         usersRepoStats: true,

@@ -43,7 +43,7 @@ export class RepoStatsController {
     @Param('org') org: string,
     @Param('repo') repo: string,
   ): Promise<RepoStats> {
-    return await this.reposStatsService.findAllByOrgByRepo(org, repo);
+    return await this.reposStatsService.findByOrgByRepo(org, repo);
   }
 
   @Post('/graphql')
