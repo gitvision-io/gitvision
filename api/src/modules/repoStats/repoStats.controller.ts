@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { RepoStats } from 'src/entities/repoStats.entity';
 import { RepoStatsService } from './repoStats.service';
 
@@ -23,12 +23,12 @@ export class RepoStatsController {
     return await this.reposStatsService.findAllByRepo(repo);
   }
 
-  @Get('org/:org/repo/:repo')
+  @Get(':org')
   async getRepoStat(
     @Param('org') org: string,
-    @Param('repo') repo: string,
-  ): Promise<RepoStats> {
-    return await this.reposStatsService.findByOrgByRepo(org, repo);
+    @Query('repos') repos: string[],
+  ): Promise<RepoStats[]> {
+    return await this.reposStatsService.findByOrgByRepos(org, repos);
   }
 
   @Post('/synchronize')

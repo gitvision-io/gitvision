@@ -62,13 +62,13 @@ export class RepoStatsService {
     });
   }
 
-  findByOrgByRepo(organization, repoName: string): Promise<RepoStats> {
-    return this.reposStatsRepository.findOne({
+  findByOrgByRepos(organization, repoNames: string[]): Promise<RepoStats[]> {
+    return this.reposStatsRepository.find({
       relations: {
         usersRepoStats: true,
       },
       where: {
-        repoName,
+        repoName: In(repoNames),
         organization,
       },
     });

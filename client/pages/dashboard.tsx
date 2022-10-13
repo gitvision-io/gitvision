@@ -140,7 +140,7 @@ function Dashboard() {
 
       <Button onClick={onClickSynchronize}>Synchronize</Button>
 
-      <div className="py-16 grid row-gap-8 sm:grid-cols-3">
+      <div className="py-16 grid row-gap-8 sm:grid-cols-4">
         <div className="text-center">
           <p className="font-bold">Contributors</p>
           <h6 className="text-5xl font-bold text-deep-purple-accent-400">
@@ -152,6 +152,10 @@ function Dashboard() {
           <h6 className="text-5xl font-bold text-deep-purple-accent-400">
             {activeRepository}
           </h6>
+        </div>
+        <div className="text-center">
+          <p className="font-bold">Pull requests</p>
+          <h6 className="text-5xl font-bold text-deep-purple-accent-400">0</h6>
         </div>
         <div className="text-center">
           <p className="font-bold">Open issues</p>

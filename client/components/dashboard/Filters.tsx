@@ -5,10 +5,9 @@ import Dropdown, { DropdownValue } from "../common/Dropdown";
 import Loader from "../common/Loader";
 
 const times = [
-  { label: "last hour" },
-  { label: "last 5 hour" },
-  { label: "yesterday" },
+  { label: "last day" },
   { label: "last week" },
+  { label: "last month" },
 ];
 
 export interface Filters {
@@ -121,7 +120,7 @@ function DashboardFilters({
             />
           )}
         </div>
-        <div className="pr-8">
+        {/* <div className="pr-8">
           <>
             {isLoadingRepos && <Loader color="blue-600" className="mb-2" />}
             {!isLoadingRepos && (
@@ -143,7 +142,7 @@ function DashboardFilters({
               />
             )}
           </>
-        </div>
+        </div> */}
         <Button
           variant="success"
           size="sm"
