@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Button from "../components/common/Button";
 import DashboardFilters, { Filters } from "../components/dashboard/Filters";
 import { getInstance } from "../services/api";
 
@@ -17,6 +18,7 @@ function Dashboard() {
   const [activeRepository, setActiveRepository] = useState(0);
   const [openIssues, setOpenIssues] = useState(0);
   const [filters, setFilters] = useState<Record<string, any>>();
+  const [isLoadingSyncronize, setIsLoadingSynchronize] = useState(false);
 
   const onApplyFilters = (filters: Record<string, any>) => {
     getInstance().get("/api/dashboard/analytics", {
@@ -26,14 +28,21 @@ function Dashboard() {
     });
   };
 
+  const onClickSynchronize = () => {
+    setIsLoadingSynchronize(true);
+    getInstance()
+      .post("/api/repostats/synchronize")
+      .finally(() => setIsLoadingSynchronize(false));
+  };
+
   const getContributersByRepo = (org: string, repo: string) => {
     return getInstance()
       .get(`/api/repostats/org/${org}/repo/${repo}`)
       .then((rest) => {
-        let contributorsVar: Contributor[] = [];
+        const contributorsVar: Contributor[] = [];
         rest.data.usersRepoStats
           .map((c: Contributor) => {
-            var ctb: Contributor = {
+            const ctb: Contributor = {
               author: c.author,
               numberOfCommits: 1,
               lineOfCodeChanges: c.lineOfCodeChanges,
@@ -46,7 +55,7 @@ function Dashboard() {
             }
             return ctb;
           })
-          .reduce((res: Contributor, value: Contributor) => {
+          .reduce((res: Record<string, Contributor>, value: Contributor) => {
             if (!res[value.author]) {
               res[value.author] = {
                 author: value.author,
@@ -60,7 +69,7 @@ function Dashboard() {
             res[value.author].numberOfCommits += value.numberOfCommits;
             res[value.author].commitActivity += value.commitActivity;
             return res;
-          }, {} as Contributor);
+          }, {} as Record<string, Contributor>);
         return contributorsVar;
       });
   };
@@ -81,11 +90,11 @@ function Dashboard() {
           })
           .catch(console.error);
       });
-      let constvar: Contributor[] = [];
+      const constvar: Contributor[] = [];
 
       contributorsLocal
         .map((c: Contributor) => {
-          var ctb: Contributor = {
+          const ctb: Contributor = {
             author: c.author,
             numberOfCommits: 1,
             lineOfCodeChanges: c.lineOfCodeChanges,
@@ -98,7 +107,7 @@ function Dashboard() {
           }
           return ctb;
         })
-        .reduce((res: Contributor, value: Contributor) => {
+        .reduce((res: Record<string, Contributor>, value: Contributor) => {
           if (!res[value.author]) {
             res[value.author] = {
               author: value.author,
@@ -112,7 +121,7 @@ function Dashboard() {
           res[value.author].numberOfCommits += value.numberOfCommits;
           res[value.author].commitActivity += value.commitActivity;
           return res;
-        }, {} as Contributor);
+        }, {} as Record<string, Contributor>);
 
       setContributors(
         constvar.sort((p, c) => c.numberOfLineAdded - p.numberOfLineAdded)
@@ -128,6 +137,8 @@ function Dashboard() {
           setFilters(filters);
         }}
       />
+
+      <Button onClick={onClickSynchronize}>Synchronize</Button>
 
       <div className="py-16 grid row-gap-8 sm:grid-cols-3">
         <div className="text-center">

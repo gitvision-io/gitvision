@@ -1,21 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  Req,
-} from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { RepoStats } from 'src/entities/repoStats.entity';
-import { User } from 'src/entities/user.entity';
-import { GithubService } from '../github/github.service';
 import { RepoStatsService } from './repoStats.service';
-/* import { USER } from './users.decorator';
-import { UserDTO, UserProfileDTO } from './users.dto';
-import { UsersService } from './users.service'; */
 
 @Controller('/api/repostats')
 export class RepoStatsController {
@@ -46,9 +31,10 @@ export class RepoStatsController {
     return await this.reposStatsService.findByOrgByRepo(org, repo);
   }
 
-  @Post('/graphql')
-  async getAllRepoStatOfAllOrg(): Promise<RepoStats[]> {
-    return await this.reposStatsService.getCommitsOfAllRepoOfAllOrg();
+  @Post('/synchronize')
+  async getAllRepoStatOfAllOrg(): Promise<void> {
+    await this.reposStatsService.getCommitsOfAllRepoOfAllOrg();
+    await this.reposStatsService.syncIssuesForAllRepoOfAllOrgs();
   }
 
   /* @Put('me')

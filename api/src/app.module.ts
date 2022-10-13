@@ -11,6 +11,7 @@ import { RepoStatsModule } from './modules/repoStats/repoStats.module';
 import { RepoStats } from './entities/repoStats.entity';
 import { UserRepoStats } from './entities/userRepoStats.entity';
 import { SynchronizeModule } from './modules/synchronize/synchronize.module';
+import { Issue } from './entities/issue.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { SynchronizeModule } from './modules/synchronize/synchronize.module';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './data.db',
-      entities: [User, RepoStats, UserRepoStats],
+      entities: [User, RepoStats, UserRepoStats, Issue],
       synchronize: true,
     }),
     BullModule.forRoot({
