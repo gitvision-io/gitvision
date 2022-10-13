@@ -4,11 +4,15 @@ query GetAllOrganizations {
     organizations(first: 100) {
       edges {
         node {
-          id
-          databaseId
-          login
+          ...OrganizationFields
         }
       }
     }
   }
+}
+
+fragment OrganizationFields on Organization {
+  id
+  databaseId
+  login
 }

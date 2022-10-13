@@ -1,0 +1,78 @@
+query GetAllCommitsOfRepo($login: String!, $repoName: String!) {
+  organization(login: $login) {
+    repository(name: $repoName) {
+      id
+      name
+      defaultBranchRef {
+        target {
+          ... on Commit {
+            history(first: 10) {
+              edges {
+                node {
+                  ... on Commit {
+                    author {
+                      date
+                      email
+                      name
+                    }
+                    committedDate
+                    id
+                    changedFilesIfAvailable
+                    additions
+                    deletions
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetAllCommitsOfAllReposOfAllOrg {
+  viewer {
+    login
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+                defaultBranchRef {
+                  target {
+                    ... on Commit {
+                      history(since: "2022-06-03T15:11:36Z") {
+                        edges {
+                          node {
+                            ... on Commit {
+                              author {
+                                date
+                                email
+                                name
+                              }
+                              id
+                              committedDate
+                              changedFilesIfAvailable
+                              additions
+                              deletions
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
