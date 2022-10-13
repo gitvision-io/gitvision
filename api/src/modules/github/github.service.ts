@@ -39,6 +39,27 @@ export class GithubService {
     return (await this.#octokit.rest.users.getAuthenticated()).data;
   }
 
+  async getOrgIssues(org: string): Promise<
+    {
+      id: number;
+      state: string;
+      created_at: string;
+      closed_at: string;
+      closed_by?: { login: string };
+      repository?: {
+        id: number;
+        node_id: string;
+        name: string;
+        full_name: string;
+      };
+    }[]
+  > {
+    return await this.#octokit.paginate(this.#octokit.issues.listForOrg, {
+      org,
+      state: 'all',
+    });
+  }
+
   async getRepositories(
     type: 'public' | 'private' | 'all',
   ): Promise<{ id: string; name: string; branches: { name: string }[] }[]> {
