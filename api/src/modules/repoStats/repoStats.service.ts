@@ -11,6 +11,7 @@ import { In, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
 import { RepoStatsDTO } from './repoStats.dto';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class RepoStatsService {
@@ -24,6 +25,9 @@ export class RepoStatsService {
 
     @InjectRepository(Issue)
     private IssueRepository: Repository<Issue>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
 
     private readonly githubService: GithubService,
   ) {}
@@ -62,7 +66,10 @@ export class RepoStatsService {
     });
   }
 
-  findByOrgByRepos(organization, repoNames: string[]): Promise<RepoStats[]> {
+  findByOrgByRepos(
+    organization: string,
+    repoNames: string[],
+  ): Promise<RepoStats[]> {
     return this.reposStatsRepository.find({
       relations: {
         usersRepoStats: true,
@@ -106,10 +113,16 @@ export class RepoStatsService {
   }
 
   async getCommitsOfAllRepoOfAllOrg(): Promise<RepoStats[]> {
+    let date: Date;
+
+    date.setMonth(date.getMonth() - 6);
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllCommitsOfAllReposOfAllOrgQuery>({
         query: GetAllCommitsOfAllReposOfAllOrg,
+        variables: {
+          date,
+        },
       });
 
     let reposStats: RepoStats[];

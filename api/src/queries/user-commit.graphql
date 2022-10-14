@@ -31,7 +31,7 @@ query GetAllCommitsOfRepo($login: String!, $repoName: String!) {
   }
 }
 
-query GetAllCommitsOfAllReposOfAllOrg {
+query GetAllCommitsOfAllReposOfAllOrg($date: GitTimestamp) {
   viewer {
     login
     organizations(first: 100) {
@@ -47,7 +47,7 @@ query GetAllCommitsOfAllReposOfAllOrg {
                 defaultBranchRef {
                   target {
                     ... on Commit {
-                      history(since: "2022-06-03T15:11:36Z") {
+                      history(since: $date) {
                         edges {
                           node {
                             ... on Commit {

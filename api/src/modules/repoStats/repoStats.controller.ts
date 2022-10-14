@@ -1,8 +1,9 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { filter } from 'rxjs';
 import { RepoStats } from 'src/entities/repoStats.entity';
 import { RepoStatsService } from './repoStats.service';
 
-@Controller('/api/repostats')
+@Controller('/api/orgstats')
 export class RepoStatsController {
   constructor(
     private readonly reposStatsService: RepoStatsService /* private readonly githubService: GithubService, */,
@@ -26,15 +27,16 @@ export class RepoStatsController {
   @Get(':org')
   async getRepoStat(
     @Param('org') org: string,
-    @Query('repos') repos: string[],
+    @Query('filters') { repositories },
   ): Promise<RepoStats[]> {
-    return await this.reposStatsService.findByOrgByRepos(org, repos);
+    console.log(repositories);
+    return await this.reposStatsService.findByOrgByRepos(org, repositories);
   }
 
   @Post('/synchronize')
-  async getAllRepoStatOfAllOrg(): Promise<void> {
-    await this.reposStatsService.getCommitsOfAllRepoOfAllOrg();
-    await this.reposStatsService.syncIssuesForAllRepoOfAllOrgs();
+  async getAllRepoStatOfAllOrg(): Promise<RepoStats[]> {
+    //await this.reposStatsService.syncIssuesForAllRepoOfAllOrgs();
+    return await this.reposStatsService.getCommitsOfAllRepoOfAllOrg();
   }
 
   /* @Put('me')
