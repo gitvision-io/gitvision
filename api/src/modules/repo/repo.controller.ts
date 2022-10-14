@@ -9,22 +9,22 @@ export class RepoController {
   constructor(
     private readonly synchronizeProducerService: ProducerService,
     private readonly githubService: GithubService,
-    private readonly reposStatsService: RepoService /* private readonly githubService: GithubService, */,
+    private readonly repoService: RepoService /* private readonly githubService: GithubService, */,
   ) {}
 
   @Get('/')
   async getAllRepoStat(): Promise<Repo[]> {
-    return await this.reposStatsService.findAll();
+    return await this.repoService.findAll();
   }
 
   @Get('/org/:org')
   async getAllRepoStatByOrg(@Param('org') org: string): Promise<Repo[]> {
-    return await this.reposStatsService.findAllByOrg(org);
+    return await this.repoService.findAllByOrg(org);
   }
 
   @Get('/repo/:repo')
   async getRepoStatByRepo(@Param('repo') repo: string): Promise<Repo[]> {
-    return await this.reposStatsService.findAllByRepo(repo);
+    return await this.repoService.findAllByRepo(repo);
   }
 
   @Get(':org')
@@ -32,20 +32,20 @@ export class RepoController {
     @Param('org') org: string,
     @Query('repos') repos: string[],
   ): Promise<Repo[]> {
-    return await this.reposStatsService.findByOrgByRepos(org, repos);
+    return await this.repoService.findByOrgByRepos(org, repos);
   }
 
   @Post('/synchronize')
   async getAllRepoStatOfAllOrg(): Promise<void> {
-    // await this.reposStatsService.getCommitsOfAllRepoOfAllOrg();
-    // await this.reposStatsService.syncIssuesForAllRepoOfAllOrgs();
+    await this.repoService.getCommitsOfAllRepoOfAllOrg();
+    await this.repoService.syncIssuesForAllRepoOfAllOrgs();
 
     // TODO : call queue instead of doing synchronously
     // TODO : get organization & repos from database
-    await this.synchronizeProducerService.addJob({
-      organization: 'toto',
-      repositories: ['titi', 'tata'],
-      githubToken: this.githubService.getToken(),
-    });
+    // await this.synchronizeProducerService.addJob({
+    //   organization: 'toto',
+    //   repositories: ['titi', 'tata'],
+    //   githubToken: this.githubService.getToken(),
+    // });
   }
 }

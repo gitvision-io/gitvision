@@ -18,9 +18,7 @@ export class GithubController {
   }
 
   @Get('repos')
-  async getMainRepositories(
-    @USER() user: User,
-  ): Promise<{ id: string; name: string }[]> {
+  async getMainRepositories(): Promise<{ id: string; name: string }[]> {
     const repos = await this.githubService.getRepositories('all');
     return repos;
   }

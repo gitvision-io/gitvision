@@ -1,5 +1,5 @@
 import { GetServerSidePropsContext } from "next";
-import React, { FormEvent, FormEventHandler } from "react";
+import React, { FormEvent } from "react";
 import { useState } from "react";
 import { SESSION_COOKIE_NAME } from "../common/constants";
 import Alert from "../components/common/Alert";
