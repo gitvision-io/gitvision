@@ -17,7 +17,7 @@ export class RepoService {
   apolloService: ApolloService;
   constructor(
     @InjectRepository(Repo)
-    private reposStatsRepository: Repository<Repo>,
+    private repoRepository: Repository<Repo>,
 
     @InjectRepository(Commit)
     private commitRepository: Repository<Commit>,
@@ -36,7 +36,7 @@ export class RepoService {
   }
 
   findAll(): Promise<Repo[]> {
-    return this.reposStatsRepository.find({
+    return this.repoRepository.find({
       relations: {
         commits: true,
       },
@@ -44,7 +44,7 @@ export class RepoService {
   }
 
   findAllByOrg(organization: string): Promise<Repo[]> {
-    return this.reposStatsRepository.find({
+    return this.repoRepository.find({
       relations: {
         commits: true,
       },
@@ -55,7 +55,7 @@ export class RepoService {
   }
 
   findAllByRepo(repoName: string): Promise<Repo[]> {
-    return this.reposStatsRepository.find({
+    return this.repoRepository.find({
       relations: {
         commits: true,
       },
@@ -66,7 +66,7 @@ export class RepoService {
   }
 
   findByOrgByRepos(organization, repoNames: string[]): Promise<Repo[]> {
-    return this.reposStatsRepository.find({
+    return this.repoRepository.find({
       relations: {
         commits: true,
       },
@@ -78,22 +78,12 @@ export class RepoService {
   }
 
   async upsert(id: string, repo: Repo): Promise<void> {
-    await this.reposStatsRepository.upsert(
+    await this.repoRepository.upsert(
       {
         id,
         ...repo,
       },
       ['id'],
-    );
-  }
-
-  async upsertUserStats(id: string, commit: Commit): Promise<void> {
-    await this.commitRepository.upsert(
-      {
-        commitId: id,
-        ...commit,
-      },
-      ['commitId'],
     );
   }
 
@@ -110,10 +100,8 @@ export class RepoService {
         },
       });
 
-    let reposStats: Repo[];
-
-    graphQLResult.data.viewer.organizations.edges.map((o) => {
-      reposStats = o.node.repositories.edges.map((r) => {
+    return graphQLResult.data.viewer.organizations.edges.flatMap((o) =>
+      o.node.repositories.edges.map((r) => {
         const repo: Repo = new Repo();
         repo.organization = o.node.login;
         repo.repoName = r.node.name;
@@ -137,18 +125,17 @@ export class RepoService {
           repo.commits = commits;
         }
 
-        this.reposStatsRepository.save(repo);
+        this.repoRepository.save(repo);
         return repo;
-      });
-    });
-    return reposStats;
+      }),
+    );
   }
 
   async syncIssuesForAllRepoOfOrg(org: string): Promise<void> {
     const issues = (await this.githubService.getOrgIssues(org)).filter((i) =>
       Boolean(i.repository),
     );
-    const existingRepos = await this.reposStatsRepository.findBy({
+    const existingRepos = await this.repoRepository.findBy({
       repoName: In(issues.map((i) => i.repository.name)),
       organization: org,
     });
