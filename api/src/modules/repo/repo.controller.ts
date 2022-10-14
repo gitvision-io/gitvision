@@ -4,7 +4,7 @@ import { GithubService } from '../github/github.service';
 import { ProducerService } from '../synchronize/producer.service';
 import { RepoService } from './repo.service';
 
-@Controller('/api/repo')
+@Controller('/api/orgstats')
 export class RepoController {
   constructor(
     private readonly synchronizeProducerService: ProducerService,
@@ -30,7 +30,7 @@ export class RepoController {
   @Get(':org')
   async getRepoStat(
     @Param('org') org: string,
-    @Query('repos') repos: string[],
+    @Query('filters') { repositories },
   ): Promise<Repo[]> {
     return await this.repoService.findByOrgByRepos(org, repos);
   }

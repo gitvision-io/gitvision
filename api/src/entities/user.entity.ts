@@ -25,6 +25,12 @@ export class User {
   avatarUrl: string;
 
   @Column({
+    type: Date,
+    nullable: true,
+  })
+  lastRepoStatsSynchronize: Date;
+
+  @Column({
     type: String,
     nullable: true,
   })

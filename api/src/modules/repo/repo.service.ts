@@ -10,6 +10,7 @@ import {
 import { In, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class RepoService {
@@ -23,6 +24,9 @@ export class RepoService {
 
     @InjectRepository(Issue)
     private IssueRepository: Repository<Issue>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
 
     private readonly githubService: GithubService,
   ) {}
@@ -84,10 +88,16 @@ export class RepoService {
   }
 
   async getCommitsOfAllRepoOfAllOrg(): Promise<Repo[]> {
+    let date: Date;
+    date.setMonth(date.getMonth() - 6);
+
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllCommitsOfAllReposOfAllOrgQuery>({
         query: GetAllCommitsOfAllReposOfAllOrg,
+        variables: {
+          date,
+        },
       });
 
     return graphQLResult.data.viewer.organizations.edges.flatMap((o) =>

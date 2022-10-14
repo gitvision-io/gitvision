@@ -38692,7 +38692,7 @@ export const GetAllCommitsOfRepo = gql`
 }
     `;
 export const GetAllCommitsOfAllReposOfAllOrg = gql`
-    query GetAllCommitsOfAllReposOfAllOrg {
+    query GetAllCommitsOfAllReposOfAllOrg($date: GitTimestamp) {
   viewer {
     login
     organizations(first: 100) {
@@ -38708,7 +38708,7 @@ export const GetAllCommitsOfAllReposOfAllOrg = gql`
                 defaultBranchRef {
                   target {
                     ... on Commit {
-                      history(since: "2022-06-03T15:11:36Z") {
+                      history(since: $date) {
                         edges {
                           node {
                             ... on Commit {
@@ -38809,7 +38809,9 @@ export type GetAllCommitsOfRepoQueryVariables = Exact<{
 
 export type GetAllCommitsOfRepoQuery = { __typename?: 'Query', organization?: { __typename?: 'Organization', repository?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', committedDate: any, id: string, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null };
 
-export type GetAllCommitsOfAllReposOfAllOrgQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetAllCommitsOfAllReposOfAllOrgQueryVariables = Exact<{
+  date?: InputMaybe<Scalars['GitTimestamp']>;
+}>;
 
 
 export type GetAllCommitsOfAllReposOfAllOrgQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null> | null } } | null } | null> | null } } };

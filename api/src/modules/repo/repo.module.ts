@@ -7,10 +7,11 @@ import { GithubModule } from '../github/github.module';
 import { SynchronizeModule } from '../synchronize/synchronize.module';
 import { RepoController } from './repo.controller';
 import { RepoService } from './repo.service';
+import { User } from 'src/entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Repo, Commit, Issue]),
+    TypeOrmModule.forFeature([Repo, Commit, Issue, User]),
     GithubModule,
     SynchronizeModule,
   ],
