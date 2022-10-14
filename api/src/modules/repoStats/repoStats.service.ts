@@ -160,6 +160,7 @@ export class RepoStatsService {
 
     const issuesDb = issues.map((i) => {
       const issueDb = new Issue();
+      issueDb.id = i.node_id;
       if (i.closed_by) {
         issueDb.closedBy = i.closed_by.login;
       }

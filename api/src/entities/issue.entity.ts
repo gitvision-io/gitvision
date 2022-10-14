@@ -3,7 +3,10 @@ import { RepoStats } from './repoStats.entity';
 
 @Entity()
 export class Issue {
-  @PrimaryColumn({ type: 'datetime' })
+  @PrimaryColumn({ type: String })
+  id: string;
+
+  @Column({ type: 'datetime' })
   createdAt: string;
 
   @Column({ type: String })

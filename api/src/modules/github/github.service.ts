@@ -42,6 +42,7 @@ export class GithubService {
   async getOrgIssues(org: string): Promise<
     {
       id: number;
+      node_id: string;
       state: string;
       created_at: string;
       closed_at: string;
