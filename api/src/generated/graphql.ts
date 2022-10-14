@@ -38741,7 +38741,7 @@ export const GetAllCommitsOfAllReposOfAllOrg = gql`
 export const GetAllRepositoriesForUser = gql`
     query GetAllRepositoriesForUser {
   viewer {
-    repositories(first: 20) {
+    repositories(first: 100) {
       edges {
         node {
           refs(refPrefix: "refs/heads/", first: 100) {
@@ -38751,6 +38751,36 @@ export const GetAllRepositoriesForUser = gql`
           }
           id
           name
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllRespositoriesAndOrganization = gql`
+    query GetAllRespositoriesAndOrganization {
+  viewer {
+    repositories(ownerAffiliations: [OWNER], first: 100) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
         }
       }
     }
@@ -38788,3 +38818,8 @@ export type GetAllRepositoriesForUserQueryVariables = Exact<{ [key: string]: nev
 
 
 export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } };
+
+export type GetAllRespositoriesAndOrganizationQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllRespositoriesAndOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null }, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } | null } | null> | null } } };

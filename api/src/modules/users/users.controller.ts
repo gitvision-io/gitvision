@@ -1,7 +1,9 @@
 import { Body, Controller, Delete, Get, Put, Req } from '@nestjs/common';
 import { Request } from 'express';
+import { Repo } from 'src/entities/repo.entity';
 import { User } from 'src/entities/user.entity';
 import { GithubService } from '../github/github.service';
+import { RepoService } from '../repo/repo.service';
 import { USER } from './users.decorator';
 import { UserDTO, UserProfileDTO } from './users.dto';
 import { UsersService } from './users.service';
@@ -11,6 +13,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly githubService: GithubService,
+    private readonly repoService: RepoService,
   ) {}
 
   @Get('me')
@@ -33,6 +36,26 @@ export class UsersController {
     @Body() userProfileDto: UserProfileDTO,
   ): Promise<{ status: string }> {
     await this.usersService.updateProfile(request['token'].sub, userProfileDto);
+    return { status: 'ok' };
+  }
+
+  @Put('me/repositories')
+  async setRepositories(@USER() user: User): Promise<{ status: string }> {
+    const profile = await this.githubService.getProfile();
+    const repos = await this.githubService.getMainAndOrgRespositories();
+    const reposEntities: Repo[] = [];
+    await Promise.all(
+      repos.map((r) => {
+        const repo = new Repo();
+        repo.id = r.id;
+        repo.organization =
+          r.organization === 'user' ? profile.login : r.organization;
+        repo.repoName = r.name;
+        reposEntities.push(repo);
+        this.repoService.upsert(repo.id, repo);
+      }),
+    );
+    await this.usersService.addRepositories(user, reposEntities);
     return { status: 'ok' };
   }
 

@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
@@ -26,25 +26,29 @@ const Dropdown = ({
   multiple,
   disabled,
 }: DropdownProps) => {
-  const selected = items.find((i) => i.value === value);
-  const selectedMultiple = multiple
-    ? items.filter((i) =>
-        ((value || []) as DropdownSingleValue[]).includes(i.value)
-      )
-    : [];
+  const selected = items.find((i) => i.value === value)?.value;
+  const selectedMultiple = (
+    multiple
+      ? items.filter((i) =>
+          ((value || []) as DropdownSingleValue[]).includes(i.value)
+        )
+      : []
+  ).map((v) => v.value);
+
+  const isAllSelected = multiple && selectedMultiple.length === items.length;
+
+  const onChangeLocal = (v: DropdownValue) => {
+    let toChange = v;
+    if (Array.isArray(v) && v.includes("all_items")) {
+      toChange = isAllSelected ? [] : items.map((i) => i.value);
+    }
+    onChange(toChange);
+  };
 
   return (
     <Listbox
       value={multiple ? selectedMultiple : selected}
-      onChange={(v) =>
-        onChange(
-          multiple
-            ? (v as { label: string; value: DropdownSingleValue }[]).map(
-                (i) => i.value
-              )
-            : (v as { label: string; value: DropdownSingleValue }).value
-        )
-      }
+      onChange={onChangeLocal}
       multiple={multiple}
       disabled={disabled}
     >
@@ -60,7 +64,7 @@ const Dropdown = ({
               <span className="flex items-center">
                 <span className="ml-3 block truncate">
                   {multiple && `${selectedMultiple.length} selected`}
-                  {!multiple && (selected?.label || "Select a value")}
+                  {!multiple && (selected || "Select a value")}
                 </span>
               </span>
               <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
@@ -79,6 +83,27 @@ const Dropdown = ({
               leaveTo="opacity-0"
             >
               <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {multiple && (
+                  <Listbox.Option
+                    className={({ active }) =>
+                      classNames(
+                        active ? "text-white bg-indigo-600" : "text-gray-900",
+                        "relative cursor-default select-none py-2 pl-3 pr-9"
+                      )
+                    }
+                    value="all_items"
+                  >
+                    <div className="flex items-center">
+                      <span
+                        className="font-normal ml-3 block truncate"
+                        title="Select all"
+                      >
+                        Select all
+                      </span>
+                    </div>
+                  </Listbox.Option>
+                )}
+
                 {items.map((item) => (
                   <Listbox.Option
                     key={item.value}
@@ -88,7 +113,7 @@ const Dropdown = ({
                         "relative cursor-default select-none py-2 pl-3 pr-9"
                       )
                     }
-                    value={item}
+                    value={item.value}
                   >
                     {({ selected, active }) => (
                       <>
