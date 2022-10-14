@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { RepoStats } from './repoStats.entity';
+import { Repo } from './repo.entity';
 
 @Entity()
 export class Issue {
@@ -29,6 +29,6 @@ export class Issue {
   })
   state: string;
 
-  @ManyToOne(() => RepoStats, (repoStats) => repoStats.usersIssueDates)
-  repoStats: RepoStats;
+  @ManyToOne(() => Repo, (repo) => repo.issues)
+  repo: Repo;
 }

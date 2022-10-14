@@ -18,7 +18,6 @@ function Dashboard() {
   const [activeRepository, setActiveRepository] = useState(0);
   const [openIssues, setOpenIssues] = useState(0);
   const [filters, setFilters] = useState<Record<string, any>>();
-  const [isLoadingSyncronize, setIsLoadingSynchronize] = useState(false);
 
   const onApplyFilters = (filters: Record<string, any>) => {
     getInstance().get("/api/dashboard/analytics", {
@@ -28,19 +27,12 @@ function Dashboard() {
     });
   };
 
-  const onClickSynchronize = () => {
-    setIsLoadingSynchronize(true);
-    getInstance()
-      .post("/api/repostats/synchronize")
-      .finally(() => setIsLoadingSynchronize(false));
-  };
-
   const getContributersByRepo = (org: string, repo: string) => {
     return getInstance()
-      .get(`/api/repostats/org/${org}/repo/${repo}`)
+      .get(`/api/repo/org/${org}/repo/${repo}`)
       .then((rest) => {
         const contributorsVar: Contributor[] = [];
-        rest.data.usersRepoStats
+        rest.data.commits
           .map((c: Contributor) => {
             const ctb: Contributor = {
               author: c.author,
@@ -76,7 +68,6 @@ function Dashboard() {
 
   useEffect(() => {
     setContributors([]);
-    console.log("button clicked");
     const fetchData = async (org: string, r: string) => {
       return await getContributersByRepo(org, r);
     };
@@ -129,6 +120,10 @@ function Dashboard() {
     }
   }, [filters]);
 
+  useEffect(() => {
+    getInstance().put("/api/users/me/repositories");
+  }, []);
+
   return (
     <>
       <DashboardFilters
@@ -137,8 +132,6 @@ function Dashboard() {
           setFilters(filters);
         }}
       />
-
-      <Button onClick={onClickSynchronize}>Synchronize</Button>
 
       <div className="py-16 grid row-gap-8 sm:grid-cols-4">
         <div className="text-center">

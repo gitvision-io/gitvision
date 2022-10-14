@@ -3,6 +3,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ForwardedRef, forwardRef, Fragment, useState } from "react";
+import Button from "../common/Button";
 
 // This component is to forward onClick event from Menu.Item to close the menu on item click
 const CustomLink = forwardRef(
@@ -80,13 +81,12 @@ export const Navbar = () => {
     <div className="px-4 py-5 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
       <div className="relative flex items-center justify-between">
         <div className="flex items-center">
-          <Link
-            href="/"
-            aria-label="Company"
-            title="Company"
-            className="inline-flex items-center mr-8"
-          >
-            <a>
+          <Link href="/">
+            <a
+              aria-label="Company"
+              title="Company"
+              className="inline-flex items-center mr-8"
+            >
               <svg
                 className="w-8 text-deep-purple-accent-400"
                 viewBox="0 0 24 24"
@@ -111,19 +111,25 @@ export const Navbar = () => {
             <ul className="flex items-center hidden space-x-8 lg:flex">
               {mainMenuItems.map((item) => (
                 <li key={item.link}>
-                  <Link
-                    href={item.link}
-                    aria-label={item.label}
-                    title={item.label}
-                    className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
-                  >
-                    {item.label}
+                  <Link href={item.link}>
+                    <a
+                      aria-label={item.label}
+                      title={item.label}
+                      className="font-medium tracking-wide text-gray-700 transition-colors duration-200 hover:text-deep-purple-accent-400"
+                    >
+                      {item.label}
+                    </a>
                   </Link>
                 </li>
               ))}
             </ul>
           )}
         </div>
+        {!session && (
+          <Button size="sm" isLink href="/auth/signin" variant="success">
+            Sign in
+          </Button>
+        )}
         {session && (
           <ul className="flex items-center hidden space-x-8 lg:flex">
             <li className="font-medium tracking-wide text-gray-700 transition-colors duration-200">
@@ -217,13 +223,12 @@ export const Navbar = () => {
               <div className="p-5 bg-white border rounded shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <Link
-                      href="/"
-                      aria-label="Company"
-                      title="Company"
-                      className="inline-flex items-center"
-                    >
-                      <a>
+                    <Link href="/">
+                      <a
+                        aria-label="Company"
+                        title="Company"
+                        className="inline-flex items-center"
+                      >
                         <svg
                           className="w-8 text-deep-purple-accent-400"
                           viewBox="0 0 24 24"

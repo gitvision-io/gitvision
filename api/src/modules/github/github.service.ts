@@ -9,18 +9,26 @@ import {
   GetAllRepositoriesOfOrganizationQuery,
   GetAllRepositoriesForUser,
   GetAllRepositoriesForUserQuery,
+  GetAllRespositoriesAndOrganization,
+  GetAllRespositoriesAndOrganizationQuery,
 } from 'src/generated/graphql';
 
 @Injectable()
 export class GithubService {
   apolloService: ApolloService;
   #octokit: Octokit;
+  #token: string;
 
   auth(token: string): void {
+    this.#token = token;
     this.#octokit = new Octokit({
       auth: token,
     });
     this.apolloService = new ApolloService(token);
+  }
+
+  getToken() {
+    return this.#token;
   }
 
   async getAllOrganizations(): Promise<{ id: number; login: string }[]> {
@@ -76,6 +84,31 @@ export class GithubService {
         name: branch.name,
       })),
     }));
+  }
+
+  async getMainAndOrgRespositories(): Promise<
+    { id: string; name: string; organization: string }[]
+  > {
+    const result = await this.apolloService
+      .githubClient()
+      .query<GetAllRespositoriesAndOrganizationQuery>({
+        query: GetAllRespositoriesAndOrganization,
+      });
+    return [
+      ...result.data.viewer.repositories.edges.map((repository) => ({
+        id: repository.node.id,
+        name: repository.node.name,
+        organization: 'user',
+      })),
+
+      ...result.data.viewer.organizations.edges.flatMap((o) =>
+        o.node.repositories.edges.map((repository) => ({
+          id: repository.node.id,
+          name: repository.node.name,
+          organization: o.node.login,
+        })),
+      ),
+    ];
   }
 
   async getOrgRepositories(

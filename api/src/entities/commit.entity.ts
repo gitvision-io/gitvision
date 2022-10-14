@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { RepoStats } from './repoStats.entity';
+import { Repo } from './repo.entity';
 
 @Entity()
-export class UserRepoStats {
+export class Commit {
   @PrimaryColumn()
   commitId: string;
 
@@ -40,6 +40,6 @@ export class UserRepoStats {
   })
   numberOfLineModified: number;
 
-  @ManyToOne(() => RepoStats, (repoStats) => repoStats.usersRepoStats)
-  repoStats: RepoStats;
+  @ManyToOne(() => Repo, (repo) => repo.commits)
+  repo: Repo;
 }

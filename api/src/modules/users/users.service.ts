@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repo } from 'src/entities/repo.entity';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserDTO, UserProfileDTO } from './users.dto';
@@ -15,8 +16,15 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  findOne(id: string): Promise<User> {
-    return this.usersRepository.findOneBy({ id });
+  async findOne(id: string): Promise<User> {
+    return await this.usersRepository.findOne({
+      relations: {
+        repos: true,
+      },
+      where: {
+        id,
+      },
+    });
   }
 
   async upsert(id: string, userDto: UserDTO): Promise<void> {
@@ -31,6 +39,11 @@ export class UsersService {
 
   async update(id: string, userDto: UserDTO): Promise<void> {
     await this.usersRepository.update(id, userDto);
+  }
+
+  async addRepositories(user: User, repos: Repo[]): Promise<void> {
+    user.repos.push(...repos);
+    await this.usersRepository.save(user);
   }
 
   async updateProfile(

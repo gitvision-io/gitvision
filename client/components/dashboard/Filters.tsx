@@ -37,7 +37,7 @@ function DashboardFilters({
   >([]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
-
+  const [isLoadingSyncronize, setIsLoadingSynchronize] = useState(false);
   const [filters, setFilters] = useState<Filters>({});
 
   const applyFilters = () => {
@@ -47,6 +47,13 @@ function DashboardFilters({
       organization: org?.isUser ? "user" : filters.organization,
       branches: filters.branches,
     });
+  };
+
+  const onClickSynchronize = () => {
+    setIsLoadingSynchronize(true);
+    getInstance()
+      .post("/api/repo/synchronize")
+      .finally(() => setIsLoadingSynchronize(false));
   };
 
   useEffect(() => {
@@ -143,14 +150,25 @@ function DashboardFilters({
             )}
           </>
         </div> */}
-        <Button
-          variant="success"
-          size="sm"
-          className="w-24"
-          onClick={applyFilters}
-        >
-          Apply
-        </Button>
+        <div>
+          <Button
+            variant="success"
+            size="sm"
+            className="w-24 mr-2"
+            onClick={applyFilters}
+          >
+            Apply
+          </Button>
+
+          <Button
+            size="sm"
+            className="w-35"
+            onClick={onClickSynchronize}
+            isLoading={isLoadingSyncronize}
+          >
+            Synchronize
+          </Button>
+        </div>
       </div>
     </>
   );
