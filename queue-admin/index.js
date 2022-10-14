@@ -7,8 +7,6 @@ const { ExpressAdapter } = require("@bull-board/express");
 require("dotenv").config({ path: "./.env.local" });
 require("dotenv").config({ path: "./.env" });
 
-console.log(process.env.REDIS_HOST);
-
 const someQueue = new Queue("sync-organization", {
   redis: {
     port: parseInt(process.env.REDIS_PORT),

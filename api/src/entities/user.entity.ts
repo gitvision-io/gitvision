@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Repo } from './repo.entity';
 
 @Entity()
 export class User {
@@ -43,4 +44,8 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @ManyToMany(() => Repo, (repo) => repo.users)
+  @JoinTable()
+  repos: Repo[];
 }

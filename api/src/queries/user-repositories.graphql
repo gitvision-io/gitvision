@@ -1,6 +1,6 @@
 query GetAllRepositoriesForUser {
   viewer {
-    repositories(first: 20) {
+    repositories(first: 100) {
       edges {
         node {
           refs(refPrefix: "refs/heads/", first: 100) {
@@ -10,6 +10,35 @@ query GetAllRepositoriesForUser {
           }
           id
           name
+        }
+      }
+    }
+  }
+}
+
+query GetAllRespositoriesAndOrganization {
+  viewer {
+    repositories(ownerAffiliations: [OWNER], first: 100) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
         }
       }
     }

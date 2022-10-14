@@ -7,9 +7,9 @@ import { User } from './entities/user.entity';
 import { UsersModule } from './modules/users/users.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { GithubModule } from './modules/github/github.module';
-import { RepoStatsModule } from './modules/repoStats/repoStats.module';
-import { RepoStats } from './entities/repoStats.entity';
-import { UserRepoStats } from './entities/userRepoStats.entity';
+import { RepoModule } from './modules/repo/repo.module';
+import { Repo } from './entities/repo.entity';
+import { Commit } from './entities/commit.entity';
 import { SynchronizeModule } from './modules/synchronize/synchronize.module';
 import { Issue } from './entities/issue.entity';
 
@@ -21,7 +21,7 @@ import { Issue } from './entities/issue.entity';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './data.db',
-      entities: [User, RepoStats, UserRepoStats, Issue],
+      entities: [User, Repo, Commit, Issue],
       synchronize: true,
     }),
     BullModule.forRoot({
@@ -34,7 +34,7 @@ import { Issue } from './entities/issue.entity';
     UsersModule,
     DashboardModule,
     GithubModule,
-    RepoStatsModule,
+    RepoModule,
     SynchronizeModule,
   ],
 })

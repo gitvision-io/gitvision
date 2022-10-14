@@ -1,9 +1,12 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { RepoStats } from './repoStats.entity';
+import { Repo } from './repo.entity';
 
 @Entity()
 export class Issue {
-  @PrimaryColumn({ type: 'datetime' })
+  @PrimaryColumn({ type: String })
+  id: string;
+
+  @Column({ type: 'datetime' })
   createdAt: string;
 
   @Column({ type: String })
@@ -26,6 +29,6 @@ export class Issue {
   })
   state: string;
 
-  @ManyToOne(() => RepoStats, (repoStats) => repoStats.usersIssueDates)
-  repoStats: RepoStats;
+  @ManyToOne(() => Repo, (repo) => repo.issues)
+  repo: Repo;
 }
