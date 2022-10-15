@@ -19,11 +19,13 @@ function Dashboard() {
   const [filters, setFilters] = useState<Record<string, any>>();
 
   const onApplyFilters = (filters: Record<string, any>) => {
-    getInstance().get("/api/dashboard/analytics", {
-      params: {
-        filters,
-      },
-    });
+    if (filters.repositories) {
+      getInstance().get("/api/dashboard/analytics", {
+        params: {
+          filters,
+        },
+      });
+    }
   };
 
   const getContributersByRepo = (org: string, filters: Record<string, any>) => {
@@ -119,7 +121,7 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    if (filters) {
+    if (filters && filters.repositories) {
       changeDashboard(filters);
     }
   }, [filters]);
@@ -132,8 +134,10 @@ function Dashboard() {
     <>
       <DashboardFilters
         onChange={(filters) => {
-          onApplyFilters(filters);
-          changeDashboard(filters);
+          if (filters.repositories) {
+            onApplyFilters(filters);
+            changeDashboard(filters);
+          }
           setFilters(filters);
         }}
       />

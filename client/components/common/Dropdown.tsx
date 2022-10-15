@@ -16,6 +16,7 @@ interface DropdownProps {
   onChange: (value: DropdownValue) => void;
   multiple: boolean;
   disabled: boolean;
+  defaultSelect: string;
 }
 
 const Dropdown = ({
@@ -25,6 +26,7 @@ const Dropdown = ({
   onChange,
   multiple,
   disabled,
+  defaultSelect,
 }: DropdownProps) => {
   const selected = items.find((i) => i.value === value)?.value;
   const selectedMultiple = (
@@ -64,7 +66,7 @@ const Dropdown = ({
               <span className="flex items-center">
                 <span className="ml-3 block truncate">
                   {multiple && `${selectedMultiple.length} selected`}
-                  {!multiple && (selected || "Select a value")}
+                  {!multiple && (selected || defaultSelect)}
                 </span>
               </span>
               <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
@@ -155,6 +157,7 @@ const Dropdown = ({
 Dropdown.defaultProps = {
   multiple: false,
   disabled: false,
+  defaultSelect: "Select a value",
 };
 
 export default Dropdown;

@@ -48,6 +48,7 @@ function DashboardFilters({
       ...filters,
       organization: filters.organization,
       branches: filters.branches,
+      time: filters.time,
     });
   };
 
@@ -60,7 +61,11 @@ function DashboardFilters({
 
   useEffect(() => {
     if (!filters.organization && organizations.length) {
-      setFilters({ ...filters, organization: organizations[0].login });
+      setFilters({
+        ...filters,
+        organization: organizations[0].login,
+        time: times[2].label,
+      });
     }
   }, [filters, organizations]);
 
@@ -108,6 +113,7 @@ function DashboardFilters({
             label={"Time"}
             items={times.map((t) => ({ ...t, value: t.label }))}
             value={filters.time}
+            defaultSelect={times[2].label}
             onChange={(v) => setFilters({ ...filters, time: v as string })}
           />
         </div>
