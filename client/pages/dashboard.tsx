@@ -34,6 +34,7 @@ function Dashboard() {
         },
       })
       .then((rest) => {
+        setActiveRepository(rest.data.length);
         const contributorsVar: Contributor[] = [];
         rest.data.map((repo: Record<string, any>) => {
           return repo.commits
