@@ -76,3 +76,41 @@ query GetAllCommitsOfAllReposOfAllOrg($date: GitTimestamp) {
     }
   }
 }
+
+query GetAllCommitsOfAllReposOfUser($date: GitTimestamp) {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(since: $date) {
+                  edges {
+                    node {
+                      ... on Commit {
+                        author {
+                          date
+                          email
+                          name
+                        }
+                        id
+                        committedDate
+                        changedFilesIfAvailable
+                        additions
+                        deletions
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

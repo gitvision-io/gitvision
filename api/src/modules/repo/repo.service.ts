@@ -6,6 +6,8 @@ import { Commit } from 'src/entities/commit.entity';
 import {
   GetAllCommitsOfAllReposOfAllOrg,
   GetAllCommitsOfAllReposOfAllOrgQuery,
+  GetAllCommitsOfAllReposOfUser,
+  GetAllCommitsOfAllReposOfUserQuery,
 } from 'src/generated/graphql';
 import { In, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
@@ -71,7 +73,7 @@ export class RepoService {
         commits: true,
       },
       where: {
-        repoName: In(repoNames),
+        repoName: In(Object.values(repoNames)),
         organization,
       },
     });
@@ -88,7 +90,7 @@ export class RepoService {
   }
 
   async getCommitsOfAllRepoOfAllOrg(): Promise<Repo[]> {
-    let date: Date;
+    let date: Date = new Date();
     date.setMonth(date.getMonth() - 6);
 
     const graphQLResult = await this.apolloService
@@ -129,6 +131,48 @@ export class RepoService {
         return repo;
       }),
     );
+  }
+
+  async getCommitsOfAllRepoOfUser(): Promise<Repo[]> {
+    let date: Date = new Date();
+    date.setMonth(date.getMonth() - 6);
+
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllCommitsOfAllReposOfUserQuery>({
+        query: GetAllCommitsOfAllReposOfUser,
+        variables: {
+          date,
+        },
+      });
+
+    return graphQLResult.data.viewer.repositories.edges.map((r) => {
+      const repo: Repo = new Repo();
+      repo.organization = graphQLResult.data.viewer.login;
+      repo.repoName = r.node.name;
+      repo.id = r.node.id;
+
+      if (r.node.defaultBranchRef.target.__typename === 'Commit') {
+        const commits: Commit[] =
+          r.node.defaultBranchRef.target.history.edges.map((c) => {
+            const commit = new Commit();
+            commit.commitId = c.node.id;
+            commit.repoId = repo.id;
+            commit.author = c.node.author.name;
+            commit.date = c.node.committedDate;
+            commit.numberOfLineAdded = c.node.additions;
+            commit.numberOfLineRemoved = c.node.deletions;
+            commit.numberOfLineModified = c.node.additions - c.node.deletions;
+
+            this.commitRepository.save(commit);
+            return commit;
+          });
+        repo.commits = commits;
+      }
+
+      this.repoRepository.save(repo);
+      return repo;
+    });
   }
 
   async syncIssuesForAllRepoOfOrg(org: string): Promise<void> {

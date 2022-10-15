@@ -32,13 +32,14 @@ export class RepoController {
     @Param('org') org: string,
     @Query('filters') { repositories },
   ): Promise<Repo[]> {
-    return await this.repoService.findByOrgByRepos(org, repos);
+    return await this.repoService.findByOrgByRepos(org, repositories);
   }
 
   @Post('/synchronize')
   async getAllRepoStatOfAllOrg(): Promise<void> {
     await this.repoService.getCommitsOfAllRepoOfAllOrg();
-    await this.repoService.syncIssuesForAllRepoOfAllOrgs();
+    await this.repoService.getCommitsOfAllRepoOfUser();
+    //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
 
     // TODO : call queue instead of doing synchronously
     // TODO : get organization & repos from database
