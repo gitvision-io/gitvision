@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Button from "../components/common/Button";
 import DashboardFilters, { Filters } from "../components/dashboard/Filters";
 import { getInstance } from "../services/api";
 
