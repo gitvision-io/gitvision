@@ -54,12 +54,8 @@ export class RepoController {
       date = new Date();
       this.usersService.update(user.id, { lastSynchronize: date });
       date.setMonth(date.getMonth() - 6);
-      console.log('not synchro date found');
-      console.log(date);
     } else {
       date = user.lastSynchronize;
-      console.log('new synchro');
-      console.log(date);
     }
     await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
     await this.repoService.getCommitsOfAllRepoOfUser(date);

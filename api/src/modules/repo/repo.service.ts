@@ -94,8 +94,6 @@ export class RepoService {
         date.setMonth(date.getMonth() - 6);
         break;
     }
-    console.log(time);
-    console.log(date);
     return this.repoRepository.find({
       relations: {
         commits: true,
