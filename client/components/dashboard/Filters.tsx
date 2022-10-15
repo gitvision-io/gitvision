@@ -8,6 +8,8 @@ const times = [
   { label: "last day" },
   { label: "last week" },
   { label: "last month" },
+  { label: "last 3 months" },
+  { label: "last 6 months" },
 ];
 
 export interface Filters {
