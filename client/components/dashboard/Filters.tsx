@@ -44,7 +44,7 @@ function DashboardFilters({
     const org = organizations.find((o) => o.login === filters.organization);
     onChange({
       ...filters,
-      organization: org?.isUser ? "user" : filters.organization,
+      organization: filters.organization,
       branches: filters.branches,
     });
   };
@@ -52,7 +52,7 @@ function DashboardFilters({
   const onClickSynchronize = () => {
     setIsLoadingSynchronize(true);
     getInstance()
-      .post("/api/repo/synchronize")
+      .post("/api/orgstats/synchronize")
       .finally(() => setIsLoadingSynchronize(false));
   };
 
