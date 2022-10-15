@@ -85,6 +85,7 @@ query GetAllCommitsOfAllReposOfUser($date: GitTimestamp) {
         node {
           id
           name
+          isInOrganization
           defaultBranchRef {
             target {
               ... on Commit {

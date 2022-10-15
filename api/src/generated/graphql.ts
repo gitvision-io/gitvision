@@ -38747,6 +38747,7 @@ export const GetAllCommitsOfAllReposOfUser = gql`
         node {
           id
           name
+          isInOrganization
           defaultBranchRef {
             target {
               ... on Commit {
@@ -38790,6 +38791,7 @@ export const GetAllRepositoriesForUser = gql`
           }
           id
           name
+          isInOrganization
         }
       }
     }
@@ -38860,12 +38862,12 @@ export type GetAllCommitsOfAllReposOfUserQueryVariables = Exact<{
 }>;
 
 
-export type GetAllCommitsOfAllReposOfUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null> | null } } };
+export type GetAllCommitsOfAllReposOfUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null> | null } } };
 
 export type GetAllRepositoriesForUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } };
+export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } };
 
 export type GetAllRespositoriesAndOrganizationQueryVariables = Exact<{ [key: string]: never; }>;
 

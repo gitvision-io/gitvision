@@ -77,13 +77,15 @@ export class GithubService {
       .query<GetAllRepositoriesForUserQuery>({
         query: GetAllRepositoriesForUser,
       });
-    return result.data.viewer.repositories.edges.map((repository) => ({
-      id: repository.node.id,
-      name: repository.node.name,
-      branches: repository.node.refs.nodes.map((branch) => ({
-        name: branch.name,
-      })),
-    }));
+    return result.data.viewer.repositories.edges
+      .filter((r) => r.node.isInOrganization === false)
+      .map((repository) => ({
+        id: repository.node.id,
+        name: repository.node.name,
+        branches: repository.node.refs.nodes.map((branch) => ({
+          name: branch.name,
+        })),
+      }));
   }
 
   async getMainAndOrgRespositories(): Promise<
