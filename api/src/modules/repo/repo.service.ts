@@ -9,7 +9,7 @@ import {
   GetAllCommitsOfAllReposOfUser,
   GetAllCommitsOfAllReposOfUserQuery,
 } from 'src/generated/graphql';
-import { In, Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
 import { User } from 'src/entities/user.entity';
@@ -67,7 +67,35 @@ export class RepoService {
     });
   }
 
-  findByOrgByRepos(organization, repoNames: string[]): Promise<Repo[]> {
+  findByOrgByReposAndTime(
+    organization: string,
+    repoNames: string[],
+    time: string,
+  ): Promise<Repo[]> {
+    let date = new Date();
+    switch (time) {
+      case 'last day':
+        date.setHours(date.getHours() - 24);
+        break;
+
+      case 'last week':
+        date.setHours(date.getHours() - 168);
+        break;
+
+      case 'last month':
+        date.setMonth(date.getMonth() - 1);
+        break;
+
+      case 'last 3 months':
+        date.setMonth(date.getMonth() - 3);
+        break;
+
+      case 'last 6 months':
+        date.setMonth(date.getMonth() - 6);
+        break;
+    }
+    console.log(time);
+    console.log(date);
     return this.repoRepository.find({
       relations: {
         commits: true,
@@ -75,6 +103,7 @@ export class RepoService {
       where: {
         repoName: In(Object.values(repoNames)),
         organization,
+        commits: { date: MoreThan(date) },
       },
     });
   }

@@ -36,9 +36,13 @@ export class RepoController {
   @Get(':org')
   async getRepoStat(
     @Param('org') org: string,
-    @Query('filters') { repositories },
+    @Query('filters') { repositories, time },
   ): Promise<Repo[]> {
-    return await this.repoService.findByOrgByRepos(org, repositories);
+    return await this.repoService.findByOrgByReposAndTime(
+      org,
+      repositories,
+      time,
+    );
   }
 
   @Post('/synchronize')
