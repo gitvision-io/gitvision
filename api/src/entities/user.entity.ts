@@ -28,7 +28,7 @@ export class User {
     type: Date,
     nullable: true,
   })
-  lastRepoStatsSynchronize: Date;
+  lastSynchronize: Date;
 
   @Column({
     type: String,

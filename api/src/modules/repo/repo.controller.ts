@@ -1,7 +1,12 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repo } from 'src/entities/repo.entity';
+import { User } from 'src/entities/user.entity';
+import { Repository } from 'typeorm';
 import { GithubService } from '../github/github.service';
 import { ProducerService } from '../synchronize/producer.service';
+import { USER } from '../users/users.decorator';
+import { UsersService } from '../users/users.service';
 import { RepoService } from './repo.service';
 
 @Controller('/api/orgstats')
@@ -10,6 +15,7 @@ export class RepoController {
     private readonly synchronizeProducerService: ProducerService,
     private readonly githubService: GithubService,
     private readonly repoService: RepoService /* private readonly githubService: GithubService, */,
+    private usersService: UsersService,
   ) {}
 
   @Get('/')
@@ -36,9 +42,23 @@ export class RepoController {
   }
 
   @Post('/synchronize')
-  async getAllRepoStatOfAllOrg(): Promise<void> {
-    await this.repoService.getCommitsOfAllRepoOfAllOrg();
-    await this.repoService.getCommitsOfAllRepoOfUser();
+  async getAllRepoStatOfAllOrg(
+    @USER() user: User,
+  ): Promise<{ status: string }> {
+    let date: Date;
+    if (!user.lastSynchronize) {
+      date = new Date();
+      this.usersService.update(user.id, { lastSynchronize: date });
+      date.setMonth(date.getMonth() - 6);
+      console.log('not synchro date found');
+      console.log(date);
+    } else {
+      date = user.lastSynchronize;
+      console.log('new synchro');
+      console.log(date);
+    }
+    await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
+    await this.repoService.getCommitsOfAllRepoOfUser(date);
     //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
 
     // TODO : call queue instead of doing synchronously
@@ -48,5 +68,9 @@ export class RepoController {
     //   repositories: ['titi', 'tata'],
     //   githubToken: this.githubService.getToken(),
     // });
+
+    this.usersService.update(user.id, { lastSynchronize: new Date() });
+
+    return { status: 'Synchronized !' };
   }
 }

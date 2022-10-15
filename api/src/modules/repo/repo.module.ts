@@ -8,6 +8,7 @@ import { SynchronizeModule } from '../synchronize/synchronize.module';
 import { RepoController } from './repo.controller';
 import { RepoService } from './repo.service';
 import { User } from 'src/entities/user.entity';
+import { UsersService } from '../users/users.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { User } from 'src/entities/user.entity';
     SynchronizeModule,
   ],
   exports: [RepoService],
-  providers: [RepoService],
+  providers: [RepoService, UsersService],
   controllers: [RepoController],
 })
 export class RepoModule {}

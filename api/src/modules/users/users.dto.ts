@@ -4,6 +4,7 @@ export class UserDTO {
   avatarUrl?: string;
   githubId?: string;
   githubToken?: string;
+  lastSynchronize?: Date;
 }
 
 export class UserProfileDTO {

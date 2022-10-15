@@ -89,10 +89,7 @@ export class RepoService {
     );
   }
 
-  async getCommitsOfAllRepoOfAllOrg(): Promise<Repo[]> {
-    let date: Date = new Date();
-    date.setMonth(date.getMonth() - 6);
-
+  async getCommitsOfAllRepoOfAllOrg(date: Date): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllCommitsOfAllReposOfAllOrgQuery>({
@@ -102,7 +99,7 @@ export class RepoService {
         },
       });
 
-    return graphQLResult.data.viewer.organizations.edges.flatMap((o) =>
+    return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
       o.node.repositories.edges.map((r) => {
         const repo: Repo = new Repo();
         repo.organization = o.node.login;
@@ -111,7 +108,7 @@ export class RepoService {
 
         if (r.node.defaultBranchRef.target.__typename === 'Commit') {
           const commits: Commit[] =
-            r.node.defaultBranchRef.target.history.edges.map((c) => {
+            r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
               commit.commitId = c.node.id;
               commit.repoId = repo.id;
@@ -127,16 +124,13 @@ export class RepoService {
           repo.commits = commits;
         }
 
-        this.repoRepository.save(repo);
+        this.upsert(repo.id, repo);
         return repo;
       }),
     );
   }
 
-  async getCommitsOfAllRepoOfUser(): Promise<Repo[]> {
-    let date: Date = new Date();
-    date.setMonth(date.getMonth() - 6);
-
+  async getCommitsOfAllRepoOfUser(date: Date): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllCommitsOfAllReposOfUserQuery>({
@@ -146,7 +140,7 @@ export class RepoService {
         },
       });
 
-    return graphQLResult.data.viewer.repositories.edges.map((r) => {
+    return graphQLResult.data.viewer.repositories.edges?.map((r) => {
       const repo: Repo = new Repo();
       repo.organization = graphQLResult.data.viewer.login;
       repo.repoName = r.node.name;
@@ -154,7 +148,7 @@ export class RepoService {
 
       if (r.node.defaultBranchRef.target.__typename === 'Commit') {
         const commits: Commit[] =
-          r.node.defaultBranchRef.target.history.edges.map((c) => {
+          r.node.defaultBranchRef.target.history.edges?.map((c) => {
             const commit = new Commit();
             commit.commitId = c.node.id;
             commit.repoId = repo.id;
@@ -170,7 +164,7 @@ export class RepoService {
         repo.commits = commits;
       }
 
-      this.repoRepository.save(repo);
+      this.upsert(repo.id, repo);
       return repo;
     });
   }
