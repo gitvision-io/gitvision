@@ -12,6 +12,7 @@ import { Repo } from './entities/repo.entity';
 import { Commit } from './entities/commit.entity';
 import { SynchronizeModule } from './modules/synchronize/synchronize.module';
 import { Issue } from './entities/issue.entity';
+import { PullRequest } from './entities/pullrequest.entity';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { Issue } from './entities/issue.entity';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './data.db',
-      entities: [User, Repo, Commit, Issue],
+      entities: [User, Repo, Commit, Issue, PullRequest],
       synchronize: true,
     }),
     BullModule.forRoot({

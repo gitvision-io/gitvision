@@ -8,11 +8,20 @@ import {
   GetAllCommitsOfAllReposOfAllOrgQuery,
   GetAllCommitsOfAllReposOfUser,
   GetAllCommitsOfAllReposOfUserQuery,
+  GetAllIssuesOfAllReposOfAllOrg,
+  GetAllIssuesOfAllReposOfAllOrgQuery,
+  GetAllIssuesOfAllReposOfUser,
+  GetAllIssuesOfAllReposOfUserQuery,
+  GetAllPullRequestOfAllReposOfAllOrg,
+  GetAllPullRequestOfAllReposOfAllOrgQuery,
+  GetAllPullRequestOfAllReposOfUser,
+  GetAllPullRequestOfAllReposOfUserQuery,
 } from 'src/generated/graphql';
 import { In, MoreThan, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
 import { User } from 'src/entities/user.entity';
+import { PullRequest } from 'src/entities/pullrequest.entity';
 
 @Injectable()
 export class RepoService {
@@ -25,7 +34,10 @@ export class RepoService {
     private commitRepository: Repository<Commit>,
 
     @InjectRepository(Issue)
-    private IssueRepository: Repository<Issue>,
+    private issueRepository: Repository<Issue>,
+
+    @InjectRepository(PullRequest)
+    private pullRequestRepository: Repository<PullRequest>,
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -157,6 +169,68 @@ export class RepoService {
     );
   }
 
+  async getIssuesOfAllRepoOfAllOrg(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllIssuesOfAllReposOfAllOrgQuery>({
+        query: GetAllIssuesOfAllReposOfAllOrg,
+      });
+
+    return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
+      o.node.repositories.edges.map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = o.node.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const issues: Issue[] = r.node.issues.edges.map((i) => {
+          const issue = new Issue();
+          issue.id = i.node.id;
+          issue.state = i.node.state;
+          issue.repoId = repo.id;
+          this.issueRepository.save(issue);
+          return issue;
+        });
+
+        repo.issues = issues;
+        this.upsert(repo.id, repo);
+        return repo;
+      }),
+    );
+  }
+
+  async getPullRequestsOfAllRepoOfAllOrg(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllPullRequestOfAllReposOfAllOrgQuery>({
+        query: GetAllPullRequestOfAllReposOfAllOrg,
+      });
+
+    return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
+      o.node.repositories.edges.map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = o.node.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const pullRequests: PullRequest[] = r.node.pullRequests.edges.map(
+          (p) => {
+            const pullRequest = new PullRequest();
+            pullRequest.id = p.node.id;
+            pullRequest.state = p.node.state;
+            pullRequest.repoId = repo.id;
+            this.pullRequestRepository.save(pullRequest);
+            return pullRequest;
+          },
+        );
+
+        repo.pullRequests = pullRequests;
+        this.upsert(repo.id, repo);
+        return repo;
+      }),
+    );
+  }
+
   async getCommitsOfAllRepoOfUser(date: Date): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
@@ -198,14 +272,76 @@ export class RepoService {
       });
   }
 
+  async getIssuesOfAllRepoOfUser(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllIssuesOfAllReposOfUserQuery>({
+        query: GetAllIssuesOfAllReposOfUser,
+      });
+
+    return graphQLResult.data.viewer.repositories.edges
+      .filter((r) => r.node.isInOrganization === false)
+      .map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = graphQLResult.data.viewer.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const issues: Issue[] = r.node.issues.edges.map((i) => {
+          const issue = new Issue();
+          issue.id = i.node.id;
+          issue.state = i.node.state;
+          issue.repoId = repo.id;
+          this.issueRepository.save(issue);
+          return issue;
+        });
+        repo.issues = issues;
+        this.upsert(repo.id, repo);
+        return repo;
+      });
+  }
+
+  async getPullRequestsOfAllRepoOfUser(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllPullRequestOfAllReposOfUserQuery>({
+        query: GetAllPullRequestOfAllReposOfUser,
+      });
+
+    return graphQLResult.data.viewer.repositories.edges
+      .filter((r) => r.node.isInOrganization === false)
+      .map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = graphQLResult.data.viewer.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const pullRequests: PullRequest[] = r.node.pullRequests.edges.map(
+          (p) => {
+            const pullRequest = new PullRequest();
+            pullRequest.id = p.node.id;
+            pullRequest.state = p.node.state;
+            pullRequest.repoId = repo.id;
+            this.pullRequestRepository.save(pullRequest);
+            return pullRequest;
+          },
+        );
+        repo.pullRequests = pullRequests;
+        this.upsert(repo.id, repo);
+        return repo;
+      });
+  }
+
   async syncIssuesForAllRepoOfOrg(org: string): Promise<void> {
     const issues = (await this.githubService.getOrgIssues(org)).filter((i) =>
       Boolean(i.repository),
     );
+    //console.log(issues);
     const existingRepos = await this.repoRepository.findBy({
       repoName: In(issues.map((i) => i.repository.name)),
       organization: org,
     });
+    //console.log(existingRepos);
 
     const issuesDb = issues.map((i) => {
       const issueDb = new Issue();
@@ -227,14 +363,17 @@ export class RepoService {
         repo.repoName = i.repository.name;
       }
       issueDb.repo = repo;
+      //console.log(issueDb);
       return issueDb;
     });
 
-    await this.IssueRepository.save(issuesDb);
+    await this.issueRepository.save(issuesDb);
+    //console.log(issuesDb);
   }
 
   async syncIssuesForAllRepoOfAllOrgs(): Promise<void> {
     const orgs = await this.githubService.getAllOrganizations();
+    //console.log(orgs);
     await Promise.all(orgs.map((o) => this.syncIssuesForAllRepoOfOrg(o.login)));
   }
 }
