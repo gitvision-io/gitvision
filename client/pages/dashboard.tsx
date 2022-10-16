@@ -13,18 +13,13 @@ interface Contributor {
 
 function Dashboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
-  const [contributorsLocal, setContributorsLocal] = useState<Contributor[]>([]);
   const [activeRepository, setActiveRepository] = useState(0);
   const [openIssues, setOpenIssues] = useState(0);
   const [filters, setFilters] = useState<Record<string, any>>();
 
   const onApplyFilters = (filters: Record<string, any>) => {
     if (filters.repositories) {
-      getInstance().get("/api/dashboard/analytics", {
-        params: {
-          filters,
-        },
-      });
+      changeDashboard(filters);
     }
   };
 
@@ -38,93 +33,46 @@ function Dashboard() {
       .then((rest) => {
         setActiveRepository(rest.data.length);
         const contributorsVar: Contributor[] = [];
-        rest.data.map((repo: Record<string, any>) => {
-          return repo.commits
-            .map((c: Contributor) => {
-              const ctb: Contributor = {
-                author: c.author,
-                numberOfCommits: 1,
-                lineOfCodeChanges: c.lineOfCodeChanges,
-                commitActivity: 1,
-                numberOfLineAdded: c.numberOfLineAdded,
-                date: c.date,
-              };
-              if (ctb.author == c.author) {
-                ctb.lineOfCodeChanges = c.numberOfLineAdded;
-              }
-              return ctb;
-            })
-            .reduce((res: Record<string, Contributor>, value: Contributor) => {
-              if (!res[value.author]) {
-                res[value.author] = {
-                  author: value.author,
-                  numberOfLineAdded: 0,
-                  numberOfCommits: 0,
-                  commitActivity: 0,
-                } as Contributor;
-                contributorsVar.push(res[value.author]);
-              }
-              res[value.author].numberOfLineAdded += value.numberOfLineAdded;
-              res[value.author].numberOfCommits += value.numberOfCommits;
-              res[value.author].commitActivity += value.commitActivity;
-              return res;
-            }, {} as Record<string, Contributor>);
-        });
+        rest.data
+          .flatMap((c: Record<string, any>) => c.commits)
+          .map((c: Contributor) => {
+            const ctb: Contributor = {
+              ...c,
+              numberOfCommits: 1,
+              commitActivity: 1,
+            };
+            if (ctb.author == c.author) {
+              ctb.lineOfCodeChanges = c.numberOfLineAdded;
+            }
+            return ctb;
+          })
+          .reduce((res: Record<string, Contributor>, value: Contributor) => {
+            if (!res[value.author]) {
+              res[value.author] = {
+                author: value.author,
+                numberOfLineAdded: 0,
+                numberOfCommits: 0,
+                commitActivity: 0,
+              } as Contributor;
+              contributorsVar.push(res[value.author]);
+            }
+            res[value.author].numberOfLineAdded += value.numberOfLineAdded;
+            res[value.author].numberOfCommits += value.numberOfCommits;
+            res[value.author].commitActivity += value.commitActivity;
+            return res;
+          }, {} as Record<string, Contributor>);
         return contributorsVar;
       });
   };
 
-  const changeDashboard = (filters: Record<string, any>) => {
+  const changeDashboard = async (filters: Record<string, any>) => {
     setContributors([]);
-    const fetchData = async (org: string, filters: Record<string, any>) => {
-      return await getContributersByRepo(org, filters);
-    };
-    fetchData(filters.organization, filters).then((res) => {
-      setContributorsLocal(res);
-    });
-    const constvar: Contributor[] = [];
-
-    contributorsLocal
-      .map((c: Contributor) => {
-        const ctb: Contributor = {
-          author: c.author,
-          numberOfCommits: c.numberOfCommits,
-          lineOfCodeChanges: c.lineOfCodeChanges,
-          commitActivity: c.numberOfCommits,
-          numberOfLineAdded: c.numberOfLineAdded,
-          date: c.date,
-        };
-        if (ctb.author == c.author) {
-          ctb.lineOfCodeChanges = c.numberOfLineAdded;
-        }
-        return ctb;
-      })
-      .reduce((res: Record<string, Contributor>, value: Contributor) => {
-        if (!res[value.author]) {
-          res[value.author] = {
-            author: value.author,
-            numberOfLineAdded: 0,
-            numberOfCommits: 0,
-            commitActivity: 0,
-          } as Contributor;
-          constvar.push(res[value.author]);
-        }
-        res[value.author].numberOfLineAdded += value.numberOfLineAdded;
-        res[value.author].numberOfCommits += value.numberOfCommits;
-        res[value.author].commitActivity += value.commitActivity;
-        return res;
-      }, {} as Record<string, Contributor>);
+    const data = await getContributersByRepo(filters.organization, filters);
 
     setContributors(
-      constvar.sort((p, c) => c.numberOfLineAdded - p.numberOfLineAdded)
+      data.sort((p, c) => c.numberOfLineAdded - p.numberOfLineAdded)
     );
   };
-
-  useEffect(() => {
-    if (filters && filters.repositories) {
-      changeDashboard(filters);
-    }
-  }, [filters]);
 
   useEffect(() => {
     getInstance().put("/api/users/me/repositories");
@@ -134,10 +82,7 @@ function Dashboard() {
     <>
       <DashboardFilters
         onChange={(filters) => {
-          if (filters.repositories) {
-            onApplyFilters(filters);
-            changeDashboard(filters);
-          }
+          onApplyFilters(filters);
           setFilters(filters);
         }}
       />

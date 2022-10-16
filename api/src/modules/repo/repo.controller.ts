@@ -59,12 +59,16 @@ export class RepoController {
     }
     await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
     await this.repoService.getCommitsOfAllRepoOfUser(date);
+
+    //await this.repoService.syncIssuesForAllRepoOfAllOrgs(date);
+
     await this.repoService.getIssuesOfAllRepoOfAllOrg();
     await this.repoService.getIssuesOfAllRepoOfUser();
     await this.repoService.getPullRequestsOfAllRepoOfAllOrg();
     await this.repoService.getPullRequestsOfAllRepoOfUser();
 
     //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
+
 
     // TODO : call queue instead of doing synchronously
     // TODO : get organization & repos from database
