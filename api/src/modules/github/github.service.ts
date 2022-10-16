@@ -13,6 +13,17 @@ import {
   GetAllRespositoriesAndOrganizationQuery,
 } from 'src/generated/graphql';
 
+export type GithubIssue = {
+  id: number;
+  node_id: string;
+  state: string;
+  created_at: string;
+  closed_at: string;
+  repository_url: string;
+  comments?: number;
+  org?: string;
+};
+
 @Injectable()
 export class GithubService {
   apolloService: ApolloService;
@@ -47,26 +58,23 @@ export class GithubService {
     return (await this.#octokit.rest.users.getAuthenticated()).data;
   }
 
-  async getOrgIssues(org: string): Promise<
-    {
-      id: number;
-      node_id: string;
-      state: string;
-      created_at: string;
-      closed_at: string;
-      closed_by?: { login: string };
-      repository?: {
-        id: number;
-        node_id: string;
-        name: string;
-        full_name: string;
-      };
-    }[]
-  > {
-    return await this.#octokit.paginate(this.#octokit.issues.listForOrg, {
-      org,
-      state: 'all',
-    });
+  async getOrgIssues(org: string, date: Date): Promise<GithubIssue[]> {
+    const res = await this.#octokit.paginate(
+      this.#octokit.search.issuesAndPullRequests,
+      {
+        q: `org:${org} created:>${date.toISOString().split('T')[0]}`,
+      },
+    );
+    return res.map((r) => ({ ...r, org }));
+  }
+
+  async getUserIssues(user: string, date: Date): Promise<GithubIssue[]> {
+    return await this.#octokit.paginate(
+      this.#octokit.search.issuesAndPullRequests,
+      {
+        q: `user:${user} created:>${date.toISOString().split('T')[0]}`,
+      },
+    );
   }
 
   async getRepositories(

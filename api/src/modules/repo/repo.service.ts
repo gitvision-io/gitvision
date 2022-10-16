@@ -72,7 +72,7 @@ export class RepoService {
     repoNames: string[],
     time: string,
   ): Promise<Repo[]> {
-    let date = new Date();
+    const date = new Date();
     switch (time) {
       case 'last day':
         date.setHours(date.getHours() - 24);
@@ -99,7 +99,7 @@ export class RepoService {
         commits: true,
       },
       where: {
-        repoName: In(Object.values(repoNames)),
+        repoName: In(Object.values(repoNames || {})),
         organization,
         commits: { date: MoreThan(date) },
       },
@@ -175,7 +175,7 @@ export class RepoService {
         repo.repoName = r.node.name;
         repo.id = r.node.id;
 
-        if (r.node.defaultBranchRef.target.__typename === 'Commit') {
+        if (r.node.defaultBranchRef?.target.__typename === 'Commit') {
           const commits: Commit[] =
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
@@ -198,44 +198,39 @@ export class RepoService {
       });
   }
 
-  async syncIssuesForAllRepoOfOrg(org: string): Promise<void> {
-    const issues = (await this.githubService.getOrgIssues(org)).filter((i) =>
-      Boolean(i.repository),
+  async syncIssuesForAllRepoOfAllOrgs(date: Date): Promise<void> {
+    const orgs = await this.githubService.getAllOrganizations();
+    const profile = await this.githubService.getProfile();
+    const issues = (
+      await Promise.all([
+        ...orgs.map((org) => this.githubService.getOrgIssues(org.login, date)),
+        this.githubService.getUserIssues(profile.login, date),
+      ])
+    ).flatMap((i) =>
+      i.map((j) => ({
+        ...j,
+        repositoryName: j.repository_url.split('/').pop(),
+      })),
     );
+
     const existingRepos = await this.repoRepository.findBy({
-      repoName: In(issues.map((i) => i.repository.name)),
-      organization: org,
+      repoName: In(issues.map((i) => i.repositoryName)),
+      organization: In([...orgs.map((o) => o.login), profile.login]),
     });
 
     const issuesDb = issues.map((i) => {
       const issueDb = new Issue();
       issueDb.id = i.node_id;
-      if (i.closed_by) {
-        issueDb.closedBy = i.closed_by.login;
-      }
       issueDb.createdAt = i.created_at;
       if (i.closed_at) {
         issueDb.closedAt = i.closed_at;
       }
-      issueDb.repoId = i.repository?.node_id;
       issueDb.state = i.state;
-
-      let repo = existingRepos.find((r) => r.repoName === i.repository.name);
-      if (!repo) {
-        repo = new Repo();
-        repo.organization = org;
-        repo.repoName = i.repository.name;
-      }
-      issueDb.repo = repo;
+      issueDb.repo = existingRepos.find((r) => r.repoName === i.repositoryName);
       return issueDb;
     });
 
     await this.IssueRepository.save(issuesDb);
-  }
-
-  async syncIssuesForAllRepoOfAllOrgs(): Promise<void> {
-    const orgs = await this.githubService.getAllOrganizations();
-    await Promise.all(orgs.map((o) => this.syncIssuesForAllRepoOfOrg(o.login)));
   }
 }
 

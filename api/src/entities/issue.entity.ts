@@ -9,20 +9,11 @@ export class Issue {
   @Column({ type: 'datetime' })
   createdAt: string;
 
-  @Column({ type: String })
-  repoId: string;
-
   @Column({
     type: 'datetime',
     nullable: true,
   })
   closedAt: string;
-
-  @Column({
-    type: String,
-    nullable: true,
-  })
-  closedBy: string;
 
   @Column({
     type: String,
