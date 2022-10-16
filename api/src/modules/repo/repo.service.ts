@@ -336,12 +336,10 @@ export class RepoService {
     const issues = (await this.githubService.getOrgIssues(org)).filter((i) =>
       Boolean(i.repository),
     );
-    //console.log(issues);
     const existingRepos = await this.repoRepository.findBy({
       repoName: In(issues.map((i) => i.repository.name)),
       organization: org,
     });
-    //console.log(existingRepos);
 
     const issuesDb = issues.map((i) => {
       const issueDb = new Issue();
@@ -363,17 +361,14 @@ export class RepoService {
         repo.repoName = i.repository.name;
       }
       issueDb.repo = repo;
-      //console.log(issueDb);
       return issueDb;
     });
 
     await this.issueRepository.save(issuesDb);
-    //console.log(issuesDb);
   }
 
   async syncIssuesForAllRepoOfAllOrgs(): Promise<void> {
     const orgs = await this.githubService.getAllOrganizations();
-    //console.log(orgs);
     await Promise.all(orgs.map((o) => this.syncIssuesForAllRepoOfOrg(o.login)));
   }
 }
