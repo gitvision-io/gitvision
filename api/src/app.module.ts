@@ -5,7 +5,6 @@ import { BullModule } from '@nestjs/bull';
 import { AuthMiddleware } from './auth.middleware';
 import { User } from './entities/user.entity';
 import { UsersModule } from './modules/users/users.module';
-import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { GithubModule } from './modules/github/github.module';
 import { RepoModule } from './modules/repo/repo.module';
 import { Repo } from './entities/repo.entity';
@@ -32,7 +31,6 @@ import { Issue } from './entities/issue.entity';
       },
     }),
     UsersModule,
-    DashboardModule,
     GithubModule,
     RepoModule,
     SynchronizeModule,
