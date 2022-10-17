@@ -178,7 +178,6 @@ export class RepoService {
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
               commit.commitId = c.node.id;
-              commit.repoId = repo.id;
               commit.author = c.node.author.name;
               commit.date = c.node.committedDate;
               commit.numberOfLineAdded = c.node.additions;
@@ -215,7 +214,6 @@ export class RepoService {
           const issue = new Issue();
           issue.id = i.node.id;
           issue.state = i.node.state;
-          issue.repoId = repo.id;
 
           if (i.node.createdAt) {
             issue.createdAt = i.node.createdAt;
@@ -225,10 +223,10 @@ export class RepoService {
             issue.closedAt = i.node.closedAt;
           }
 
-          this.issueRepository.save(issue);
           return issue;
         });
 
+        this.issueRepository.save(issues);
         repo.issues = issues;
         this.upsert(repo.id, repo);
         return repo;
@@ -255,7 +253,6 @@ export class RepoService {
             const pullRequest = new PullRequest();
             pullRequest.id = p.node.id;
             pullRequest.state = p.node.state;
-            pullRequest.repoId = repo.id;
 
             if (p.node.createdAt) {
               pullRequest.createdAt = p.node.createdAt;
@@ -265,11 +262,11 @@ export class RepoService {
               pullRequest.closedAt = p.node.closedAt;
             }
 
-            this.pullRequestRepository.save(pullRequest);
             return pullRequest;
           },
         );
 
+        this.pullRequestRepository.save(pullRequests);
         repo.pullRequests = pullRequests;
         this.upsert(repo.id, repo);
         return repo;
@@ -300,16 +297,15 @@ export class RepoService {
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
               commit.commitId = c.node.id;
-              commit.repoId = repo.id;
               commit.author = c.node.author.name;
               commit.date = c.node.committedDate;
               commit.numberOfLineAdded = c.node.additions;
               commit.numberOfLineRemoved = c.node.deletions;
               commit.numberOfLineModified = c.node.additions - c.node.deletions;
 
-              this.commitRepository.save(commit);
               return commit;
             });
+          this.commitRepository.save(commits);
           repo.commits = commits;
         }
 
@@ -337,19 +333,15 @@ export class RepoService {
           const issue = new Issue();
           issue.id = i.node.id;
           issue.state = i.node.state;
-          issue.repoId = repo.id;
-
           if (i.node.createdAt) {
             issue.createdAt = i.node.createdAt;
           }
-
           if (i.node.closedAt) {
             issue.closedAt = i.node.closedAt;
           }
-
-          this.issueRepository.save(issue);
           return issue;
         });
+        this.issueRepository.save(issues);
         repo.issues = issues;
         this.upsert(repo.id, repo);
         return repo;
@@ -376,20 +368,16 @@ export class RepoService {
             const pullRequest = new PullRequest();
             pullRequest.id = p.node.id;
             pullRequest.state = p.node.state;
-            pullRequest.repoId = repo.id;
-
             if (p.node.createdAt) {
               pullRequest.createdAt = p.node.createdAt;
             }
-
             if (p.node.closedAt) {
               pullRequest.closedAt = p.node.closedAt;
             }
-
-            this.pullRequestRepository.save(pullRequest);
             return pullRequest;
           },
         );
+        this.pullRequestRepository.save(pullRequests);
         repo.pullRequests = pullRequests;
         this.upsert(repo.id, repo);
         return repo;
