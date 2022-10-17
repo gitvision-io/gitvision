@@ -1,16 +1,10 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { Repo } from 'src/entities/repo.entity';
-import { User } from 'src/entities/user.entity';
-import { USER } from '../users/users.decorator';
-import { UsersService } from '../users/users.service';
 import { RepoService } from './repo.service';
 
 @Controller('/api/orgstats')
 export class RepoController {
-  constructor(
-    private readonly repoService: RepoService,
-    private usersService: UsersService,
-  ) {}
+  constructor(private readonly repoService: RepoService) {}
 
   @Get('/')
   async getAllRepoStat(): Promise<Repo[]> {
@@ -56,37 +50,5 @@ export class RepoController {
       org,
       repositories,
     );
-  }
-
-  @Post('/synchronize')
-  async getAllRepoStatOfAllOrg(
-    @USER() user: User,
-  ): Promise<{ status: string }> {
-    let date: Date;
-    if (!user.lastSynchronize) {
-      date = new Date();
-      this.usersService.update(user.id, { lastSynchronize: date });
-      date.setMonth(date.getMonth() - 6);
-    } else {
-      date = user.lastSynchronize;
-    }
-
-    // Get Commits
-    await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
-    await this.repoService.getCommitsOfAllRepoOfUser(date);
-
-    //await this.repoService.syncIssuesForAllRepoOfAllOrgs(date);
-
-    // Get Issues
-    await this.repoService.getIssuesOfAllRepoOfAllOrg();
-    await this.repoService.getIssuesOfAllRepoOfUser();
-
-    // Get Pull Requests
-    await this.repoService.getPullRequestsOfAllRepoOfAllOrg();
-    await this.repoService.getPullRequestsOfAllRepoOfUser();
-
-    this.usersService.update(user.id, { lastSynchronize: new Date() });
-
-    return { status: 'Synchronized !' };
   }
 }

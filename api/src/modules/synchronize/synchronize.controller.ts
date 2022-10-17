@@ -11,12 +11,12 @@ import { USER } from '../users/users.decorator';
 export class SynchronizeController {
   constructor(private readonly synchronizeProducerService: ProducerService) {}
 
-  @Get('/jobs/:id')
+  @Get('jobs/:id')
   async getAllRepoStat(@Param('id') id: string): Promise<Job<SynchronizeJob>> {
     return await this.synchronizeProducerService.getJob(id);
   }
 
-  @Post('/jobs')
+  @Post('jobs')
   async getAllRepoStatOfAllOrg(
     @USER() user: User,
   ): Promise<Job<SynchronizeJob>> {

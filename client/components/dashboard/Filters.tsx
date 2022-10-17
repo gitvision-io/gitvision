@@ -3,6 +3,7 @@ import { getInstance } from "../../services/api";
 import Button from "../common/Button";
 import Dropdown, { DropdownValue } from "../common/Dropdown";
 import Loader from "../common/Loader";
+import Synchronize from "./Synchronize";
 
 const times = [
   { label: "last day" },
@@ -18,6 +19,8 @@ export interface Filters {
   repositories?: string[];
   branches?: string[];
 }
+
+let timer: number | undefined;
 
 export interface Repository {
   id: string;
@@ -39,7 +42,6 @@ function DashboardFilters({
   >([]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
-  const [isLoadingSyncronize, setIsLoadingSynchronize] = useState(false);
   const [filters, setFilters] = useState<Filters>({});
 
   const applyFilters = () => {
@@ -50,13 +52,6 @@ function DashboardFilters({
       branches: filters.branches,
       time: filters.time,
     });
-  };
-
-  const onClickSynchronize = () => {
-    setIsLoadingSynchronize(true);
-    getInstance()
-      .post("/api/orgstats/synchronize")
-      .finally(() => setIsLoadingSynchronize(false));
   };
 
   useEffect(() => {
@@ -168,14 +163,7 @@ function DashboardFilters({
             Apply
           </Button>
 
-          <Button
-            size="sm"
-            className="w-35"
-            onClick={onClickSynchronize}
-            isLoading={isLoadingSyncronize}
-          >
-            Synchronize
-          </Button>
+          <Synchronize />
         </div>
       </div>
     </>

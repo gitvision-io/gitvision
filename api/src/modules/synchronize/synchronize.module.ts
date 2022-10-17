@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
 import { ConsumerService } from './consumer.service';
 import { ProducerService } from './producer.service';
+import { SynchronizeController } from './synchronize.controller';
 import { SynchronizeService } from './synchronize.service';
 
 @Module({
@@ -18,6 +19,7 @@ import { SynchronizeService } from './synchronize.service';
     UsersModule,
     RepoModule,
   ],
+  controllers: [SynchronizeController],
   exports: [ProducerService],
   providers: [
     ProducerService,

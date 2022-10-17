@@ -7,7 +7,6 @@ import { GithubModule } from '../github/github.module';
 import { RepoController } from './repo.controller';
 import { RepoService } from './repo.service';
 import { User } from 'src/entities/user.entity';
-import { UsersService } from '../users/users.service';
 import { PullRequest } from 'src/entities/pullrequest.entity';
 
 @Module({
@@ -16,7 +15,7 @@ import { PullRequest } from 'src/entities/pullrequest.entity';
     GithubModule,
   ],
   exports: [RepoService],
-  providers: [RepoService, UsersService],
+  providers: [RepoService],
   controllers: [RepoController],
 })
 export class RepoModule {}
