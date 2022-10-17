@@ -8,11 +8,6 @@ export class Commit {
 
   @Column({
     type: String,
-  })
-  repoId: string;
-
-  @Column({
-    type: String,
     nullable: true,
   })
   author: string;

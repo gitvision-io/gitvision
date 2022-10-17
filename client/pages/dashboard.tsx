@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import DashboardFilters, { Filters } from "../components/dashboard/Filters";
+import DashboardFilters from "../components/dashboard/Filters";
 import { getInstance } from "../services/api";
 
 interface Contributor {
@@ -16,7 +16,6 @@ function Dashboard() {
   const [activeRepository, setActiveRepository] = useState(0);
   const [openIssues, setOpenIssues] = useState(0);
   const [pullRequests, setPullRequests] = useState(0);
-  const [filters, setFilters] = useState<Record<string, any>>();
 
   const onApplyFilters = (filters: Record<string, any>) => {
     if (filters.repositories) {
@@ -32,7 +31,6 @@ function Dashboard() {
         },
       })
       .then((rest) => {
-        console.log(rest.data);
         setPullRequests(
           rest.data
             .flatMap((r: Record<string, any>) => r.pullRequests)
@@ -119,7 +117,6 @@ function Dashboard() {
       <DashboardFilters
         onChange={(filters) => {
           onApplyFilters(filters);
-          setFilters(filters);
         }}
       />
 

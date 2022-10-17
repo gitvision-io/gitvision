@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getInstance } from "../../services/api";
-import Button from "../common/Button";
 import Dropdown, { DropdownValue } from "../common/Dropdown";
 import Loader from "../common/Loader";
+import Synchronize from "./Synchronize";
 
 const times = [
   { label: "last day" },
@@ -39,34 +39,18 @@ function DashboardFilters({
   >([]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
-  const [isLoadingSynchronize, setIsLoadingSynchronize] = useState(false);
-  const [isSynchronizedDisabled, setIsSynchronizedDisabled] = useState(false);
-
   const [filters, setFilters] = useState<Filters>({});
 
-  const applyFilters = () => {
-    const org = organizations.find((o) => o.login === filters.organization);
-    onChange({
-      ...filters,
-      organization: filters.organization,
-      branches: filters.branches,
-      time: filters.time,
-    });
-  };
-
-  const onClickSynchronize = () => {
-    setIsLoadingSynchronize(true);
-    setIsSynchronizedDisabled(true);
-    getInstance()
-      .post("/api/orgstats/synchronize", {
-        organizations,
-        repositories,
-      })
-      .finally(() => {
-        setIsLoadingSynchronize(false);
-        setIsSynchronizedDisabled(false);
+  useEffect(() => {
+    if (filters.organization && filters.repositories?.length) {
+      onChange({
+        organization: filters.organization,
+        repositories: filters.repositories,
+        branches: filters.branches,
+        time: filters.time,
       });
-  };
+    }
+  }, [JSON.stringify(filters)]);
 
   useEffect(() => {
     if (!filters.organization && organizations.length) {
@@ -92,8 +76,10 @@ function DashboardFilters({
         )
         .then((res) => {
           setRepositories(res.data);
-          setIsSynchronizedDisabled(false);
-          setIsLoadingSynchronize(false);
+          setFilters({
+            ...filters,
+            repositories: res.data.map((r: { name: string }) => r.name),
+          });
           setIsLoadingRepos(false);
         });
     }
@@ -172,24 +158,7 @@ function DashboardFilters({
           </>
         </div> */}
         <div>
-          <Button
-            variant="success"
-            size="sm"
-            className="w-24 mr-2"
-            onClick={applyFilters}
-          >
-            Apply
-          </Button>
-
-          <Button
-            size="sm"
-            className="w-35"
-            onClick={onClickSynchronize}
-            isLoading={isLoadingSynchronize}
-            isDisabled={isSynchronizedDisabled}
-          >
-            Synchronize
-          </Button>
+          <Synchronize />
         </div>
       </div>
     </>
