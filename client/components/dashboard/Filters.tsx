@@ -39,7 +39,9 @@ function DashboardFilters({
   >([]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
-  const [isLoadingSyncronize, setIsLoadingSynchronize] = useState(false);
+  const [isLoadingSynchronize, setIsLoadingSynchronize] = useState(false);
+  const [isSynchronizedDisabled, setIsSynchronizedDisabled] = useState(false);
+
   const [filters, setFilters] = useState<Filters>({});
 
   const applyFilters = () => {
@@ -54,9 +56,16 @@ function DashboardFilters({
 
   const onClickSynchronize = () => {
     setIsLoadingSynchronize(true);
+    setIsSynchronizedDisabled(true);
     getInstance()
-      .post("/api/orgstats/synchronize")
-      .finally(() => setIsLoadingSynchronize(false));
+      .post("/api/orgstats/synchronize", {
+        organizations,
+        repositories,
+      })
+      .finally(() => {
+        setIsLoadingSynchronize(false);
+        setIsSynchronizedDisabled(false);
+      });
   };
 
   useEffect(() => {
@@ -72,6 +81,8 @@ function DashboardFilters({
   useEffect(() => {
     if (filters.organization) {
       setIsLoadingRepos(true);
+      setIsSynchronizedDisabled(true);
+      setIsLoadingSynchronize(true);
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(
@@ -81,6 +92,8 @@ function DashboardFilters({
         )
         .then((res) => {
           setRepositories(res.data);
+          setIsSynchronizedDisabled(false);
+          setIsLoadingSynchronize(false);
           setIsLoadingRepos(false);
         });
     }
@@ -172,7 +185,8 @@ function DashboardFilters({
             size="sm"
             className="w-35"
             onClick={onClickSynchronize}
-            isLoading={isLoadingSyncronize}
+            isLoading={isLoadingSynchronize}
+            isDisabled={isSynchronizedDisabled}
           >
             Synchronize
           </Button>

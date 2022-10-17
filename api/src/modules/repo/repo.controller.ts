@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repo } from 'src/entities/repo.entity';
 import { User } from 'src/entities/user.entity';
@@ -67,6 +67,7 @@ export class RepoController {
   @Post('/synchronize')
   async getAllRepoStatOfAllOrg(
     @USER() user: User,
+    @Body() { organizations, repositories },
   ): Promise<{ status: string }> {
     let date: Date;
     if (!user.lastSynchronize) {
@@ -84,12 +85,20 @@ export class RepoController {
     //await this.repoService.syncIssuesForAllRepoOfAllOrgs(date);
 
     // Get Issues
-    await this.repoService.getIssuesOfAllRepoOfAllOrg();
-    await this.repoService.getIssuesOfAllRepoOfUser();
+    await this.repoService.getIssuesOfAllRepoOfAllOrg(
+      organizations.filter((o: Record<string, any>) => o.isUser === false)
+        .length,
+      repositories.length,
+    );
+    await this.repoService.getIssuesOfAllRepoOfUser(repositories.length);
 
     // Get Pull Requests
-    await this.repoService.getPullRequestsOfAllRepoOfAllOrg();
-    await this.repoService.getPullRequestsOfAllRepoOfUser();
+    await this.repoService.getPullRequestsOfAllRepoOfAllOrg(
+      organizations.filter((o: Record<string, any>) => o.isUser === false)
+        .length,
+      repositories.length,
+    );
+    await this.repoService.getPullRequestsOfAllRepoOfUser(repositories.length);
 
     //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
 

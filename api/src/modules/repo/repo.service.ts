@@ -197,11 +197,18 @@ export class RepoService {
     );
   }
 
-  async getIssuesOfAllRepoOfAllOrg(): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfAllOrg(
+    orgCount: number,
+    repoCount: number,
+  ): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllIssuesOfAllReposOfAllOrgQuery>({
         query: GetAllIssuesOfAllReposOfAllOrg,
+        variables: {
+          orgCount,
+          repoCount,
+        },
       });
 
     return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
@@ -236,11 +243,18 @@ export class RepoService {
     );
   }
 
-  async getPullRequestsOfAllRepoOfAllOrg(): Promise<Repo[]> {
+  async getPullRequestsOfAllRepoOfAllOrg(
+    orgCount: number,
+    repoCount: number,
+  ): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllPullRequestOfAllReposOfAllOrgQuery>({
         query: GetAllPullRequestOfAllReposOfAllOrg,
+        variables: {
+          orgCount,
+          repoCount,
+        },
       });
 
     return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
@@ -318,11 +332,14 @@ export class RepoService {
       });
   }
 
-  async getIssuesOfAllRepoOfUser(): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfUser(repoCount: number): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllIssuesOfAllReposOfUserQuery>({
         query: GetAllIssuesOfAllReposOfUser,
+        variables: {
+          repoCount,
+        },
       });
 
     return graphQLResult.data.viewer.repositories.edges
@@ -356,11 +373,14 @@ export class RepoService {
       });
   }
 
-  async getPullRequestsOfAllRepoOfUser(): Promise<Repo[]> {
+  async getPullRequestsOfAllRepoOfUser(repoCount: number): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllPullRequestOfAllReposOfUserQuery>({
         query: GetAllPullRequestOfAllReposOfUser,
+        variables: {
+          repoCount,
+        },
       });
 
     return graphQLResult.data.viewer.repositories.edges
