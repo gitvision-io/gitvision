@@ -17,12 +17,12 @@ export class SynchronizeService {
     //await this.repoService.syncIssuesForAllRepoOfAllOrgs(date);
 
     // Get Issues
-    await this.repoService.getIssuesOfAllRepoOfAllOrg();
-    await this.repoService.getIssuesOfAllRepoOfUser();
+    await this.repoService.getIssuesOfAllRepoOfAllOrg1();
+    await this.repoService.getIssuesOfAllRepoOfUser1();
 
     // Get Pull Requests
-    await this.repoService.getPullRequestsOfAllRepoOfAllOrg();
-    await this.repoService.getPullRequestsOfAllRepoOfUser();
+    await this.repoService.getPullRequestsOfAllRepoOfAllOrg1();
+    await this.repoService.getPullRequestsOfAllRepoOfUser1();
     //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
   }
 }

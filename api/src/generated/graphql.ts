@@ -38804,6 +38804,32 @@ export const GetAllIssuesOfAllReposOfUser = gql`
   }
 }
     `;
+export const GetAllIssuesOfAllReposOfUser1 = gql`
+    query GetAllIssuesOfAllReposOfUser1 {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          issues(first: 100, states: [OPEN]) {
+            edges {
+              node {
+                id
+                state
+                closedAt
+                createdAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
 export const GetAllIssuesOfAllReposOfAllOrg = gql`
     query GetAllIssuesOfAllReposOfAllOrg($orgCount: Int, $repoCount: Int) {
   viewer {
@@ -38814,6 +38840,39 @@ export const GetAllIssuesOfAllReposOfAllOrg = gql`
           id
           login
           repositories(first: $repoCount) {
+            edges {
+              node {
+                id
+                name
+                issues(first: 100, states: [OPEN]) {
+                  edges {
+                    node {
+                      id
+                      state
+                      closedAt
+                      createdAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllIssuesOfAllReposOfAllOrg1 = gql`
+    query GetAllIssuesOfAllReposOfAllOrg1 {
+  viewer {
+    login
+    organizations(first: 5) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
             edges {
               node {
                 id
@@ -38863,6 +38922,32 @@ export const GetAllPullRequestOfAllReposOfUser = gql`
   }
 }
     `;
+export const GetAllPullRequestOfAllReposOfUser1 = gql`
+    query GetAllPullRequestOfAllReposOfUser1 {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          pullRequests(first: 100, states: [OPEN]) {
+            edges {
+              node {
+                id
+                state
+                closedAt
+                createdAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
 export const GetAllPullRequestOfAllReposOfAllOrg = gql`
     query GetAllPullRequestOfAllReposOfAllOrg($orgCount: Int, $repoCount: Int) {
   viewer {
@@ -38873,6 +38958,39 @@ export const GetAllPullRequestOfAllReposOfAllOrg = gql`
           id
           login
           repositories(first: $repoCount) {
+            edges {
+              node {
+                id
+                name
+                pullRequests(first: 100, states: [OPEN]) {
+                  edges {
+                    node {
+                      id
+                      state
+                      closedAt
+                      createdAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllPullRequestOfAllReposOfAllOrg1 = gql`
+    query GetAllPullRequestOfAllReposOfAllOrg1 {
+  viewer {
+    login
+    organizations(first: 5) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
             edges {
               node {
                 id
@@ -38989,6 +39107,11 @@ export type GetAllIssuesOfAllReposOfUserQueryVariables = Exact<{
 
 export type GetAllIssuesOfAllReposOfUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } };
 
+export type GetAllIssuesOfAllReposOfUser1QueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllIssuesOfAllReposOfUser1Query = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } };
+
 export type GetAllIssuesOfAllReposOfAllOrgQueryVariables = Exact<{
   orgCount?: InputMaybe<Scalars['Int']>;
   repoCount?: InputMaybe<Scalars['Int']>;
@@ -38997,12 +39120,22 @@ export type GetAllIssuesOfAllReposOfAllOrgQueryVariables = Exact<{
 
 export type GetAllIssuesOfAllReposOfAllOrgQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } | null } | null> | null } } };
 
+export type GetAllIssuesOfAllReposOfAllOrg1QueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllIssuesOfAllReposOfAllOrg1Query = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } | null } | null> | null } } };
+
 export type GetAllPullRequestOfAllReposOfUserQueryVariables = Exact<{
   repoCount?: InputMaybe<Scalars['Int']>;
 }>;
 
 
 export type GetAllPullRequestOfAllReposOfUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, pullRequests: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } };
+
+export type GetAllPullRequestOfAllReposOfUser1QueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllPullRequestOfAllReposOfUser1Query = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, pullRequests: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } };
 
 export type GetAllPullRequestOfAllReposOfAllOrgQueryVariables = Exact<{
   orgCount?: InputMaybe<Scalars['Int']>;
@@ -39011,6 +39144,11 @@ export type GetAllPullRequestOfAllReposOfAllOrgQueryVariables = Exact<{
 
 
 export type GetAllPullRequestOfAllReposOfAllOrgQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, pullRequests: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } | null } | null> | null } } };
+
+export type GetAllPullRequestOfAllReposOfAllOrg1QueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllPullRequestOfAllReposOfAllOrg1Query = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, pullRequests: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } | null } | null> | null } } };
 
 export type GetAllRepositoriesForUserQueryVariables = Exact<{ [key: string]: never; }>;
 

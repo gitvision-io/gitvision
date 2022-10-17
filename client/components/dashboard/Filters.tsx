@@ -65,8 +65,6 @@ function DashboardFilters({
   useEffect(() => {
     if (filters.organization) {
       setIsLoadingRepos(true);
-      setIsSynchronizedDisabled(true);
-      setIsLoadingSynchronize(true);
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(

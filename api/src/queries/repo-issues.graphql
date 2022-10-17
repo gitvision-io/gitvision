@@ -23,6 +23,31 @@ query GetAllIssuesOfAllReposOfUser($repoCount: Int) {
   }
 }
 
+query GetAllIssuesOfAllReposOfUser1 {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          issues(first: 100, states: [OPEN]) {
+            edges {
+              node {
+                id
+                state
+                closedAt
+                createdAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 query GetAllIssuesOfAllReposOfAllOrg($orgCount: Int, $repoCount: Int) {
   viewer {
     login
@@ -32,6 +57,38 @@ query GetAllIssuesOfAllReposOfAllOrg($orgCount: Int, $repoCount: Int) {
           id
           login
           repositories(first: $repoCount) {
+            edges {
+              node {
+                id
+                name
+                issues(first: 100, states: [OPEN]) {
+                  edges {
+                    node {
+                      id
+                      state
+                      closedAt
+                      createdAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetAllIssuesOfAllReposOfAllOrg1 {
+  viewer {
+    login
+    organizations(first: 5) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
             edges {
               node {
                 id
