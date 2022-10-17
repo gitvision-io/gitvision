@@ -4,7 +4,6 @@ import { Issue } from 'src/entities/issue.entity';
 import { Repo } from 'src/entities/repo.entity';
 import { Commit } from 'src/entities/commit.entity';
 import { GithubModule } from '../github/github.module';
-import { SynchronizeModule } from '../synchronize/synchronize.module';
 import { RepoController } from './repo.controller';
 import { RepoService } from './repo.service';
 import { User } from 'src/entities/user.entity';
@@ -15,7 +14,6 @@ import { PullRequest } from 'src/entities/pullrequest.entity';
   imports: [
     TypeOrmModule.forFeature([Repo, Commit, Issue, PullRequest, User]),
     GithubModule,
-    SynchronizeModule,
   ],
   exports: [RepoService],
   providers: [RepoService, UsersService],

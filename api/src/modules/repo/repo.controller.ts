@@ -1,10 +1,6 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repo } from 'src/entities/repo.entity';
 import { User } from 'src/entities/user.entity';
-import { Repository } from 'typeorm';
-import { GithubService } from '../github/github.service';
-import { ProducerService } from '../synchronize/producer.service';
 import { USER } from '../users/users.decorator';
 import { UsersService } from '../users/users.service';
 import { RepoService } from './repo.service';
@@ -12,8 +8,6 @@ import { RepoService } from './repo.service';
 @Controller('/api/orgstats')
 export class RepoController {
   constructor(
-    private readonly synchronizeProducerService: ProducerService,
-    private readonly githubService: GithubService,
     private readonly repoService: RepoService,
     private usersService: UsersService,
   ) {}
@@ -90,16 +84,6 @@ export class RepoController {
     // Get Pull Requests
     await this.repoService.getPullRequestsOfAllRepoOfAllOrg();
     await this.repoService.getPullRequestsOfAllRepoOfUser();
-
-    //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
-
-    // TODO : call queue instead of doing synchronously
-    // TODO : get organization & repos from database
-    // await this.synchronizeProducerService.addJob({
-    //   organization: 'toto',
-    //   repositories: ['titi', 'tata'],
-    //   githubToken: this.githubService.getToken(),
-    // });
 
     this.usersService.update(user.id, { lastSynchronize: new Date() });
 
