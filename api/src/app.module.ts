@@ -5,13 +5,13 @@ import { BullModule } from '@nestjs/bull';
 import { AuthMiddleware } from './auth.middleware';
 import { User } from './entities/user.entity';
 import { UsersModule } from './modules/users/users.module';
-import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { GithubModule } from './modules/github/github.module';
 import { RepoModule } from './modules/repo/repo.module';
 import { Repo } from './entities/repo.entity';
 import { Commit } from './entities/commit.entity';
 import { SynchronizeModule } from './modules/synchronize/synchronize.module';
 import { Issue } from './entities/issue.entity';
+import { PullRequest } from './entities/pullrequest.entity';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { Issue } from './entities/issue.entity';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './data.db',
-      entities: [User, Repo, Commit, Issue],
+      entities: [User, Repo, Commit, Issue, PullRequest],
       synchronize: true,
     }),
     BullModule.forRoot({
@@ -32,7 +32,6 @@ import { Issue } from './entities/issue.entity';
       },
     }),
     UsersModule,
-    DashboardModule,
     GithubModule,
     RepoModule,
     SynchronizeModule,

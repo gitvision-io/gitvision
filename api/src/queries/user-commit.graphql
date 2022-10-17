@@ -77,6 +77,70 @@ query GetAllCommitsOfAllReposOfAllOrg($date: GitTimestamp) {
   }
 }
 
+query GetAllIssuesOfAllReposOfAllOrg {
+  viewer {
+    login
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+                issues(first: 48) {
+                  edges {
+                    node {
+                      id
+                      state
+                      closedAt
+                      createdAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetAllPullRequestOfAllReposOfAllOrg {
+  viewer {
+    login
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+                pullRequests(first: 48) {
+                  edges {
+                    node {
+                      id
+                      state
+                      closedAt
+                      createdAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 query GetAllCommitsOfAllReposOfUser($date: GitTimestamp) {
   viewer {
     login
@@ -107,6 +171,56 @@ query GetAllCommitsOfAllReposOfUser($date: GitTimestamp) {
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetAllIssuesOfAllReposOfUser {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          issues(first: 100) {
+            edges {
+              node {
+                id
+                state
+                closedAt
+                createdAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetAllPullRequestOfAllReposOfUser {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          pullRequests(first: 100) {
+            edges {
+              node {
+                id
+                state
+                closedAt
+                createdAt
               }
             }
           }

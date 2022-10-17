@@ -14,7 +14,7 @@ export class RepoController {
   constructor(
     private readonly synchronizeProducerService: ProducerService,
     private readonly githubService: GithubService,
-    private readonly repoService: RepoService /* private readonly githubService: GithubService, */,
+    private readonly repoService: RepoService,
     private usersService: UsersService,
   ) {}
 
@@ -45,6 +45,25 @@ export class RepoController {
     );
   }
 
+  @Get(':org/issues')
+  async getRepoIssues(
+    @Param('org') org: string,
+    @Query('filters') { repositories },
+  ): Promise<Repo[]> {
+    return await this.repoService.findIssuesByOrgByRepos(org, repositories);
+  }
+
+  @Get(':org/pullRequests')
+  async getRepoRequests(
+    @Param('org') org: string,
+    @Query('filters') { repositories },
+  ): Promise<Repo[]> {
+    return await this.repoService.findPullRequestsByOrgByRepos(
+      org,
+      repositories,
+    );
+  }
+
   @Post('/synchronize')
   async getAllRepoStatOfAllOrg(
     @USER() user: User,
@@ -57,9 +76,22 @@ export class RepoController {
     } else {
       date = user.lastSynchronize;
     }
+
+    // Get Commits
     await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
     await this.repoService.getCommitsOfAllRepoOfUser(date);
-    await this.repoService.syncIssuesForAllRepoOfAllOrgs();
+
+    //await this.repoService.syncIssuesForAllRepoOfAllOrgs(date);
+
+    // Get Issues
+    await this.repoService.getIssuesOfAllRepoOfAllOrg();
+    await this.repoService.getIssuesOfAllRepoOfUser();
+
+    // Get Pull Requests
+    await this.repoService.getPullRequestsOfAllRepoOfAllOrg();
+    await this.repoService.getPullRequestsOfAllRepoOfUser();
+
+    //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
 
     // TODO : call queue instead of doing synchronously
     // TODO : get organization & repos from database

@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Repo } from './repo.entity';
 
 @Entity()
-export class Issue {
+export class PullRequest {
   @PrimaryColumn({ type: String })
   id: string;
 
@@ -23,6 +23,6 @@ export class Issue {
   })
   state: string;
 
-  @ManyToOne(() => Repo, (repo) => repo.issues)
+  @ManyToOne(() => Repo, (repo) => repo.pullRequests)
   repo: Repo;
 }

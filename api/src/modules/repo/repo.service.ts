@@ -8,11 +8,19 @@ import {
   GetAllCommitsOfAllReposOfAllOrgQuery,
   GetAllCommitsOfAllReposOfUser,
   GetAllCommitsOfAllReposOfUserQuery,
+  GetAllIssuesOfAllReposOfAllOrg,
+  GetAllIssuesOfAllReposOfAllOrgQuery,
+  GetAllIssuesOfAllReposOfUser,
+  GetAllIssuesOfAllReposOfUserQuery,
+  GetAllPullRequestOfAllReposOfAllOrg,
+  GetAllPullRequestOfAllReposOfAllOrgQuery,
+  GetAllPullRequestOfAllReposOfUser,
+  GetAllPullRequestOfAllReposOfUserQuery,
 } from 'src/generated/graphql';
 import { In, MoreThan, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
-import { User } from 'src/entities/user.entity';
+import { PullRequest } from 'src/entities/pullrequest.entity';
 
 @Injectable()
 export class RepoService {
@@ -25,10 +33,10 @@ export class RepoService {
     private commitRepository: Repository<Commit>,
 
     @InjectRepository(Issue)
-    private IssueRepository: Repository<Issue>,
+    private issueRepository: Repository<Issue>,
 
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(PullRequest)
+    private pullRequestRepository: Repository<PullRequest>,
 
     private readonly githubService: GithubService,
   ) {}
@@ -67,12 +75,42 @@ export class RepoService {
     });
   }
 
+  findIssuesByOrgByRepos(
+    organization: string,
+    repoNames: string[],
+  ): Promise<Repo[]> {
+    return this.repoRepository.find({
+      relations: {
+        issues: true,
+      },
+      where: {
+        repoName: In(Object.values(repoNames || {})),
+        organization,
+      },
+    });
+  }
+
+  findPullRequestsByOrgByRepos(
+    organization: string,
+    repoNames: string[],
+  ): Promise<Repo[]> {
+    return this.repoRepository.find({
+      relations: {
+        pullRequests: true,
+      },
+      where: {
+        repoName: In(Object.values(repoNames || {})),
+        organization,
+      },
+    });
+  }
+
   findByOrgByReposAndTime(
     organization: string,
     repoNames: string[],
     time: string,
   ): Promise<Repo[]> {
-    let date = new Date();
+    const date = new Date();
     switch (time) {
       case 'last day':
         date.setHours(date.getHours() - 24);
@@ -97,9 +135,11 @@ export class RepoService {
     return this.repoRepository.find({
       relations: {
         commits: true,
+        issues: true,
+        pullRequests: true,
       },
       where: {
-        repoName: In(Object.values(repoNames)),
+        repoName: In(Object.values(repoNames || {})),
         organization,
         commits: { date: MoreThan(date) },
       },
@@ -157,6 +197,86 @@ export class RepoService {
     );
   }
 
+  async getIssuesOfAllRepoOfAllOrg(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllIssuesOfAllReposOfAllOrgQuery>({
+        query: GetAllIssuesOfAllReposOfAllOrg,
+      });
+
+    return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
+      o.node.repositories.edges.map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = o.node.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const issues: Issue[] = r.node.issues.edges.map((i) => {
+          const issue = new Issue();
+          issue.id = i.node.id;
+          issue.state = i.node.state;
+          issue.repoId = repo.id;
+
+          if (i.node.createdAt) {
+            issue.createdAt = i.node.createdAt;
+          }
+
+          if (i.node.closedAt) {
+            issue.closedAt = i.node.closedAt;
+          }
+
+          this.issueRepository.save(issue);
+          return issue;
+        });
+
+        repo.issues = issues;
+        this.upsert(repo.id, repo);
+        return repo;
+      }),
+    );
+  }
+
+  async getPullRequestsOfAllRepoOfAllOrg(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllPullRequestOfAllReposOfAllOrgQuery>({
+        query: GetAllPullRequestOfAllReposOfAllOrg,
+      });
+
+    return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
+      o.node.repositories.edges.map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = o.node.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const pullRequests: PullRequest[] = r.node.pullRequests.edges.map(
+          (p) => {
+            const pullRequest = new PullRequest();
+            pullRequest.id = p.node.id;
+            pullRequest.state = p.node.state;
+            pullRequest.repoId = repo.id;
+
+            if (p.node.createdAt) {
+              pullRequest.createdAt = p.node.createdAt;
+            }
+
+            if (p.node.closedAt) {
+              pullRequest.closedAt = p.node.closedAt;
+            }
+
+            this.pullRequestRepository.save(pullRequest);
+            return pullRequest;
+          },
+        );
+
+        repo.pullRequests = pullRequests;
+        this.upsert(repo.id, repo);
+        return repo;
+      }),
+    );
+  }
+
   async getCommitsOfAllRepoOfUser(date: Date): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
@@ -175,7 +295,7 @@ export class RepoService {
         repo.repoName = r.node.name;
         repo.id = r.node.id;
 
-        if (r.node.defaultBranchRef.target.__typename === 'Commit') {
+        if (r.node.defaultBranchRef?.target.__typename === 'Commit') {
           const commits: Commit[] =
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
@@ -198,44 +318,117 @@ export class RepoService {
       });
   }
 
-  async syncIssuesForAllRepoOfOrg(org: string): Promise<void> {
-    const issues = (await this.githubService.getOrgIssues(org)).filter((i) =>
-      Boolean(i.repository),
+  async getIssuesOfAllRepoOfUser(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllIssuesOfAllReposOfUserQuery>({
+        query: GetAllIssuesOfAllReposOfUser,
+      });
+
+    return graphQLResult.data.viewer.repositories.edges
+      .filter((r) => r.node.isInOrganization === false)
+      .map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = graphQLResult.data.viewer.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const issues: Issue[] = r.node.issues.edges.map((i) => {
+          const issue = new Issue();
+          issue.id = i.node.id;
+          issue.state = i.node.state;
+          issue.repoId = repo.id;
+
+          if (i.node.createdAt) {
+            issue.createdAt = i.node.createdAt;
+          }
+
+          if (i.node.closedAt) {
+            issue.closedAt = i.node.closedAt;
+          }
+
+          this.issueRepository.save(issue);
+          return issue;
+        });
+        repo.issues = issues;
+        this.upsert(repo.id, repo);
+        return repo;
+      });
+  }
+
+  async getPullRequestsOfAllRepoOfUser(): Promise<Repo[]> {
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllPullRequestOfAllReposOfUserQuery>({
+        query: GetAllPullRequestOfAllReposOfUser,
+      });
+
+    return graphQLResult.data.viewer.repositories.edges
+      .filter((r) => r.node.isInOrganization === false)
+      .map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = graphQLResult.data.viewer.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const pullRequests: PullRequest[] = r.node.pullRequests.edges.map(
+          (p) => {
+            const pullRequest = new PullRequest();
+            pullRequest.id = p.node.id;
+            pullRequest.state = p.node.state;
+            pullRequest.repoId = repo.id;
+
+            if (p.node.createdAt) {
+              pullRequest.createdAt = p.node.createdAt;
+            }
+
+            if (p.node.closedAt) {
+              pullRequest.closedAt = p.node.closedAt;
+            }
+
+            this.pullRequestRepository.save(pullRequest);
+            return pullRequest;
+          },
+        );
+        repo.pullRequests = pullRequests;
+        this.upsert(repo.id, repo);
+        return repo;
+      });
+  }
+
+  async syncIssuesForAllRepoOfAllOrgs(date: Date): Promise<void> {
+    const orgs = await this.githubService.getAllOrganizations();
+    const profile = await this.githubService.getProfile();
+    const issues = (
+      await Promise.all([
+        ...orgs.map((org) => this.githubService.getOrgIssues(org.login, date)),
+        this.githubService.getUserIssues(profile.login, date),
+      ])
+    ).flatMap((i) =>
+      i.map((j) => ({
+        ...j,
+        repositoryName: j.repository_url.split('/').pop(),
+      })),
     );
+
     const existingRepos = await this.repoRepository.findBy({
-      repoName: In(issues.map((i) => i.repository.name)),
-      organization: org,
+      repoName: In(issues.map((i) => i.repositoryName)),
+      organization: In([...orgs.map((o) => o.login), profile.login]),
     });
 
     const issuesDb = issues.map((i) => {
       const issueDb = new Issue();
       issueDb.id = i.node_id;
-      if (i.closed_by) {
-        issueDb.closedBy = i.closed_by.login;
-      }
       issueDb.createdAt = i.created_at;
       if (i.closed_at) {
         issueDb.closedAt = i.closed_at;
       }
-      issueDb.repoId = i.repository?.node_id;
       issueDb.state = i.state;
-
-      let repo = existingRepos.find((r) => r.repoName === i.repository.name);
-      if (!repo) {
-        repo = new Repo();
-        repo.organization = org;
-        repo.repoName = i.repository.name;
-      }
-      issueDb.repo = repo;
+      issueDb.repo = existingRepos.find((r) => r.repoName === i.repositoryName);
       return issueDb;
     });
 
-    await this.IssueRepository.save(issuesDb);
-  }
-
-  async syncIssuesForAllRepoOfAllOrgs(): Promise<void> {
-    const orgs = await this.githubService.getAllOrganizations();
-    await Promise.all(orgs.map((o) => this.syncIssuesForAllRepoOfOrg(o.login)));
+    await this.issueRepository.save(issuesDb);
   }
 }
 

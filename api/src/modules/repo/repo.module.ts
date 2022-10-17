@@ -9,10 +9,11 @@ import { RepoController } from './repo.controller';
 import { RepoService } from './repo.service';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from '../users/users.service';
+import { PullRequest } from 'src/entities/pullrequest.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Repo, Commit, Issue, User]),
+    TypeOrmModule.forFeature([Repo, Commit, Issue, PullRequest, User]),
     GithubModule,
     SynchronizeModule,
   ],

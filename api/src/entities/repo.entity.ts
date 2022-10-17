@@ -2,6 +2,7 @@ import { Entity, Column, OneToMany, PrimaryColumn, ManyToMany } from 'typeorm';
 import { Issue } from './issue.entity';
 import { User } from './user.entity';
 import { Commit } from './commit.entity';
+import { PullRequest } from './pullrequest.entity';
 
 @Entity()
 export class Repo {
@@ -25,6 +26,9 @@ export class Repo {
 
   @OneToMany(() => Issue, (issue: Issue) => issue.repo)
   issues: Issue[];
+
+  @OneToMany(() => PullRequest, (pullRequest: PullRequest) => pullRequest.repo)
+  pullRequests: PullRequest[];
 
   @ManyToMany(() => User, (user: User) => user.repos)
   users: User[];
