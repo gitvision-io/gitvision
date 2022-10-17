@@ -15,12 +15,46 @@ function Dashboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [activeRepository, setActiveRepository] = useState(0);
   const [openIssues, setOpenIssues] = useState(0);
+  const [pullRequests, setPullRequests] = useState(0);
   const [filters, setFilters] = useState<Record<string, any>>();
 
   const onApplyFilters = (filters: Record<string, any>) => {
     if (filters.repositories) {
       changeDashboard(filters);
     }
+  };
+
+  const getPullRequestsByRepo = (org: string, filters: Record<string, any>) => {
+    return getInstance()
+      .get(`/api/orgstats/${org}/pullRequests`, {
+        params: {
+          filters,
+        },
+      })
+      .then((rest) => {
+        console.log(rest.data);
+        setPullRequests(
+          rest.data
+            .flatMap((r: Record<string, any>) => r.pullRequests)
+            .filter((p: Record<string, any>) => p.state === "OPEN").length
+        );
+      });
+  };
+
+  const getIssuesByRepo = (org: string, filters: Record<string, any>) => {
+    return getInstance()
+      .get(`/api/orgstats/${org}/issues`, {
+        params: {
+          filters,
+        },
+      })
+      .then((rest) => {
+        setOpenIssues(
+          rest.data
+            .flatMap((r: Record<string, any>) => r.issues)
+            .filter((i: Record<string, any>) => i.state === "OPEN").length
+        );
+      });
   };
 
   const getContributersByRepo = (org: string, filters: Record<string, any>) => {
@@ -34,7 +68,7 @@ function Dashboard() {
         setActiveRepository(rest.data.length);
         const contributorsVar: Contributor[] = [];
         rest.data
-          .flatMap((c: Record<string, any>) => c.commits)
+          .flatMap((r: Record<string, any>) => r.commits)
           .map((c: Contributor) => {
             const ctb: Contributor = {
               ...c,
@@ -68,6 +102,8 @@ function Dashboard() {
   const changeDashboard = async (filters: Record<string, any>) => {
     setContributors([]);
     const data = await getContributersByRepo(filters.organization, filters);
+    await getIssuesByRepo(filters.organization, filters);
+    await getPullRequestsByRepo(filters.organization, filters);
 
     setContributors(
       data.sort((p, c) => c.numberOfLineAdded - p.numberOfLineAdded)
@@ -102,7 +138,9 @@ function Dashboard() {
         </div>
         <div className="text-center">
           <p className="font-bold">Pull requests</p>
-          <h6 className="text-5xl font-bold text-deep-purple-accent-400">0</h6>
+          <h6 className="text-5xl font-bold text-deep-purple-accent-400">
+            {pullRequests}
+          </h6>
         </div>
         <div className="text-center">
           <p className="font-bold">Open issues</p>

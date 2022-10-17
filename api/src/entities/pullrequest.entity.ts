@@ -20,12 +20,6 @@ export class PullRequest {
 
   @Column({
     type: String,
-    nullable: true,
-  })
-  closedBy: string;
-
-  @Column({
-    type: String,
   })
   state: string;
 

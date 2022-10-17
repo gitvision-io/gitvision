@@ -20,7 +20,6 @@ import {
 import { In, MoreThan, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
-import { User } from 'src/entities/user.entity';
 import { PullRequest } from 'src/entities/pullrequest.entity';
 
 @Injectable()
@@ -38,9 +37,6 @@ export class RepoService {
 
     @InjectRepository(PullRequest)
     private pullRequestRepository: Repository<PullRequest>,
-
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
 
     private readonly githubService: GithubService,
   ) {}
@@ -79,6 +75,36 @@ export class RepoService {
     });
   }
 
+  findIssuesByOrgByRepos(
+    organization: string,
+    repoNames: string[],
+  ): Promise<Repo[]> {
+    return this.repoRepository.find({
+      relations: {
+        issues: true,
+      },
+      where: {
+        repoName: In(Object.values(repoNames || {})),
+        organization,
+      },
+    });
+  }
+
+  findPullRequestsByOrgByRepos(
+    organization: string,
+    repoNames: string[],
+  ): Promise<Repo[]> {
+    return this.repoRepository.find({
+      relations: {
+        pullRequests: true,
+      },
+      where: {
+        repoName: In(Object.values(repoNames || {})),
+        organization,
+      },
+    });
+  }
+
   findByOrgByReposAndTime(
     organization: string,
     repoNames: string[],
@@ -109,6 +135,8 @@ export class RepoService {
     return this.repoRepository.find({
       relations: {
         commits: true,
+        issues: true,
+        pullRequests: true,
       },
       where: {
         repoName: In(Object.values(repoNames || {})),
@@ -188,6 +216,15 @@ export class RepoService {
           issue.id = i.node.id;
           issue.state = i.node.state;
           issue.repoId = repo.id;
+
+          if (i.node.createdAt) {
+            issue.createdAt = i.node.createdAt;
+          }
+
+          if (i.node.closedAt) {
+            issue.closedAt = i.node.closedAt;
+          }
+
           this.issueRepository.save(issue);
           return issue;
         });
@@ -219,6 +256,15 @@ export class RepoService {
             pullRequest.id = p.node.id;
             pullRequest.state = p.node.state;
             pullRequest.repoId = repo.id;
+
+            if (p.node.createdAt) {
+              pullRequest.createdAt = p.node.createdAt;
+            }
+
+            if (p.node.closedAt) {
+              pullRequest.closedAt = p.node.closedAt;
+            }
+
             this.pullRequestRepository.save(pullRequest);
             return pullRequest;
           },
@@ -271,7 +317,7 @@ export class RepoService {
         return repo;
       });
   }
-  
+
   async getIssuesOfAllRepoOfUser(): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
@@ -292,6 +338,15 @@ export class RepoService {
           issue.id = i.node.id;
           issue.state = i.node.state;
           issue.repoId = repo.id;
+
+          if (i.node.createdAt) {
+            issue.createdAt = i.node.createdAt;
+          }
+
+          if (i.node.closedAt) {
+            issue.closedAt = i.node.closedAt;
+          }
+
           this.issueRepository.save(issue);
           return issue;
         });
@@ -300,7 +355,7 @@ export class RepoService {
         return repo;
       });
   }
-  
+
   async getPullRequestsOfAllRepoOfUser(): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
@@ -322,6 +377,15 @@ export class RepoService {
             pullRequest.id = p.node.id;
             pullRequest.state = p.node.state;
             pullRequest.repoId = repo.id;
+
+            if (p.node.createdAt) {
+              pullRequest.createdAt = p.node.createdAt;
+            }
+
+            if (p.node.closedAt) {
+              pullRequest.closedAt = p.node.closedAt;
+            }
+
             this.pullRequestRepository.save(pullRequest);
             return pullRequest;
           },

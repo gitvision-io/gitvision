@@ -95,6 +95,8 @@ query GetAllIssuesOfAllReposOfAllOrg {
                     node {
                       id
                       state
+                      closedAt
+                      createdAt
                     }
                   }
                 }
@@ -125,6 +127,8 @@ query GetAllPullRequestOfAllReposOfAllOrg {
                     node {
                       id
                       state
+                      closedAt
+                      createdAt
                     }
                   }
                 }
@@ -190,6 +194,8 @@ query GetAllIssuesOfAllReposOfUser {
               node {
                 id
                 state
+                closedAt
+                createdAt
               }
             }
           }
@@ -213,6 +219,8 @@ query GetAllPullRequestOfAllReposOfUser {
               node {
                 id
                 state
+                closedAt
+                createdAt
               }
             }
           }
