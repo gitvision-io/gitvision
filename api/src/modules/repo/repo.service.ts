@@ -25,7 +25,7 @@ import {
   GetAllPullRequestOfAllReposOfUser1Query,
   GetAllPullRequestOfAllReposOfUserQuery,
 } from 'src/generated/graphql';
-import { In, MoreThan, Repository } from 'typeorm';
+import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
 import { PullRequest } from 'src/entities/pullrequest.entity';
@@ -143,13 +143,11 @@ export class RepoService {
     return this.repoRepository.find({
       relations: {
         commits: true,
-        issues: true,
-        pullRequests: true,
       },
       where: {
         repoName: In(Object.values(repoNames || {})),
         organization,
-        commits: { date: MoreThan(date) },
+        commits: { date: MoreThanOrEqual(date) },
       },
     });
   }
@@ -185,19 +183,20 @@ export class RepoService {
           const commits: Commit[] =
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
-              commit.commitId = c.node.id;
+              commit.id = c.node.id;
+              commit.repoId = repo.id;
               commit.author = c.node.author.name;
               commit.date = c.node.committedDate;
               commit.numberOfLineAdded = c.node.additions;
               commit.numberOfLineRemoved = c.node.deletions;
               commit.numberOfLineModified = c.node.additions - c.node.deletions;
 
-              this.commitRepository.save(commit);
               return commit;
             });
+
+          this.commitRepository.save(commits);
           repo.commits = commits;
         }
-
         this.upsert(repo.id, repo);
         return repo;
       }),
@@ -229,6 +228,7 @@ export class RepoService {
           const issue = new Issue();
           issue.id = i.node.id;
           issue.state = i.node.state;
+          issue.repoId = repo.id;
 
           if (i.node.createdAt) {
             issue.createdAt = i.node.createdAt;
@@ -266,6 +266,7 @@ export class RepoService {
         const issues: Issue[] = r.node.issues.edges.map((i) => {
           const issue = new Issue();
           issue.id = i.node.id;
+          issue.repoId = repo.id;
           issue.state = i.node.state;
 
           if (i.node.createdAt) {
@@ -312,6 +313,7 @@ export class RepoService {
           (p) => {
             const pullRequest = new PullRequest();
             pullRequest.id = p.node.id;
+            pullRequest.repoId = repo.id;
             pullRequest.state = p.node.state;
 
             if (p.node.createdAt) {
@@ -352,6 +354,7 @@ export class RepoService {
           (p) => {
             const pullRequest = new PullRequest();
             pullRequest.id = p.node.id;
+            pullRequest.repoId = repo.id;
             pullRequest.state = p.node.state;
 
             if (p.node.createdAt) {
@@ -396,7 +399,8 @@ export class RepoService {
           const commits: Commit[] =
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
-              commit.commitId = c.node.id;
+              commit.id = c.node.id;
+              commit.repoId = repo.id;
               commit.author = c.node.author.name;
               commit.date = c.node.committedDate;
               commit.numberOfLineAdded = c.node.additions;
@@ -435,6 +439,7 @@ export class RepoService {
         const issues: Issue[] = r.node.issues.edges.map((i) => {
           const issue = new Issue();
           issue.id = i.node.id;
+          issue.repoId = repo.id;
           issue.state = i.node.state;
           if (i.node.createdAt) {
             issue.createdAt = i.node.createdAt;
@@ -469,6 +474,7 @@ export class RepoService {
         const issues: Issue[] = r.node.issues.edges.map((i) => {
           const issue = new Issue();
           issue.id = i.node.id;
+          issue.repoId = repo.id;
           issue.state = i.node.state;
           if (i.node.createdAt) {
             issue.createdAt = i.node.createdAt;
@@ -543,6 +549,7 @@ export class RepoService {
           (p) => {
             const pullRequest = new PullRequest();
             pullRequest.id = p.node.id;
+            pullRequest.repoId = repo.id;
             pullRequest.state = p.node.state;
             if (p.node.createdAt) {
               pullRequest.createdAt = p.node.createdAt;
