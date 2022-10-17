@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { getInstance } from "../../services/api";
-import Button from "../common/Button";
 import Dropdown, { DropdownValue } from "../common/Dropdown";
 import Loader from "../common/Loader";
 import Synchronize from "./Synchronize";
@@ -19,8 +18,6 @@ export interface Filters {
   repositories?: string[];
   branches?: string[];
 }
-
-let timer: number | undefined;
 
 export interface Repository {
   id: string;
@@ -44,15 +41,16 @@ function DashboardFilters({
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
   const [filters, setFilters] = useState<Filters>({});
 
-  const applyFilters = () => {
-    const org = organizations.find((o) => o.login === filters.organization);
-    onChange({
-      ...filters,
-      organization: filters.organization,
-      branches: filters.branches,
-      time: filters.time,
-    });
-  };
+  useEffect(() => {
+    if (filters.organization && filters.repositories?.length) {
+      onChange({
+        organization: filters.organization,
+        repositories: filters.repositories,
+        branches: filters.branches,
+        time: filters.time,
+      });
+    }
+  }, [JSON.stringify(filters)]);
 
   useEffect(() => {
     if (!filters.organization && organizations.length) {
@@ -76,6 +74,10 @@ function DashboardFilters({
         )
         .then((res) => {
           setRepositories(res.data);
+          setFilters({
+            ...filters,
+            repositories: res.data.map((r: { name: string }) => r.name),
+          });
           setIsLoadingRepos(false);
         });
     }
@@ -154,15 +156,6 @@ function DashboardFilters({
           </>
         </div> */}
         <div>
-          <Button
-            variant="success"
-            size="sm"
-            className="w-24 mr-2"
-            onClick={applyFilters}
-          >
-            Apply
-          </Button>
-
           <Synchronize />
         </div>
       </div>
