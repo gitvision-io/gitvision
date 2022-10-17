@@ -1,53 +1,152 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardFilters, { Filters } from "../components/dashboard/Filters";
 import { getInstance } from "../services/api";
 
-const contributors = [
-  {
-    username: "guillaume.jaquart",
-    numberOfCommits: "100",
-    lineOfCodeChanges: "5000",
-    commitActivity: "20",
-  },
-  {
-    username: "Chadiii",
-    numberOfCommits: "50",
-    lineOfCodeChanges: "2000",
-    commitActivity: "10",
-  },
-  {
-    username: "John.Doe",
-    numberOfCommits: "5",
-    lineOfCodeChanges: "400",
-    commitActivity: "2",
-  },
-];
+interface Contributor {
+  author: string;
+  numberOfCommits: number;
+  lineOfCodeChanges: number;
+  commitActivity: number;
+  numberOfLineAdded: number;
+  date: Date;
+}
 
 function Dashboard() {
+  const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [activeRepository, setActiveRepository] = useState(0);
+  const [openIssues, setOpenIssues] = useState(0);
+  const [pullRequests, setPullRequests] = useState(0);
+  const [filters, setFilters] = useState<Record<string, any>>();
+
   const onApplyFilters = (filters: Record<string, any>) => {
-    getInstance().get("/api/dashboard/analytics", {
-      params: {
-        filters,
-      },
-    });
+    if (filters.repositories) {
+      changeDashboard(filters);
+    }
   };
+
+  const getPullRequestsByRepo = (org: string, filters: Record<string, any>) => {
+    return getInstance()
+      .get(`/api/orgstats/${org}/pullRequests`, {
+        params: {
+          filters,
+        },
+      })
+      .then((rest) => {
+        console.log(rest.data);
+        setPullRequests(
+          rest.data
+            .flatMap((r: Record<string, any>) => r.pullRequests)
+            .filter((p: Record<string, any>) => p.state === "OPEN").length
+        );
+      });
+  };
+
+  const getIssuesByRepo = (org: string, filters: Record<string, any>) => {
+    return getInstance()
+      .get(`/api/orgstats/${org}/issues`, {
+        params: {
+          filters,
+        },
+      })
+      .then((rest) => {
+        setOpenIssues(
+          rest.data
+            .flatMap((r: Record<string, any>) => r.issues)
+            .filter((i: Record<string, any>) => i.state === "OPEN").length
+        );
+      });
+  };
+
+  const getContributersByRepo = (org: string, filters: Record<string, any>) => {
+    return getInstance()
+      .get(`/api/orgstats/${org}`, {
+        params: {
+          filters,
+        },
+      })
+      .then((rest) => {
+        setActiveRepository(rest.data.length);
+        const contributorsVar: Contributor[] = [];
+        rest.data
+          .flatMap((r: Record<string, any>) => r.commits)
+          .map((c: Contributor) => {
+            const ctb: Contributor = {
+              ...c,
+              numberOfCommits: 1,
+              commitActivity: 1,
+            };
+            if (ctb.author == c.author) {
+              ctb.lineOfCodeChanges = c.numberOfLineAdded;
+            }
+            return ctb;
+          })
+          .reduce((res: Record<string, Contributor>, value: Contributor) => {
+            if (!res[value.author]) {
+              res[value.author] = {
+                author: value.author,
+                numberOfLineAdded: 0,
+                numberOfCommits: 0,
+                commitActivity: 0,
+              } as Contributor;
+              contributorsVar.push(res[value.author]);
+            }
+            res[value.author].numberOfLineAdded += value.numberOfLineAdded;
+            res[value.author].numberOfCommits += value.numberOfCommits;
+            res[value.author].commitActivity += value.commitActivity;
+            return res;
+          }, {} as Record<string, Contributor>);
+        return contributorsVar;
+      });
+  };
+
+  const changeDashboard = async (filters: Record<string, any>) => {
+    setContributors([]);
+    const data = await getContributersByRepo(filters.organization, filters);
+    await getIssuesByRepo(filters.organization, filters);
+    await getPullRequestsByRepo(filters.organization, filters);
+
+    setContributors(
+      data.sort((p, c) => c.numberOfLineAdded - p.numberOfLineAdded)
+    );
+  };
+
+  useEffect(() => {
+    getInstance().put("/api/users/me/repositories");
+  }, []);
 
   return (
     <>
-      <DashboardFilters onChange={(filters) => onApplyFilters(filters)} />
+      <DashboardFilters
+        onChange={(filters) => {
+          onApplyFilters(filters);
+          setFilters(filters);
+        }}
+      />
 
-      <div className="py-16 grid row-gap-8 sm:grid-cols-3">
+      <div className="py-16 grid row-gap-8 sm:grid-cols-4">
         <div className="text-center">
           <p className="font-bold">Contributors</p>
-          <h6 className="text-5xl font-bold text-deep-purple-accent-400">10</h6>
+          <h6 className="text-5xl font-bold text-deep-purple-accent-400">
+            {contributors && contributors.length}
+          </h6>
         </div>
         <div className="text-center">
           <p className="font-bold">Active repository</p>
-          <h6 className="text-5xl font-bold text-deep-purple-accent-400">10</h6>
+          <h6 className="text-5xl font-bold text-deep-purple-accent-400">
+            {activeRepository}
+          </h6>
+        </div>
+        <div className="text-center">
+          <p className="font-bold">Pull requests</p>
+          <h6 className="text-5xl font-bold text-deep-purple-accent-400">
+            {pullRequests}
+          </h6>
         </div>
         <div className="text-center">
           <p className="font-bold">Open issues</p>
-          <h6 className="text-5xl font-bold text-deep-purple-accent-400">10</h6>
+          <h6 className="text-5xl font-bold text-deep-purple-accent-400">
+            {openIssues}
+          </h6>
         </div>
       </div>
 
@@ -65,7 +164,7 @@ function Dashboard() {
                 Number of commits
               </th>
               <th scope="col" className="py-3 px-6">
-                Line of code changes
+                Number of line added
               </th>
               <th scope="col" className="py-3 px-6">
                 Commit activity
@@ -73,24 +172,25 @@ function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {contributors.map((item) => {
-              return (
-                <tr
-                  key={item.username}
-                  className="bg-white border-b  hover:bg-gray-50 "
-                >
-                  <th
-                    scope="row"
-                    className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap "
+            {contributors &&
+              contributors.map((item) => {
+                return (
+                  <tr
+                    key={item.author}
+                    className="bg-white border-b  hover:bg-gray-50 "
                   >
-                    {item.username}
-                  </th>
-                  <td className="py-4 px-6">{item.numberOfCommits}</td>
-                  <td className="py-4 px-6">{item.lineOfCodeChanges}</td>
-                  <td className="py-4 px-6">{item.commitActivity}</td>
-                </tr>
-              );
-            })}
+                    <th
+                      scope="row"
+                      className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap "
+                    >
+                      {item.author}
+                    </th>
+                    <td className="py-4 px-6">{item.numberOfCommits}</td>
+                    <td className="py-4 px-6">{item.numberOfLineAdded}</td>
+                    <td className="py-4 px-6">{item.commitActivity}</td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>

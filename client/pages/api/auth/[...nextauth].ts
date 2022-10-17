@@ -17,6 +17,9 @@ export const authOptions: NextAuthOptions = {
           scope: "repo read:user user:email read:org",
         },
       },
+      httpOptions: {
+        timeout: 30000,
+      },
     }),
     // ...add more providers here
   ],
@@ -27,7 +30,7 @@ export const authOptions: NextAuthOptions = {
 
       // Persist the OAuth access_token and or the user id to the token right after signin
       if (account) {
-        await getInstance().put(`/api/users/me`, {
+        await getInstance("server").put(`/api/users/me`, {
           avatarUrl: profile?.avatar_url,
           email: profile?.email,
           name: profile?.name,

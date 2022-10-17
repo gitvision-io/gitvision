@@ -4,36 +4,39 @@ let token: string | null = null;
 
 const setToken = (newToken: string) => (token = newToken);
 
-const instance = axios.create({
+const clientInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
 
-instance.interceptors.request.use((config) => {
-  if (token && config.headers) {
-    config.headers["Authorization"] = `Bearer ${token}`;
-  }
-  return config;
+const serverInstance = axios.create({
+  baseURL: process.env.SERVER_API_URL,
 });
 
-instance.interceptors.response.use(
-  (response) => {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      if (typeof location !== "undefined") {
-        location.href = "/login";
-      }
+[clientInstance, serverInstance].forEach((instance) => {
+  instance.interceptors.request.use((config) => {
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    return Promise.reject(error);
-  }
-);
+    return config;
+  });
 
-const getInstance = () => instance;
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        if (typeof location !== "undefined") {
+          location.href = "/auth/signin";
+        }
+      }
+      // Any status codes that falls outside the range of 2xx cause this function to trigger
+      // Do something with response error
+      return Promise.reject(error);
+    }
+  );
+});
+
+const getInstance = (type: "client" | "server" = "client") =>
+  type === "server" ? serverInstance : clientInstance;
 
 export { setToken, getInstance };

@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { getInstance } from "../../services/api";
 import Button from "../common/Button";
-import Dropdown from "../common/Dropdown";
+import Dropdown, { DropdownValue } from "../common/Dropdown";
 import Loader from "../common/Loader";
 
 const times = [
-  { label: "last hour" },
-  { label: "last 5 hour" },
-  { label: "yesterday" },
+  { label: "last day" },
   { label: "last week" },
+  { label: "last month" },
+  { label: "last 3 months" },
+  { label: "last 6 months" },
 ];
 
 export interface Filters {
   organization?: string;
   time?: string;
-  repository?: string;
-  branch?: string;
+  repositories?: string[];
+  branches?: string[];
 }
 
 export interface Repository {
@@ -37,31 +38,40 @@ function DashboardFilters({
     }[]
   >([]);
   const [repositories, setRepositories] = useState<Repository[]>([]);
-  const [repository, setRepository] = useState<Repository>();
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
-  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
-
+  const [isLoadingSyncronize, setIsLoadingSynchronize] = useState(false);
   const [filters, setFilters] = useState<Filters>({});
 
   const applyFilters = () => {
     const org = organizations.find((o) => o.login === filters.organization);
     onChange({
       ...filters,
-      organization: org?.isUser ? "user" : filters.organization,
-      branch: filters.branch,
+      organization: filters.organization,
+      branches: filters.branches,
+      time: filters.time,
     });
+  };
+
+  const onClickSynchronize = () => {
+    setIsLoadingSynchronize(true);
+    getInstance()
+      .post("/api/orgstats/synchronize")
+      .finally(() => setIsLoadingSynchronize(false));
   };
 
   useEffect(() => {
     if (!filters.organization && organizations.length) {
-      setFilters({ ...filters, organization: organizations[0].login });
+      setFilters({
+        ...filters,
+        organization: organizations[0].login,
+        time: times[2].label,
+      });
     }
   }, [filters, organizations]);
 
   useEffect(() => {
     if (filters.organization) {
       setIsLoadingRepos(true);
-      setIsLoadingBranches(true);
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(
@@ -103,6 +113,7 @@ function DashboardFilters({
             label={"Time"}
             items={times.map((t) => ({ ...t, value: t.label }))}
             value={filters.time}
+            defaultSelect={times[2].label}
             onChange={(v) => setFilters({ ...filters, time: v as string })}
           />
         </div>
@@ -115,43 +126,57 @@ function DashboardFilters({
                 label: r.name,
                 value: r.name,
               }))}
-              value={filters.repository}
-              onChange={(v) => {
-                setFilters({ ...filters, repository: v as string });
-                setRepository(
-                  repositories.find((r) => r.name === v.toString())
-                );
-                setIsLoadingBranches(false);
+              value={filters.repositories}
+              onChange={(v: DropdownValue) => {
+                setFilters({ ...filters, repositories: v as string[] });
               }}
               disabled={!repositories.length}
+              multiple
             />
           )}
         </div>
-        <div className="pr-8">
-          {isLoadingBranches && <Loader color="blue-600" className="mb-2" />}
-          {repository && !isLoadingBranches && (
-            <Dropdown
-              label={"Branches"}
-              items={repository.branches?.map((b) => ({
-                label: b.name,
-                value: b.name,
-              }))}
-              value={filters.branch}
-              onChange={(v) => {
-                setFilters({ ...filters, branch: v as string });
-              }}
-              disabled={!repository?.branches?.length}
-            />
-          )}
+        {/* <div className="pr-8">
+          <>
+            {isLoadingRepos && <Loader color="blue-600" className="mb-2" />}
+            {!isLoadingRepos && (
+              <Dropdown
+                label={"Branches"}
+                items={repositories
+                  .filter((r) => filters.repositories?.includes(r.name))
+                  .flatMap((repo) => repo.branches.map((b) => ({ ...b, repo })))
+                  .map((b) => ({
+                    label: `${b.repo.name} - ${b.name}`,
+                    value: `${b.repo.name};${b.name}`,
+                  }))}
+                value={filters.branches}
+                onChange={(v) => {
+                  setFilters({ ...filters, branches: v as string[] });
+                }}
+                disabled={!filters.repositories?.length}
+                multiple
+              />
+            )}
+          </>
+        </div> */}
+        <div>
+          <Button
+            variant="success"
+            size="sm"
+            className="w-24 mr-2"
+            onClick={applyFilters}
+          >
+            Apply
+          </Button>
+
+          <Button
+            size="sm"
+            className="w-35"
+            onClick={onClickSynchronize}
+            isLoading={isLoadingSyncronize}
+          >
+            Synchronize
+          </Button>
         </div>
-        <Button
-          variant="success"
-          size="sm"
-          className="w-24"
-          onClick={applyFilters}
-        >
-          Apply
-        </Button>
       </div>
     </>
   );

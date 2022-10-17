@@ -1,4 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { User } from 'src/entities/user.entity';
+import { USER } from '../users/users.decorator';
 import { GithubService } from './github.service';
 
 @Controller('/api/github')
@@ -17,7 +19,8 @@ export class GithubController {
 
   @Get('repos')
   async getMainRepositories(): Promise<{ id: string; name: string }[]> {
-    return await this.githubService.getRepositories('all');
+    const repos = await this.githubService.getRepositories('all');
+    return repos;
   }
 
   @Get('orgs/:org/repos')

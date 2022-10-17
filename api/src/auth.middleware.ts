@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { verify } from 'jsonwebtoken';
 import { SESSION_COOKIE_NAME } from './common/constants';
 import { GithubService } from './modules/github/github.service';
+import { RepoService } from './modules/repo/repo.service';
 import { UsersService } from './modules/users/users.service';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class AuthMiddleware implements NestMiddleware {
   constructor(
     private readonly usersService: UsersService,
     private readonly githubService: GithubService,
+    private readonly repoService: RepoService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -32,6 +34,7 @@ export class AuthMiddleware implements NestMiddleware {
 
     if (user) {
       this.githubService.auth(user.githubToken);
+      this.repoService.auth(user.githubToken);
     }
     next();
   }

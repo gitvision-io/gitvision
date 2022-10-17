@@ -38614,7 +38614,13 @@ export type DirectiveResolvers<ContextType = any> = {
   requiredCapabilities?: RequiredCapabilitiesDirectiveResolver<any, any, ContextType>;
 };
 
-
+export const OrganizationFields = gql`
+    fragment OrganizationFields on Organization {
+  id
+  databaseId
+  login
+}
+    `;
 export const GetAllRepositoriesOfOrganization = gql`
     query GetAllRepositoriesOfOrganization($login: String!) {
   viewer {
@@ -38644,9 +38650,246 @@ export const GetAllOrganizations = gql`
     organizations(first: 100) {
       edges {
         node {
+          ...OrganizationFields
+        }
+      }
+    }
+  }
+}
+    ${OrganizationFields}`;
+export const GetAllCommitsOfRepo = gql`
+    query GetAllCommitsOfRepo($login: String!, $repoName: String!) {
+  organization(login: $login) {
+    repository(name: $repoName) {
+      id
+      name
+      defaultBranchRef {
+        target {
+          ... on Commit {
+            history(first: 10) {
+              edges {
+                node {
+                  ... on Commit {
+                    author {
+                      date
+                      email
+                      name
+                    }
+                    committedDate
+                    id
+                    changedFilesIfAvailable
+                    additions
+                    deletions
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllCommitsOfAllReposOfAllOrg = gql`
+    query GetAllCommitsOfAllReposOfAllOrg($date: GitTimestamp) {
+  viewer {
+    login
+    organizations(first: 100) {
+      edges {
+        node {
           id
-          databaseId
           login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+                defaultBranchRef {
+                  target {
+                    ... on Commit {
+                      history(since: $date) {
+                        edges {
+                          node {
+                            ... on Commit {
+                              author {
+                                date
+                                email
+                                name
+                              }
+                              id
+                              committedDate
+                              changedFilesIfAvailable
+                              additions
+                              deletions
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllIssuesOfAllReposOfAllOrg = gql`
+    query GetAllIssuesOfAllReposOfAllOrg {
+  viewer {
+    login
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+                issues(first: 48) {
+                  edges {
+                    node {
+                      id
+                      state
+                      closedAt
+                      createdAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllPullRequestOfAllReposOfAllOrg = gql`
+    query GetAllPullRequestOfAllReposOfAllOrg {
+  viewer {
+    login
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+                pullRequests(first: 48) {
+                  edges {
+                    node {
+                      id
+                      state
+                      closedAt
+                      createdAt
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllCommitsOfAllReposOfUser = gql`
+    query GetAllCommitsOfAllReposOfUser($date: GitTimestamp) {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(since: $date) {
+                  edges {
+                    node {
+                      ... on Commit {
+                        author {
+                          date
+                          email
+                          name
+                        }
+                        id
+                        committedDate
+                        changedFilesIfAvailable
+                        additions
+                        deletions
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllIssuesOfAllReposOfUser = gql`
+    query GetAllIssuesOfAllReposOfUser {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          issues(first: 100) {
+            edges {
+              node {
+                id
+                state
+                closedAt
+                createdAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllPullRequestOfAllReposOfUser = gql`
+    query GetAllPullRequestOfAllReposOfUser {
+  viewer {
+    login
+    repositories(first: 100) {
+      edges {
+        node {
+          id
+          name
+          isInOrganization
+          pullRequests(first: 100) {
+            edges {
+              node {
+                id
+                state
+                closedAt
+                createdAt
+              }
+            }
+          }
         }
       }
     }
@@ -38656,7 +38899,7 @@ export const GetAllOrganizations = gql`
 export const GetAllRepositoriesForUser = gql`
     query GetAllRepositoriesForUser {
   viewer {
-    repositories(first: 20) {
+    repositories(first: 100) {
       edges {
         node {
           refs(refPrefix: "refs/heads/", first: 100) {
@@ -38666,6 +38909,37 @@ export const GetAllRepositoriesForUser = gql`
           }
           id
           name
+          isInOrganization
+        }
+      }
+    }
+  }
+}
+    `;
+export const GetAllRespositoriesAndOrganization = gql`
+    query GetAllRespositoriesAndOrganization {
+  viewer {
+    repositories(ownerAffiliations: [OWNER], first: 100) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+    organizations(first: 100) {
+      edges {
+        node {
+          id
+          login
+          repositories(first: 100) {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
         }
       }
     }
@@ -38684,7 +38958,56 @@ export type GetAllOrganizationsQueryVariables = Exact<{ [key: string]: never; }>
 
 export type GetAllOrganizationsQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, databaseId?: number | null, login: string } | null } | null> | null } } };
 
+export type OrganizationFieldsFragment = { __typename?: 'Organization', id: string, databaseId?: number | null, login: string };
+
+export type GetAllCommitsOfRepoQueryVariables = Exact<{
+  login: Scalars['String'];
+  repoName: Scalars['String'];
+}>;
+
+
+export type GetAllCommitsOfRepoQuery = { __typename?: 'Query', organization?: { __typename?: 'Organization', repository?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', committedDate: any, id: string, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null };
+
+export type GetAllCommitsOfAllReposOfAllOrgQueryVariables = Exact<{
+  date?: InputMaybe<Scalars['GitTimestamp']>;
+}>;
+
+
+export type GetAllCommitsOfAllReposOfAllOrgQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null> | null } } | null } | null> | null } } };
+
+export type GetAllIssuesOfAllReposOfAllOrgQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllIssuesOfAllReposOfAllOrgQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } | null } | null> | null } } };
+
+export type GetAllPullRequestOfAllReposOfAllOrgQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllPullRequestOfAllReposOfAllOrgQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, pullRequests: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } | null } | null> | null } } };
+
+export type GetAllCommitsOfAllReposOfUserQueryVariables = Exact<{
+  date?: InputMaybe<Scalars['GitTimestamp']>;
+}>;
+
+
+export type GetAllCommitsOfAllReposOfUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null> | null } } };
+
+export type GetAllIssuesOfAllReposOfUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllIssuesOfAllReposOfUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, issues: { __typename?: 'IssueConnection', edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } };
+
+export type GetAllPullRequestOfAllReposOfUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllPullRequestOfAllReposOfUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, pullRequests: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null> | null } } };
+
 export type GetAllRepositoriesForUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } };
+export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } };
+
+export type GetAllRespositoriesAndOrganizationQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllRespositoriesAndOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null }, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } | null } | null> | null } } };
