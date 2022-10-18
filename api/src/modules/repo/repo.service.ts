@@ -22,11 +22,16 @@ import {
   GetAllReposOfOrgWithPaginationQuery,
   GetAllReposOfUserWithPaginationQuery,
   GetAllReposOfUserWithPagination,
+  GetAllCommitsOfAllReposOfAllOrgWithPagination,
+  GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery,
+  GetAllCommitsOfAllReposOfUserWithPagination,
+  GetAllCommitsOfAllReposOfUserWithPaginationQuery,
 } from 'src/generated/graphql';
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
 import { PullRequest } from 'src/entities/pullrequest.entity';
+import { ApolloQueryResult } from '@apollo/client';
 
 interface Organization {
   id: string;
@@ -211,6 +216,55 @@ export class RepoService {
     );
   }
 
+  async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
+    let repositories: Repo[] = [];
+    let allRepos = await this.getAllRepoOfAllOrgWithPagination();
+
+    await Promise.all([
+      ...allRepos.map(async (r) => {
+        let graphQLResultWithPagination = await this.apolloService
+          .githubClient()
+          .query<GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery>({
+            query: GetAllCommitsOfAllReposOfAllOrgWithPagination,
+            variables: {
+              orgLogin: r.organization,
+              repoName: r.repoName,
+              date,
+            },
+          });
+
+        if (
+          graphQLResultWithPagination.data.viewer.organization.repository
+            .defaultBranchRef.target.__typename === 'Commit'
+        ) {
+          const commits: Commit[] =
+            graphQLResultWithPagination.data.viewer.organization.repository.defaultBranchRef.target.history.edges.map(
+              (c) => {
+                const commit = new Commit();
+                commit.id = c.node.id;
+                commit.repoId = r.id;
+                commit.author = c.node.author.name;
+                commit.date = c.node.committedDate;
+                commit.numberOfLineAdded = c.node.additions;
+                commit.numberOfLineRemoved = c.node.deletions;
+                commit.numberOfLineModified =
+                  c.node.additions - c.node.deletions;
+                return commit;
+              },
+            );
+          this.commitRepository.save(commits);
+          r.commits = commits;
+        }
+
+        repositories.push(r);
+        this.upsert(r.id, r);
+        return r;
+      }),
+    ]);
+
+    return repositories;
+  }
+
   async getIssuesOfAllRepoOfAllOrg(): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
@@ -294,7 +348,7 @@ export class RepoService {
   async getAllOrgWithPagination(): Promise<Organization[]> {
     let organizations: Organization[] = [];
     let orgEndCursor: string = null;
-    let graphQLResultWithPagination: any;
+    let graphQLResultWithPagination: ApolloQueryResult<GetAllOrgsWithPaginationQuery>;
 
     do {
       graphQLResultWithPagination = await this.apolloService
@@ -330,7 +384,7 @@ export class RepoService {
     let repositories: Repo[] = [];
     let repoEndCursor: string = null;
     let allOrgs = await this.getAllOrgWithPagination();
-    let graphQLResultWithPagination: any;
+    let graphQLResultWithPagination: ApolloQueryResult<GetAllReposOfOrgWithPaginationQuery>;
 
     await Promise.all([
       ...allOrgs.map(async (o) => {
@@ -371,7 +425,7 @@ export class RepoService {
   async getAllRepoOfUserWithPagination(): Promise<Repo[]> {
     let repositories: Repo[] = [];
     let repoEndCursor: string = null;
-    let graphQLResultWithPagination: any;
+    let graphQLResultWithPagination: ApolloQueryResult<GetAllReposOfUserWithPaginationQuery>;
 
     do {
       graphQLResultWithPagination = await this.apolloService
@@ -478,6 +532,61 @@ export class RepoService {
         this.upsert(repo.id, repo);
         return repo;
       });
+  }
+
+  async getCommitsOfAllRepoOfUserWithPaginate(date: Date): Promise<void> {
+    let repositories: Repo[] = [];
+    let repoEndCursor: string = null;
+    let graphQLResultWithPagination: ApolloQueryResult<GetAllCommitsOfAllReposOfUserWithPaginationQuery>;
+
+    do {
+      graphQLResultWithPagination = await this.apolloService
+        .githubClient()
+        .query<GetAllCommitsOfAllReposOfUserWithPaginationQuery>({
+          query: GetAllCommitsOfAllReposOfUserWithPagination,
+          variables: {
+            cursorRepo: repoEndCursor,
+            date,
+          },
+        });
+
+      repoEndCursor =
+        graphQLResultWithPagination.data.viewer.repositories.pageInfo.endCursor;
+
+      graphQLResultWithPagination.data.viewer.repositories.edges
+        .filter((r) => !r.node.isInOrganization)
+        .map((r) => {
+          const repo: Repo = new Repo();
+          repo.id = r.node.id;
+          repo.repoName = r.node.name;
+          repo.organization = graphQLResultWithPagination.data.viewer.login;
+          if (r.node.defaultBranchRef.target.__typename === 'Commit') {
+            const commits: Commit[] =
+              r.node.defaultBranchRef.target.history.edges.map(
+                (c: Record<string, any>) => {
+                  const commit = new Commit();
+                  commit.id = c.node.id;
+                  commit.repoId = r.node.id;
+                  commit.author = c.node.author.name;
+                  commit.date = c.node.committedDate;
+                  commit.numberOfLineAdded = c.node.additions;
+                  commit.numberOfLineRemoved = c.node.deletions;
+                  commit.numberOfLineModified =
+                    c.node.additions - c.node.deletions;
+
+                  return commit;
+                },
+              );
+            this.commitRepository.save(commits);
+            repo.commits = commits;
+          }
+          this.upsert(repo.id, repo);
+          repositories.push(repo);
+          return repo;
+        });
+    } while (
+      graphQLResultWithPagination.data.viewer.repositories.pageInfo.hasNextPage
+    );
   }
 
   async getIssuesOfAllRepoOfUser(): Promise<Repo[]> {

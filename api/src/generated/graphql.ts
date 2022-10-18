@@ -38643,6 +38643,45 @@ export const GetAllRepositoriesOfOrganization = gql`
   }
 }
     `;
+export const GetAllCommitsOfAllReposOfAllOrgWithPagination = gql`
+    query GetAllCommitsOfAllReposOfAllOrgWithPagination($orgLogin: String!, $repoName: String!, $date: GitTimestamp) {
+  viewer {
+    login
+    organization(login: $orgLogin) {
+      id
+      login
+      repository(name: $repoName) {
+        id
+        name
+        defaultBranchRef {
+          target {
+            ... on Commit {
+              history(since: $date) {
+                edges {
+                  node {
+                    ... on Commit {
+                      author {
+                        date
+                        email
+                        name
+                      }
+                      id
+                      committedDate
+                      changedFilesIfAvailable
+                      additions
+                      deletions
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
 export const GetAllOrgsWithPagination = gql`
     query GetAllOrgsWithPagination($cursorOrgs: String) {
   viewer {
@@ -39132,6 +39171,51 @@ export const GetAllRespositoriesAndOrganization = gql`
   }
 }
     `;
+export const GetAllCommitsOfAllReposOfUserWithPagination = gql`
+    query GetAllCommitsOfAllReposOfUserWithPagination($cursorRepo: String, $date: GitTimestamp) {
+  viewer {
+    login
+    repositories(first: 100, after: $cursorRepo) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          name
+          isInOrganization
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(since: $date) {
+                  edges {
+                    node {
+                      ... on Commit {
+                        author {
+                          date
+                          email
+                          name
+                        }
+                        id
+                        committedDate
+                        changedFilesIfAvailable
+                        additions
+                        deletions
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
 export const GetAllReposOfUserWithPagination = gql`
     query GetAllReposOfUserWithPagination($cursorRepo: String) {
   viewer {
@@ -39159,6 +39243,15 @@ export type GetAllRepositoriesOfOrganizationQueryVariables = Exact<{
 
 
 export type GetAllRepositoriesOfOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', name: string, id: string, visibility: RepositoryVisibility, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } | null } };
+
+export type GetAllCommitsOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
+  orgLogin: Scalars['String'];
+  repoName: Scalars['String'];
+  date?: InputMaybe<Scalars['GitTimestamp']>;
+}>;
+
+
+export type GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organization?: { __typename?: 'Organization', id: string, login: string, repository?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null } };
 
 export type GetAllOrgsWithPaginationQueryVariables = Exact<{
   cursorOrgs?: InputMaybe<Scalars['String']>;
@@ -39267,6 +39360,14 @@ export type GetAllRespositoriesAndOrganizationQueryVariables = Exact<{ [key: str
 
 
 export type GetAllRespositoriesAndOrganizationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null }, organizations: { __typename?: 'OrganizationConnection', edges?: Array<{ __typename?: 'OrganizationEdge', node?: { __typename?: 'Organization', id: string, login: string, repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } | null } | null> | null } } };
+
+export type GetAllCommitsOfAllReposOfUserWithPaginationQueryVariables = Exact<{
+  cursorRepo?: InputMaybe<Scalars['String']>;
+  date?: InputMaybe<Scalars['GitTimestamp']>;
+}>;
+
+
+export type GetAllCommitsOfAllReposOfUserWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RepositoryEdge', cursor: string, node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null> | null } } };
 
 export type GetAllReposOfUserWithPaginationQueryVariables = Exact<{
   cursorRepo?: InputMaybe<Scalars['String']>;

@@ -14,11 +14,12 @@ export class SynchronizeService {
     //await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
     //await this.repoService.getCommitsOfAllRepoOfUser(date);
 
-    await this.repoService.getAllOrgWithPagination();
-    await this.repoService.getAllRepoOfAllOrgWithPagination();
+    //await this.repoService.getAllOrgWithPagination();
+    //await this.repoService.getAllRepoOfAllOrgWithPagination();
     //console.log('hi');
-    await this.repoService.getAllRepoOfUserWithPagination();
-
+    //await this.repoService.getAllRepoOfUserWithPagination();
+    await this.repoService.getCommitsOfAllRepoOfAllOrgWithPagination(date);
+    await this.repoService.getCommitsOfAllRepoOfUserWithPaginate(date);
     // Get Issues
     //await this.repoService.getIssuesOfAllRepoOfAllOrg1();
     //await this.repoService.getIssuesOfAllRepoOfUser1();

@@ -1,0 +1,41 @@
+query GetAllCommitsOfAllReposOfAllOrgWithPagination(
+  $orgLogin: String!
+  $repoName: String!
+  $date: GitTimestamp
+) {
+  viewer {
+    login
+    organization(login: $orgLogin) {
+      id
+      login
+      repository(name: $repoName) {
+        id
+        name
+        defaultBranchRef {
+          target {
+            ... on Commit {
+              history(since: $date) {
+                edges {
+                  node {
+                    ... on Commit {
+                      author {
+                        date
+                        email
+                        name
+                      }
+                      id
+                      committedDate
+                      changedFilesIfAvailable
+                      additions
+                      deletions
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

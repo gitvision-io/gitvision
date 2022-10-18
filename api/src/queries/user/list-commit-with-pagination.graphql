@@ -1,0 +1,46 @@
+query GetAllCommitsOfAllReposOfUserWithPagination(
+  $cursorRepo: String
+  $date: GitTimestamp
+) {
+  viewer {
+    login
+    repositories(first: 100, after: $cursorRepo) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          name
+          isInOrganization
+          defaultBranchRef {
+            target {
+              ... on Commit {
+                history(since: $date) {
+                  edges {
+                    node {
+                      ... on Commit {
+                        author {
+                          date
+                          email
+                          name
+                        }
+                        id
+                        committedDate
+                        changedFilesIfAvailable
+                        additions
+                        deletions
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
