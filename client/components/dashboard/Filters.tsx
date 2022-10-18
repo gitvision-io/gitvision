@@ -43,8 +43,9 @@ function DashboardFilters({
 
   useEffect(() => {
     if (filters.organization && filters.repositories?.length) {
+      const org = organizations.find((o) => o.login === filters.organization);
       onChange({
-        organization: filters.organization,
+        organization: org?.isUser ? "user" : filters.organization,
         repositories: filters.repositories,
         branches: filters.branches,
         time: filters.time,

@@ -19,7 +19,7 @@ export class Repo {
     type: String,
     nullable: true,
   })
-  organization: string;
+  organization?: string;
 
   @OneToMany(() => Commit, (commit) => commit.repo)
   commits: Commit[];
