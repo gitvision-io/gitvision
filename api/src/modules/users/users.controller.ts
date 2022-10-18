@@ -41,17 +41,9 @@ export class UsersController {
 
   @Put('me/repositories')
   async setRepositories(@USER() user: User): Promise<{ status: string }> {
-    //const profile = await this.githubService.getProfile();
     const reposOrg = await this.repoService.getAllRepoOfAllOrgWithPagination();
     const reposUser = await this.repoService.getAllRepoOfUserWithPagination();
     const reposEntities: Repo[] = reposOrg.concat(reposUser);
-    await Promise.all(
-      reposEntities.map((repo: Repo) => {
-        console.log(repo);
-        this.repoService.upsert(repo.id, repo);
-      }),
-    );
-
     await this.usersService.addRepositories(user, reposEntities);
     return { status: 'ok' };
   }
