@@ -1,29 +1,4 @@
-query GetAllPullRequestOfAllReposOfUser($repoCount: Int) {
-  viewer {
-    login
-    repositories(first: $repoCount) {
-      edges {
-        node {
-          id
-          name
-          isInOrganization
-          pullRequests(first: 100, states: [OPEN]) {
-            edges {
-              node {
-                id
-                state
-                closedAt
-                createdAt
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-query GetAllPullRequestOfAllReposOfUser1 {
+query GetAllPullRequestOfAllReposOfUser {
   viewer {
     login
     repositories(first: 100) {
@@ -48,39 +23,7 @@ query GetAllPullRequestOfAllReposOfUser1 {
   }
 }
 
-query GetAllPullRequestOfAllReposOfAllOrg($orgCount: Int, $repoCount: Int) {
-  viewer {
-    login
-    organizations(first: $orgCount) {
-      edges {
-        node {
-          id
-          login
-          repositories(first: $repoCount) {
-            edges {
-              node {
-                id
-                name
-                pullRequests(first: 100, states: [OPEN]) {
-                  edges {
-                    node {
-                      id
-                      state
-                      closedAt
-                      createdAt
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-query GetAllPullRequestOfAllReposOfAllOrg1 {
+query GetAllPullRequestOfAllReposOfAllOrg {
   viewer {
     login
     organizations(first: 5) {

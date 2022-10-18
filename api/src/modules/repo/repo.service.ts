@@ -9,20 +9,12 @@ import {
   GetAllCommitsOfAllReposOfUser,
   GetAllCommitsOfAllReposOfUserQuery,
   GetAllIssuesOfAllReposOfAllOrg,
-  GetAllIssuesOfAllReposOfAllOrg1,
-  GetAllIssuesOfAllReposOfAllOrg1Query,
   GetAllIssuesOfAllReposOfAllOrgQuery,
   GetAllIssuesOfAllReposOfUser,
-  GetAllIssuesOfAllReposOfUser1,
-  GetAllIssuesOfAllReposOfUser1Query,
   GetAllIssuesOfAllReposOfUserQuery,
   GetAllPullRequestOfAllReposOfAllOrg,
-  GetAllPullRequestOfAllReposOfAllOrg1,
-  GetAllPullRequestOfAllReposOfAllOrg1Query,
   GetAllPullRequestOfAllReposOfAllOrgQuery,
   GetAllPullRequestOfAllReposOfUser,
-  GetAllPullRequestOfAllReposOfUser1,
-  GetAllPullRequestOfAllReposOfUser1Query,
   GetAllPullRequestOfAllReposOfUserQuery,
 } from 'src/generated/graphql';
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
@@ -203,57 +195,11 @@ export class RepoService {
     );
   }
 
-  async getIssuesOfAllRepoOfAllOrg(
-    orgCount: number,
-    repoCount: number,
-  ): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfAllOrg(): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllIssuesOfAllReposOfAllOrgQuery>({
         query: GetAllIssuesOfAllReposOfAllOrg,
-        variables: {
-          orgCount,
-          repoCount,
-        },
-      });
-
-    return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
-      o.node.repositories.edges.map((r) => {
-        const repo: Repo = new Repo();
-        repo.organization = o.node.login;
-        repo.repoName = r.node.name;
-        repo.id = r.node.id;
-
-        const issues: Issue[] = r.node.issues.edges.map((i) => {
-          const issue = new Issue();
-          issue.id = i.node.id;
-          issue.state = i.node.state;
-          issue.repoId = repo.id;
-
-          if (i.node.createdAt) {
-            issue.createdAt = i.node.createdAt;
-          }
-
-          if (i.node.closedAt) {
-            issue.closedAt = i.node.closedAt;
-          }
-
-          return issue;
-        });
-
-        this.issueRepository.save(issues);
-        repo.issues = issues;
-        this.upsert(repo.id, repo);
-        return repo;
-      }),
-    );
-  }
-
-  async getIssuesOfAllRepoOfAllOrg1(): Promise<Repo[]> {
-    const graphQLResult = await this.apolloService
-      .githubClient()
-      .query<GetAllIssuesOfAllReposOfAllOrg1Query>({
-        query: GetAllIssuesOfAllReposOfAllOrg1,
       });
 
     return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
@@ -288,59 +234,11 @@ export class RepoService {
     );
   }
 
-  async getPullRequestsOfAllRepoOfAllOrg(
-    orgCount: number,
-    repoCount: number,
-  ): Promise<Repo[]> {
+  async getPullRequestsOfAllRepoOfAllOrg(): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllPullRequestOfAllReposOfAllOrgQuery>({
         query: GetAllPullRequestOfAllReposOfAllOrg,
-        variables: {
-          orgCount,
-          repoCount,
-        },
-      });
-
-    return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
-      o.node.repositories.edges.map((r) => {
-        const repo: Repo = new Repo();
-        repo.organization = o.node.login;
-        repo.repoName = r.node.name;
-        repo.id = r.node.id;
-
-        const pullRequests: PullRequest[] = r.node.pullRequests.edges.map(
-          (p) => {
-            const pullRequest = new PullRequest();
-            pullRequest.id = p.node.id;
-            pullRequest.repoId = repo.id;
-            pullRequest.state = p.node.state;
-
-            if (p.node.createdAt) {
-              pullRequest.createdAt = p.node.createdAt;
-            }
-
-            if (p.node.closedAt) {
-              pullRequest.closedAt = p.node.closedAt;
-            }
-
-            return pullRequest;
-          },
-        );
-
-        this.pullRequestRepository.save(pullRequests);
-        repo.pullRequests = pullRequests;
-        this.upsert(repo.id, repo);
-        return repo;
-      }),
-    );
-  }
-
-  async getPullRequestsOfAllRepoOfAllOrg1(): Promise<Repo[]> {
-    const graphQLResult = await this.apolloService
-      .githubClient()
-      .query<GetAllPullRequestOfAllReposOfAllOrg1Query>({
-        query: GetAllPullRequestOfAllReposOfAllOrg1,
       });
 
     return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
@@ -418,14 +316,11 @@ export class RepoService {
       });
   }
 
-  async getIssuesOfAllRepoOfUser(repoCount: number): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfUser(): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllIssuesOfAllReposOfUserQuery>({
         query: GetAllIssuesOfAllReposOfUser,
-        variables: {
-          repoCount,
-        },
       });
 
     return graphQLResult.data.viewer.repositories.edges
@@ -456,85 +351,11 @@ export class RepoService {
       });
   }
 
-  async getIssuesOfAllRepoOfUser1(): Promise<Repo[]> {
-    const graphQLResult = await this.apolloService
-      .githubClient()
-      .query<GetAllIssuesOfAllReposOfUser1Query>({
-        query: GetAllIssuesOfAllReposOfUser1,
-      });
-
-    return graphQLResult.data.viewer.repositories.edges
-      .filter((r) => r.node.isInOrganization === false)
-      .map((r) => {
-        const repo: Repo = new Repo();
-        repo.organization = graphQLResult.data.viewer.login;
-        repo.repoName = r.node.name;
-        repo.id = r.node.id;
-
-        const issues: Issue[] = r.node.issues.edges.map((i) => {
-          const issue = new Issue();
-          issue.id = i.node.id;
-          issue.repoId = repo.id;
-          issue.state = i.node.state;
-          if (i.node.createdAt) {
-            issue.createdAt = i.node.createdAt;
-          }
-          if (i.node.closedAt) {
-            issue.closedAt = i.node.closedAt;
-          }
-          return issue;
-        });
-        this.issueRepository.save(issues);
-        repo.issues = issues;
-        this.upsert(repo.id, repo);
-        return repo;
-      });
-  }
-
-  async getPullRequestsOfAllRepoOfUser(repoCount: number): Promise<Repo[]> {
+  async getPullRequestsOfAllRepoOfUser(): Promise<Repo[]> {
     const graphQLResult = await this.apolloService
       .githubClient()
       .query<GetAllPullRequestOfAllReposOfUserQuery>({
         query: GetAllPullRequestOfAllReposOfUser,
-        variables: {
-          repoCount,
-        },
-      });
-
-    return graphQLResult.data.viewer.repositories.edges
-      .filter((r) => r.node.isInOrganization === false)
-      .map((r) => {
-        const repo: Repo = new Repo();
-        repo.organization = graphQLResult.data.viewer.login;
-        repo.repoName = r.node.name;
-        repo.id = r.node.id;
-
-        const pullRequests: PullRequest[] = r.node.pullRequests.edges.map(
-          (p) => {
-            const pullRequest = new PullRequest();
-            pullRequest.id = p.node.id;
-            pullRequest.state = p.node.state;
-            if (p.node.createdAt) {
-              pullRequest.createdAt = p.node.createdAt;
-            }
-            if (p.node.closedAt) {
-              pullRequest.closedAt = p.node.closedAt;
-            }
-            return pullRequest;
-          },
-        );
-        this.pullRequestRepository.save(pullRequests);
-        repo.pullRequests = pullRequests;
-        this.upsert(repo.id, repo);
-        return repo;
-      });
-  }
-
-  async getPullRequestsOfAllRepoOfUser1(): Promise<Repo[]> {
-    const graphQLResult = await this.apolloService
-      .githubClient()
-      .query<GetAllPullRequestOfAllReposOfUser1Query>({
-        query: GetAllPullRequestOfAllReposOfUser1,
       });
 
     return graphQLResult.data.viewer.repositories.edges
