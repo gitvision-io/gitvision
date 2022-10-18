@@ -365,7 +365,6 @@ export class RepoService {
         );
       }),
     ]);
-    this.repoRepository.save(repositories);
     return repositories;
   }
 
@@ -400,7 +399,6 @@ export class RepoService {
       graphQLResultWithPagination.data.viewer.repositories.pageInfo.hasNextPage
     );
 
-    this.repoRepository.save(repositories);
     return repositories;
   }
 
