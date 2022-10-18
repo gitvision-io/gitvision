@@ -41,20 +41,17 @@ export class UsersController {
 
   @Put('me/repositories')
   async setRepositories(@USER() user: User): Promise<{ status: string }> {
-    const profile = await this.githubService.getProfile();
-    const repos = await this.githubService.getMainAndOrgRespositories();
-    const reposEntities: Repo[] = [];
+    //const profile = await this.githubService.getProfile();
+    const reposOrg = await this.repoService.getAllRepoOfAllOrgWithPagination();
+    const reposUser = await this.repoService.getAllRepoOfUserWithPagination();
+    const reposEntities: Repo[] = reposOrg.concat(reposUser);
     await Promise.all(
-      repos.map((r) => {
-        const repo = new Repo();
-        repo.id = r.id;
-        repo.organization =
-          r.organization === 'user' ? profile.login : r.organization;
-        repo.repoName = r.name;
-        reposEntities.push(repo);
+      reposEntities.map((repo: Repo) => {
+        console.log(repo);
         this.repoService.upsert(repo.id, repo);
       }),
     );
+
     await this.usersService.addRepositories(user, reposEntities);
     return { status: 'ok' };
   }
