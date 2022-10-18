@@ -11,18 +11,26 @@ export class SynchronizeService {
 
   async synchronize(date: Date) {
     // Get Commits
-    await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
-    await this.repoService.getCommitsOfAllRepoOfUser(date);
+    //await this.repoService.getCommitsOfAllRepoOfAllOrg(date);
+    //await this.repoService.getCommitsOfAllRepoOfUser(date);
 
-    //await this.repoService.syncIssuesForAllRepoOfAllOrgs(date);
+    //console.log(await this.repoService.getAllOrgWithPagination());
+    console.log(await this.repoService.getAllOrgWithPagination());
+    //console.log(await this.repoService.getAllRepoOfAllOrgWithPagination());
+    console.log(
+      await (
+        await this.repoService.getAllRepoOfAllOrgWithPagination()
+      ).length,
+    );
+    //await this.repoService.getAllOrgWithPagination();
 
     // Get Issues
-    await this.repoService.getIssuesOfAllRepoOfAllOrg();
-    await this.repoService.getIssuesOfAllRepoOfUser();
+    //await this.repoService.getIssuesOfAllRepoOfAllOrg1();
+    //await this.repoService.getIssuesOfAllRepoOfUser1();
 
     // Get Pull Requests
-    await this.repoService.getPullRequestsOfAllRepoOfAllOrg();
-    await this.repoService.getPullRequestsOfAllRepoOfUser();
+    //await this.repoService.getPullRequestsOfAllRepoOfAllOrg1();
+    //await this.repoService.getPullRequestsOfAllRepoOfUser1();
     //await this.repoService.syncIssuesForAllRepoOfAllOrgs();
   }
 }
