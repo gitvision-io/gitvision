@@ -70,7 +70,15 @@ export class RepoService {
     });
   }
 
-  findAllByOrg(organization: string): Promise<Repo[]> {
+  findAllByOrg(organization: string | null): Promise<Repo[]> {
+    console.log({
+      relations: {
+        commits: true,
+      },
+      where: {
+        organization,
+      },
+    });
     return this.repoRepository.find({
       relations: {
         commits: true,
@@ -93,7 +101,8 @@ export class RepoService {
   }
 
   findIssuesByOrgByRepos(
-    organization: string,
+    userId: string,
+    organization: string | null,
     repoNames: string[],
   ): Promise<Repo[]> {
     return this.repoRepository.find({
@@ -103,12 +112,16 @@ export class RepoService {
       where: {
         repoName: In(Object.values(repoNames || {})),
         organization,
+        users: {
+          id: userId,
+        },
       },
     });
   }
 
   findPullRequestsByOrgByRepos(
-    organization: string,
+    userId: string,
+    organization: string | null,
     repoNames: string[],
   ): Promise<Repo[]> {
     return this.repoRepository.find({
@@ -118,12 +131,16 @@ export class RepoService {
       where: {
         repoName: In(Object.values(repoNames || {})),
         organization,
+        users: {
+          id: userId,
+        },
       },
     });
   }
 
   findByOrgByReposAndTime(
-    organization: string,
+    userId: string,
+    organization: string | null,
     repoNames: string[],
     time: string,
   ): Promise<Repo[]> {
@@ -157,6 +174,9 @@ export class RepoService {
         repoName: In(Object.values(repoNames || {})),
         organization,
         commits: { date: MoreThanOrEqual(date) },
+        users: {
+          id: userId,
+        },
       },
     });
   }
@@ -217,12 +237,12 @@ export class RepoService {
   }
 
   async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
-    let repositories: Repo[] = [];
-    let allRepos = await this.getAllRepoOfAllOrgWithPagination();
+    const repositories: Repo[] = [];
+    const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
     await Promise.all([
       ...allRepos.map(async (r) => {
-        let graphQLResultWithPagination = await this.apolloService
+        const graphQLResultWithPagination = await this.apolloService
           .githubClient()
           .query<GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery>({
             query: GetAllCommitsOfAllReposOfAllOrgWithPagination,
@@ -346,7 +366,7 @@ export class RepoService {
   }
 
   async getAllOrgWithPagination(): Promise<Organization[]> {
-    let organizations: Organization[] = [];
+    const organizations: Organization[] = [];
     let orgEndCursor: string = null;
     let graphQLResultWithPagination: ApolloQueryResult<GetAllOrgsWithPaginationQuery>;
 
@@ -381,9 +401,9 @@ export class RepoService {
   }
 
   async getAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
-    let repositories: Repo[] = [];
+    const repositories: Repo[] = [];
     let repoEndCursor: string = null;
-    let allOrgs = await this.getAllOrgWithPagination();
+    const allOrgs = await this.getAllOrgWithPagination();
     let graphQLResultWithPagination: ApolloQueryResult<GetAllReposOfOrgWithPaginationQuery>;
 
     await Promise.all([
@@ -423,7 +443,7 @@ export class RepoService {
   }
 
   async getAllRepoOfUserWithPagination(): Promise<Repo[]> {
-    let repositories: Repo[] = [];
+    const repositories: Repo[] = [];
     let repoEndCursor: string = null;
     let graphQLResultWithPagination: ApolloQueryResult<GetAllReposOfUserWithPaginationQuery>;
 
@@ -446,7 +466,6 @@ export class RepoService {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
           repo.repoName = r.node.name;
-          repo.organization = graphQLResultWithPagination.data.viewer.login;
           repositories.push(repo);
         });
     } while (
@@ -467,7 +486,6 @@ export class RepoService {
       .filter((r) => r.node.isInOrganization === false)
       .map((r) => {
         const repo: Repo = new Repo();
-        repo.organization = graphQLResult.data.viewer.login;
         repo.repoName = r.node.name;
         repo.id = r.node.id;
 
@@ -507,7 +525,6 @@ export class RepoService {
       .filter((r) => r.node.isInOrganization === false)
       .map((r) => {
         const repo: Repo = new Repo();
-        repo.organization = graphQLResult.data.viewer.login;
         repo.repoName = r.node.name;
         repo.id = r.node.id;
 
@@ -535,7 +552,7 @@ export class RepoService {
   }
 
   async getCommitsOfAllRepoOfUserWithPaginate(date: Date): Promise<void> {
-    let repositories: Repo[] = [];
+    const repositories: Repo[] = [];
     let repoEndCursor: string = null;
     let graphQLResultWithPagination: ApolloQueryResult<GetAllCommitsOfAllReposOfUserWithPaginationQuery>;
 
@@ -559,7 +576,7 @@ export class RepoService {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
           repo.repoName = r.node.name;
-          repo.organization = graphQLResultWithPagination.data.viewer.login;
+
           if (r.node.defaultBranchRef.target.__typename === 'Commit') {
             const commits: Commit[] =
               r.node.defaultBranchRef.target.history.edges.map(
@@ -600,7 +617,6 @@ export class RepoService {
       .filter((r) => r.node.isInOrganization === false)
       .map((r) => {
         const repo: Repo = new Repo();
-        repo.organization = graphQLResult.data.viewer.login;
         repo.repoName = r.node.name;
         repo.id = r.node.id;
 
@@ -635,7 +651,6 @@ export class RepoService {
       .filter((r) => r.node.isInOrganization === false)
       .map((r) => {
         const repo: Repo = new Repo();
-        repo.organization = graphQLResult.data.viewer.login;
         repo.repoName = r.node.name;
         repo.id = r.node.id;
 
