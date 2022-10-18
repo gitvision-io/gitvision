@@ -15,13 +15,11 @@ export class SynchronizeService {
     //await this.repoService.getCommitsOfAllRepoOfUser(date);
 
     //console.log(await this.repoService.getAllOrgWithPagination());
-    console.log(await this.repoService.getAllOrgWithPagination());
+    //console.log(await this.repoService.getAllOrgWithPagination());
     //console.log(await this.repoService.getAllRepoOfAllOrgWithPagination());
-    console.log(
-      await (
-        await this.repoService.getAllRepoOfAllOrgWithPagination()
-      ).length,
-    );
+
+    await this.repoService.getAllRepoOfUserWithPagination();
+    await this.repoService.getAllRepoOfAllOrgWithPagination();
     //await this.repoService.getAllOrgWithPagination();
 
     // Get Issues

@@ -2,6 +2,8 @@ overwrite: true
 schema: 'src/generated/github-schema-loader.ts'
 documents:
   - src/queries/*.graphql
+  - src/queries/user/*.graphql
+  - src/queries/org/*.graphql
   - src/mutations/*.graphql
 generates:
   src/generated/graphql.ts:

@@ -20,10 +20,14 @@ import {
   GetAllPullRequestOfAllReposOfAllOrgQuery,
   GetAllPullRequestOfAllReposOfUser,
   GetAllPullRequestOfAllReposOfUserQuery,
-  GetAllReposV2,
-  GetAllReposV2Query,
-  GetAllReposWithPagination,
-  GetAllReposWithPaginationQuery,
+  GetAllReposOfOrgWithPagination,
+  GetAllReposOfOrgWithPaginationQuery,
+  GetAllReposOfOrgV2Query,
+  GetAllReposOfOrgV2,
+  GetAllReposOfUserWithPaginationQuery,
+  GetAllReposOfUserWithPagination,
+  GetAllReposOfUserV2Query,
+  GetAllReposOfUserV2,
 } from 'src/generated/graphql';
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
@@ -33,11 +37,7 @@ import { PullRequest } from 'src/entities/pullrequest.entity';
 interface Organization {
   id: string;
   login: string;
-}
-
-interface GithubRepository {
-  id: string;
-  name: string;
+  databaseId: number;
 }
 
 @Injectable()
@@ -304,7 +304,11 @@ export class RepoService {
       });
 
     graphQLResult.data.viewer.organizations.edges.map((o) => {
-      organizations.push({ id: o.node.id, login: o.node.login });
+      organizations.push({
+        id: o.node.id,
+        login: o.node.login,
+        databaseId: o.node.databaseId,
+      });
     });
 
     if (graphQLResult.data.viewer.organizations.pageInfo.hasNextPage) {
@@ -322,7 +326,11 @@ export class RepoService {
           });
 
         graphQLResultWithPagination.data.viewer.organizations.edges.map((o) => {
-          organizations.push({ id: o.node.id, login: o.node.login });
+          organizations.push({
+            id: o.node.id,
+            login: o.node.login,
+            databaseId: o.node.databaseId,
+          });
         });
       } while (
         graphQLResultWithPagination.data.viewer.organizations.pageInfo
@@ -366,8 +374,8 @@ export class RepoService {
     ); */
   }
 
-  async getAllRepoOfAllOrgWithPagination(): Promise<GithubRepository[]> {
-    let repositories: GithubRepository[] = [];
+  async getAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
+    let repositories: Repo[] = [];
     let repoEndCursor: string;
     let allOrgs = await this.getAllOrgWithPagination();
 
@@ -375,16 +383,23 @@ export class RepoService {
       ...allOrgs.map(async (o) => {
         const graphQLResult = await this.apolloService
           .githubClient()
-          .query<GetAllReposV2Query>({
-            query: GetAllReposV2,
+          .query<GetAllReposOfOrgV2Query>({
+            query: GetAllReposOfOrgV2,
             variables: {
               orgLogin: o.login,
             },
           });
 
-        graphQLResult.data.viewer.organization.repositories.edges.map((r) => {
-          repositories.push({ id: r.node.id, name: r.node.name });
-        });
+        graphQLResult.data.viewer.organization.repositories.edges.map(
+          (r: Record<string, any>) => {
+            const repo: Repo = new Repo();
+            repo.id = r.node.id;
+            repo.repoName = r.node.name;
+            repo.organization = o.login;
+
+            repositories.push(repo);
+          },
+        );
 
         if (
           graphQLResult.data.viewer.organization.repositories.pageInfo
@@ -398,8 +413,8 @@ export class RepoService {
                 .endCursor;
             graphQLResultWithPagination = await this.apolloService
               .githubClient()
-              .query<GetAllReposWithPaginationQuery>({
-                query: GetAllReposWithPagination,
+              .query<GetAllReposOfOrgWithPaginationQuery>({
+                query: GetAllReposOfOrgWithPagination,
                 variables: {
                   orgLogin: o.login,
                   cursorRepo: repoEndCursor,
@@ -408,7 +423,12 @@ export class RepoService {
 
             graphQLResultWithPagination.data.viewer.organization.repositories.edges.map(
               (r: Record<string, any>) => {
-                repositories.push({ id: r.node.id, name: r.node.name });
+                const repo: Repo = new Repo();
+                repo.id = r.node.id;
+                repo.repoName = r.node.name;
+                repo.organization = o.login;
+
+                repositories.push(repo);
               },
             );
           } while (
@@ -418,6 +438,94 @@ export class RepoService {
         }
       }),
     ]);
+    this.repoRepository.save(repositories);
+    return repositories;
+
+    /* return graphQLResult.data.viewer.organizations.edges?.flatMap((o) =>
+      o.node.repositories.edges.map((r) => {
+        const repo: Repo = new Repo();
+        repo.organization = o.node.login;
+        repo.repoName = r.node.name;
+        repo.id = r.node.id;
+
+        const pullRequests: PullRequest[] = r.node.pullRequests.edges.map(
+          (p) => {
+            const pullRequest = new PullRequest();
+            pullRequest.id = p.node.id;
+            pullRequest.repoId = repo.id;
+            pullRequest.state = p.node.state;
+
+            if (p.node.createdAt) {
+              pullRequest.createdAt = p.node.createdAt;
+            }
+
+            if (p.node.closedAt) {
+              pullRequest.closedAt = p.node.closedAt;
+            }
+
+            return pullRequest;
+          },
+        );
+
+        this.pullRequestRepository.save(pullRequests);
+        repo.pullRequests = pullRequests;
+        this.upsert(repo.id, repo);
+        return repo;
+      }),
+    ); */
+  }
+
+  async getAllRepoOfUserWithPagination(): Promise<Repo[]> {
+    let repositories: Repo[] = [];
+    let repoEndCursor: string;
+
+    const graphQLResult = await this.apolloService
+      .githubClient()
+      .query<GetAllReposOfUserV2Query>({
+        query: GetAllReposOfUserV2,
+      });
+
+    graphQLResult.data.viewer.repositories.edges
+      .filter((r) => !r.node.isInOrganization)
+      .map((r: Record<string, any>) => {
+        const repo: Repo = new Repo();
+        repo.id = r.node.id;
+        repo.repoName = r.node.name;
+        repo.organization = graphQLResult.data.viewer.login;
+
+        repositories.push(repo);
+      });
+
+    if (graphQLResult.data.viewer.repositories.pageInfo.hasNextPage) {
+      let graphQLResultWithPagination: any;
+
+      do {
+        repoEndCursor =
+          graphQLResult.data.viewer.repositories.pageInfo.endCursor;
+        graphQLResultWithPagination = await this.apolloService
+          .githubClient()
+          .query<GetAllReposOfUserWithPaginationQuery>({
+            query: GetAllReposOfUserWithPagination,
+            variables: {
+              cursorRepo: repoEndCursor,
+            },
+          });
+
+        graphQLResultWithPagination.data.viewer.organization.repositories.edges.map(
+          (r: Record<string, any>) => {
+            const repo: Repo = new Repo();
+            repo.id = r.node.id;
+            repo.repoName = r.node.name;
+            repo.organization = graphQLResult.data.viewer.login;
+
+            repositories.push(repo);
+          },
+        );
+      } while (
+        graphQLResultWithPagination.data.viewer.organization.repositories
+          .pageInfo.hasNextPage
+      );
+    }
     this.repoRepository.save(repositories);
     return repositories;
 

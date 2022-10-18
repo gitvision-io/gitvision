@@ -1,0 +1,20 @@
+query GetAllReposOfOrgV2($orgLogin: String!) {
+  viewer {
+    login
+    organization(login: $orgLogin) {
+      repositories(first: 100) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}
