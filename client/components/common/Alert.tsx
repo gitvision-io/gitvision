@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { Variant } from "./Variant";
 
 const variantColor = {

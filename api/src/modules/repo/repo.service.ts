@@ -17,7 +17,7 @@ import {
   GetAllPullRequestOfAllReposOfUser,
   GetAllPullRequestOfAllReposOfUserQuery,
 } from 'src/generated/graphql';
-import { In, MoreThan, Repository } from 'typeorm';
+import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { GithubService } from '../github/github.service';
 import { PullRequest } from 'src/entities/pullrequest.entity';
@@ -135,13 +135,11 @@ export class RepoService {
     return this.repoRepository.find({
       relations: {
         commits: true,
-        issues: true,
-        pullRequests: true,
       },
       where: {
         repoName: In(Object.values(repoNames || {})),
         organization,
-        commits: { date: MoreThan(date) },
+        commits: { date: MoreThanOrEqual(date) },
       },
     });
   }
@@ -177,7 +175,7 @@ export class RepoService {
           const commits: Commit[] =
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
-              commit.commitId = c.node.id;
+              commit.id = c.node.id;
               commit.repoId = repo.id;
               commit.author = c.node.author.name;
               commit.date = c.node.committedDate;
@@ -185,12 +183,12 @@ export class RepoService {
               commit.numberOfLineRemoved = c.node.deletions;
               commit.numberOfLineModified = c.node.additions - c.node.deletions;
 
-              this.commitRepository.save(commit);
               return commit;
             });
+
+          this.commitRepository.save(commits);
           repo.commits = commits;
         }
-
         this.upsert(repo.id, repo);
         return repo;
       }),
@@ -214,8 +212,8 @@ export class RepoService {
         const issues: Issue[] = r.node.issues.edges.map((i) => {
           const issue = new Issue();
           issue.id = i.node.id;
-          issue.state = i.node.state;
           issue.repoId = repo.id;
+          issue.state = i.node.state;
 
           if (i.node.createdAt) {
             issue.createdAt = i.node.createdAt;
@@ -225,10 +223,10 @@ export class RepoService {
             issue.closedAt = i.node.closedAt;
           }
 
-          this.issueRepository.save(issue);
           return issue;
         });
 
+        this.issueRepository.save(issues);
         repo.issues = issues;
         this.upsert(repo.id, repo);
         return repo;
@@ -254,8 +252,8 @@ export class RepoService {
           (p) => {
             const pullRequest = new PullRequest();
             pullRequest.id = p.node.id;
-            pullRequest.state = p.node.state;
             pullRequest.repoId = repo.id;
+            pullRequest.state = p.node.state;
 
             if (p.node.createdAt) {
               pullRequest.createdAt = p.node.createdAt;
@@ -265,11 +263,11 @@ export class RepoService {
               pullRequest.closedAt = p.node.closedAt;
             }
 
-            this.pullRequestRepository.save(pullRequest);
             return pullRequest;
           },
         );
 
+        this.pullRequestRepository.save(pullRequests);
         repo.pullRequests = pullRequests;
         this.upsert(repo.id, repo);
         return repo;
@@ -299,7 +297,7 @@ export class RepoService {
           const commits: Commit[] =
             r.node.defaultBranchRef.target.history.edges?.map((c) => {
               const commit = new Commit();
-              commit.commitId = c.node.id;
+              commit.id = c.node.id;
               commit.repoId = repo.id;
               commit.author = c.node.author.name;
               commit.date = c.node.committedDate;
@@ -307,9 +305,9 @@ export class RepoService {
               commit.numberOfLineRemoved = c.node.deletions;
               commit.numberOfLineModified = c.node.additions - c.node.deletions;
 
-              this.commitRepository.save(commit);
               return commit;
             });
+          this.commitRepository.save(commits);
           repo.commits = commits;
         }
 
@@ -336,20 +334,17 @@ export class RepoService {
         const issues: Issue[] = r.node.issues.edges.map((i) => {
           const issue = new Issue();
           issue.id = i.node.id;
-          issue.state = i.node.state;
           issue.repoId = repo.id;
-
+          issue.state = i.node.state;
           if (i.node.createdAt) {
             issue.createdAt = i.node.createdAt;
           }
-
           if (i.node.closedAt) {
             issue.closedAt = i.node.closedAt;
           }
-
-          this.issueRepository.save(issue);
           return issue;
         });
+        this.issueRepository.save(issues);
         repo.issues = issues;
         this.upsert(repo.id, repo);
         return repo;
@@ -375,21 +370,18 @@ export class RepoService {
           (p) => {
             const pullRequest = new PullRequest();
             pullRequest.id = p.node.id;
-            pullRequest.state = p.node.state;
             pullRequest.repoId = repo.id;
-
+            pullRequest.state = p.node.state;
             if (p.node.createdAt) {
               pullRequest.createdAt = p.node.createdAt;
             }
-
             if (p.node.closedAt) {
               pullRequest.closedAt = p.node.closedAt;
             }
-
-            this.pullRequestRepository.save(pullRequest);
             return pullRequest;
           },
         );
+        this.pullRequestRepository.save(pullRequests);
         repo.pullRequests = pullRequests;
         this.upsert(repo.id, repo);
         return repo;

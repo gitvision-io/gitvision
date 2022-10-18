@@ -4,12 +4,7 @@ import { Repo } from './repo.entity';
 @Entity()
 export class Commit {
   @PrimaryColumn()
-  commitId: string;
-
-  @Column({
-    type: String,
-  })
-  repoId: string;
+  id: string;
 
   @Column({
     type: String,
@@ -21,6 +16,9 @@ export class Commit {
     type: Date,
   })
   date: Date;
+
+  @Column({ type: String })
+  repoId: string;
 
   @Column({
     type: Number,

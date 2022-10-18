@@ -1,15 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Job, Queue } from 'bull';
+import Bull, { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 
 export interface SynchronizeJob {
-  organization: string;
-  repositories?: string[];
-
-  // ISO Datetime
-  fromDate?: string;
-
-  githubToken: string;
+  fromDate: string;
+  userId: string;
 }
 
 @Injectable()
@@ -18,6 +13,10 @@ export class ProducerService {
     @InjectQueue('sync-organization')
     private synchronizationQueue: Queue<SynchronizeJob>,
   ) {}
+
+  async getJob(jobId: Bull.JobId) {
+    return await this.synchronizationQueue.getJob(jobId);
+  }
 
   async addJob(job: SynchronizeJob): Promise<Job<SynchronizeJob>> {
     const now = new Date();
@@ -33,10 +32,7 @@ export class ProducerService {
 
     if (
       [...actives, ...waitings].some(
-        (j) =>
-          j.data.organization === job.organization &&
-          j.data.repositories.every((r) => job.repositories.includes(r)) &&
-          job.repositories.every((r) => j.data.repositories.includes(r)),
+        (j) => j.data.fromDate === job.fromDate && j.data.userId === job.userId,
       )
     ) {
       console.log('has active, cancelling');

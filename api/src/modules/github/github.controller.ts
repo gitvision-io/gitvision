@@ -1,6 +1,4 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { User } from 'src/entities/user.entity';
-import { USER } from '../users/users.decorator';
 import { GithubService } from './github.service';
 
 @Controller('/api/github')

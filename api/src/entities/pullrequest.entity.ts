@@ -6,11 +6,11 @@ export class PullRequest {
   @PrimaryColumn({ type: String })
   id: string;
 
-  @Column({ type: 'datetime', nullable: true })
-  createdAt: string;
-
   @Column({ type: String })
   repoId: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  createdAt: string;
 
   @Column({
     type: 'datetime',
