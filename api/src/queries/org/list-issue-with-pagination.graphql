@@ -1,0 +1,32 @@
+query GetAllIssuesOfAllReposOfAllOrgWithPagination(
+  $orgLogin: String!
+  $repoName: String!
+  $cursorIssue: String
+) {
+  viewer {
+    login
+    organization(login: $orgLogin) {
+      id
+      login
+      repository(name: $repoName) {
+        id
+        name
+        issues(first: 100, states: [OPEN], after: $cursorIssue) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          edges {
+            cursor
+            node {
+              id
+              state
+              closedAt
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  }
+}
