@@ -38757,26 +38757,6 @@ export const GetAllReposOfOrgWithPagination = gql`
   }
 }
     `;
-export const GetAllRepositoriesForUser = gql`
-    query GetAllRepositoriesForUser {
-  viewer {
-    repositories(first: 100) {
-      edges {
-        node {
-          refs(refPrefix: "refs/heads/", first: 100) {
-            nodes {
-              name
-            }
-          }
-          id
-          name
-          isInOrganization
-        }
-      }
-    }
-  }
-}
-    `;
 export const GetAllCommitsOfAllReposOfUserWithPagination = gql`
     query GetAllCommitsOfAllReposOfUserWithPagination($cursorRepo: String, $date: GitTimestamp) {
   viewer {
@@ -38956,11 +38936,6 @@ export type GetAllReposOfOrgWithPaginationQueryVariables = Exact<{
 
 
 export type GetAllReposOfOrgWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RepositoryEdge', cursor: string, node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } | null } };
-
-export type GetAllRepositoriesForUserQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetAllRepositoriesForUserQuery = { __typename?: 'Query', viewer: { __typename?: 'User', repositories: { __typename?: 'RepositoryConnection', edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, refs?: { __typename?: 'RefConnection', nodes?: Array<{ __typename?: 'Ref', name: string } | null> | null } | null } | null } | null> | null } } };
 
 export type GetAllCommitsOfAllReposOfUserWithPaginationQueryVariables = Exact<{
   cursorRepo?: InputMaybe<Scalars['String']>;

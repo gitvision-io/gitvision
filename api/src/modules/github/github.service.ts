@@ -3,12 +3,12 @@ import { Octokit } from '@octokit/rest';
 import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 import { ApolloService } from '../apollo-client/apollo.service';
 import {
-  GetAllRepositoriesForUser,
-  GetAllRepositoriesForUserQuery,
   GetAllReposOfOrgWithPaginationQuery,
   GetAllReposOfOrgWithPagination,
   GetAllOrgsWithPaginationQuery,
   GetAllOrgsWithPagination,
+  GetAllReposOfUserWithPaginationQuery,
+  GetAllReposOfUserWithPagination,
 } from 'src/generated/graphql';
 import { ApolloQueryResult } from '@apollo/client';
 import { Repo } from 'src/entities/repo.entity';
@@ -99,23 +99,37 @@ export class GithubService {
     );
   }
 
-  async getRepositories(
-    type: 'public' | 'private' | 'all',
-  ): Promise<{ id: string; name: string; branches: { name: string }[] }[]> {
-    const result = await this.apolloService
-      .githubClient()
-      .query<GetAllRepositoriesForUserQuery>({
-        query: GetAllRepositoriesForUser,
-      });
-    return result.data.viewer.repositories.edges
-      .filter((r) => r.node.isInOrganization === false)
-      .map((repository) => ({
-        id: repository.node.id,
-        name: repository.node.name,
-        branches: repository.node.refs.nodes.map((branch) => ({
-          name: branch.name,
-        })),
-      }));
+  async getRepositories(): Promise<Repo[]> {
+    const repositories: Repo[] = [];
+    let repoEndCursor: string = null;
+    let graphQLResultWithPagination: ApolloQueryResult<GetAllReposOfUserWithPaginationQuery>;
+
+    do {
+      graphQLResultWithPagination = await this.apolloService
+        .githubClient()
+        .query<GetAllReposOfUserWithPaginationQuery>({
+          query: GetAllReposOfUserWithPagination,
+          variables: {
+            cursorRepo: repoEndCursor,
+          },
+        });
+
+      repoEndCursor =
+        graphQLResultWithPagination.data.viewer.repositories.pageInfo.endCursor;
+
+      graphQLResultWithPagination.data.viewer.repositories.edges
+        .filter((r: Record<string, any>) => !r.node.isInOrganization)
+        .map((r: Record<string, any>) => {
+          const repo: Repo = new Repo();
+          repo.id = r.node.id;
+          repo.repoName = r.node.name;
+          repositories.push(repo);
+        });
+    } while (
+      graphQLResultWithPagination.data.viewer.repositories.pageInfo.hasNextPage
+    );
+
+    return repositories;
   }
 
   async getOrgRepositories(org: string): Promise<Repo[]> {

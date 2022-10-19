@@ -132,29 +132,6 @@ function DashboardFilters({
             />
           )}
         </div>
-        {/* <div className="pr-8">
-          <>
-            {isLoadingRepos && <Loader color="blue-600" className="mb-2" />}
-            {!isLoadingRepos && (
-              <Dropdown
-                label={"Branches"}
-                items={repositories
-                  .filter((r) => filters.repositories?.includes(r.name))
-                  .flatMap((repo) => repo.branches.map((b) => ({ ...b, repo })))
-                  .map((b) => ({
-                    label: `${b.repo.name} - ${b.name}`,
-                    value: `${b.repo.name};${b.name}`,
-                  }))}
-                value={filters.branches}
-                onChange={(v) => {
-                  setFilters({ ...filters, branches: v as string[] });
-                }}
-                disabled={!filters.repositories?.length}
-                multiple
-              />
-            )}
-          </>
-        </div> */}
         <div>
           <Synchronize />
         </div>
