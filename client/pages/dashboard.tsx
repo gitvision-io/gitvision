@@ -8,6 +8,8 @@ interface Contributor {
   lineOfCodeChanges: number;
   commitActivity: number;
   numberOfLineAdded: number;
+  numberOfLineRemoved: number;
+  numberOfLineModified: number;
   date: Date;
 }
 
@@ -82,6 +84,8 @@ function Dashboard() {
             if (!res[value.author]) {
               res[value.author] = {
                 author: value.author,
+                numberOfLineRemoved: 0,
+                numberOfLineModified: 0,
                 numberOfLineAdded: 0,
                 numberOfCommits: 0,
                 commitActivity: 0,
@@ -90,6 +94,9 @@ function Dashboard() {
             }
             res[value.author].numberOfLineAdded += value.numberOfLineAdded;
             res[value.author].numberOfCommits += value.numberOfCommits;
+            res[value.author].numberOfLineRemoved += value.numberOfLineRemoved;
+            res[value.author].numberOfLineModified +=
+              value.numberOfLineModified;
             res[value.author].commitActivity += value.commitActivity;
             return res;
           }, {} as Record<string, Contributor>);
@@ -164,6 +171,12 @@ function Dashboard() {
                 Number of line added
               </th>
               <th scope="col" className="py-3 px-6">
+                Number of line deleted
+              </th>
+              <th scope="col" className="py-3 px-6">
+                Number of line modified
+              </th>
+              <th scope="col" className="py-3 px-6">
                 Commit activity
               </th>
             </tr>
@@ -184,6 +197,8 @@ function Dashboard() {
                     </th>
                     <td className="py-4 px-6">{item.numberOfCommits}</td>
                     <td className="py-4 px-6">{item.numberOfLineAdded}</td>
+                    <td className="py-4 px-6">{item.numberOfLineRemoved}</td>
+                    <td className="py-4 px-6">{item.numberOfLineModified}</td>
                     <td className="py-4 px-6">{item.commitActivity}</td>
                   </tr>
                 );
