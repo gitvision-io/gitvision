@@ -16,32 +16,3 @@ query GetAllRepositoriesForUser {
     }
   }
 }
-
-query GetAllRespositoriesAndOrganization {
-  viewer {
-    repositories(ownerAffiliations: [OWNER], first: 100) {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
-    organizations(first: 100) {
-      edges {
-        node {
-          id
-          login
-          repositories(first: 100) {
-            edges {
-              node {
-                id
-                name
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
