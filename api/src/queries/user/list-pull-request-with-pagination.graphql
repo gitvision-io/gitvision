@@ -1,6 +1,6 @@
-query GetAllIssuesOfAllRepoOfUserWithPagination(
+query GetAllPullRequestsOfAllRepoOfUserWithPagination(
   $cursorRepo: String
-  $cursorIssue: String
+  $cursorPullRequest: String
 ) {
   viewer {
     login
@@ -15,7 +15,7 @@ query GetAllIssuesOfAllRepoOfUserWithPagination(
           id
           name
           isInOrganization
-          issues(first: 100, states: [OPEN], after: $cursorIssue) {
+          pullRequests(first: 100, states: [OPEN], after: $cursorPullRequest) {
             pageInfo {
               hasNextPage
               endCursor
