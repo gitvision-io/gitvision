@@ -1,4 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { Repo } from 'src/entities/repo.entity';
 import { GithubService } from './github.service';
 
 @Controller('/api/github')
@@ -16,15 +17,12 @@ export class GithubController {
   }
 
   @Get('repos')
-  async getMainRepositories(): Promise<{ id: string; name: string }[]> {
-    const repos = await this.githubService.getRepositories('all');
-    return repos;
+  async getMainRepositories(): Promise<Repo[]> {
+    return await this.githubService.getRepositories();
   }
 
   @Get('orgs/:org/repos')
-  async getOrgRepositories(
-    @Param('org') org: string,
-  ): Promise<{ id: string; name: string; branches: { name: string }[] }[]> {
-    return await this.githubService.getOrgRepositories(org, 'public');
+  async getOrgRepositories(@Param('org') org: string): Promise<Repo[]> {
+    return await this.githubService.getOrgRepositories(org);
   }
 }

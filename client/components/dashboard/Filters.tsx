@@ -21,8 +21,7 @@ export interface Filters {
 
 export interface Repository {
   id: string;
-  name: string;
-  branches: { name: string }[];
+  repoName: string;
 }
 
 function DashboardFilters({
@@ -43,8 +42,9 @@ function DashboardFilters({
 
   useEffect(() => {
     if (filters.organization && filters.repositories?.length) {
+      const org = organizations.find((o) => o.login === filters.organization);
       onChange({
-        organization: filters.organization,
+        organization: org?.isUser ? "user" : filters.organization,
         repositories: filters.repositories,
         branches: filters.branches,
         time: filters.time,
@@ -76,7 +76,7 @@ function DashboardFilters({
           setRepositories(res.data);
           setFilters({
             ...filters,
-            repositories: res.data.map((r: { name: string }) => r.name),
+            repositories: res.data.map((r: { repoName: string }) => r.repoName),
           });
           setIsLoadingRepos(false);
         });
@@ -120,8 +120,8 @@ function DashboardFilters({
             <Dropdown
               label={"Repositories"}
               items={repositories.map((r) => ({
-                label: r.name,
-                value: r.name,
+                label: r.repoName,
+                value: r.repoName,
               }))}
               value={filters.repositories}
               onChange={(v: DropdownValue) => {
@@ -132,29 +132,6 @@ function DashboardFilters({
             />
           )}
         </div>
-        {/* <div className="pr-8">
-          <>
-            {isLoadingRepos && <Loader color="blue-600" className="mb-2" />}
-            {!isLoadingRepos && (
-              <Dropdown
-                label={"Branches"}
-                items={repositories
-                  .filter((r) => filters.repositories?.includes(r.name))
-                  .flatMap((repo) => repo.branches.map((b) => ({ ...b, repo })))
-                  .map((b) => ({
-                    label: `${b.repo.name} - ${b.name}`,
-                    value: `${b.repo.name};${b.name}`,
-                  }))}
-                value={filters.branches}
-                onChange={(v) => {
-                  setFilters({ ...filters, branches: v as string[] });
-                }}
-                disabled={!filters.repositories?.length}
-                multiple
-              />
-            )}
-          </>
-        </div> */}
         <div>
           <Synchronize />
         </div>
