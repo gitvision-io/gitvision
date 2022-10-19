@@ -29,7 +29,7 @@ function DashboardFilters({
 }: {
   onChange: (filters: Filters) => void;
 }) {
-  const [organizations, setOrganization] = useState<
+  const [organizations, setOrganizations] = useState<
     {
       id: string;
       login: string;
@@ -86,7 +86,7 @@ function DashboardFilters({
   useEffect(() => {
     getInstance()
       .get("/api/github/orgs")
-      .then((res) => setOrganization(res.data));
+      .then((res) => setOrganizations(res.data));
   }, []);
 
   return (

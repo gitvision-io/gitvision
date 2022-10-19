@@ -63,36 +63,6 @@ export class RepoService {
     });
   }
 
-  findAllByOrg(organization: string | null): Promise<Repo[]> {
-    console.log({
-      relations: {
-        commits: true,
-      },
-      where: {
-        organization,
-      },
-    });
-    return this.repoRepository.find({
-      relations: {
-        commits: true,
-      },
-      where: {
-        organization,
-      },
-    });
-  }
-
-  findAllByRepo(repoName: string): Promise<Repo[]> {
-    return this.repoRepository.find({
-      relations: {
-        commits: true,
-      },
-      where: {
-        repoName,
-      },
-    });
-  }
-
   findIssuesByOrgByRepos(
     userId: string,
     organization: string | null,
@@ -162,6 +132,8 @@ export class RepoService {
     return this.repoRepository.find({
       relations: {
         commits: true,
+        issues: true,
+        pullRequests: true,
       },
       where: {
         repoName: In(Object.values(repoNames || {})),
@@ -315,7 +287,7 @@ export class RepoService {
 
         if (
           graphQLResultWithPagination.data.viewer.organization.repository
-            .defaultBranchRef.target.__typename === 'Commit'
+            .defaultBranchRef?.target.__typename === 'Commit'
         ) {
           const commits: Commit[] =
             graphQLResultWithPagination.data.viewer.organization.repository.defaultBranchRef.target.history.edges.map(
@@ -367,7 +339,7 @@ export class RepoService {
           repo.id = r.node.id;
           repo.repoName = r.node.name;
 
-          if (r.node.defaultBranchRef.target.__typename === 'Commit') {
+          if (r.node.defaultBranchRef?.target.__typename === 'Commit') {
             const commits: Commit[] =
               r.node.defaultBranchRef.target.history.edges.map(
                 (c: Record<string, any>) => {
