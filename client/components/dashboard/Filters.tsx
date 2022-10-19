@@ -21,8 +21,7 @@ export interface Filters {
 
 export interface Repository {
   id: string;
-  name: string;
-  branches: { name: string }[];
+  repoName: string;
 }
 
 function DashboardFilters({
@@ -77,7 +76,7 @@ function DashboardFilters({
           setRepositories(res.data);
           setFilters({
             ...filters,
-            repositories: res.data.map((r: { name: string }) => r.name),
+            repositories: res.data.map((r: { repoName: string }) => r.repoName),
           });
           setIsLoadingRepos(false);
         });
@@ -121,8 +120,8 @@ function DashboardFilters({
             <Dropdown
               label={"Repositories"}
               items={repositories.map((r) => ({
-                label: r.name,
-                value: r.name,
+                label: r.repoName,
+                value: r.repoName,
               }))}
               value={filters.repositories}
               onChange={(v: DropdownValue) => {
