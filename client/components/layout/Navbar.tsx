@@ -3,6 +3,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ForwardedRef, forwardRef, Fragment, useState } from "react";
+import { classNames } from "../../common/utils";
 import Button from "../common/Button";
 
 // This component is to forward onClick event from Menu.Item to close the menu on item click
@@ -30,10 +31,6 @@ export const Navbar = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-  function classNames(...classes: any[]) {
-    return classes.filter(Boolean).join(" ");
-  }
 
   const mainMenuItems =
     session && router.pathname != "/"
