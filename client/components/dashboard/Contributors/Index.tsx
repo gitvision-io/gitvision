@@ -1,6 +1,4 @@
-import { Tab } from "@headlessui/react";
 import { Contributor, RepositoryStatistics } from "../../../common/types";
-import { classNames } from "../../../common/utils";
 import Tabs from "../../common/Tabs";
 import ContributorsHistory from "./History";
 import ContributorsTable from "./Table";
