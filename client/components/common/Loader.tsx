@@ -5,7 +5,7 @@ const Loader = ({
   color?: string;
   className?: string;
 }) => (
-  <div className={`text-${color} ${className}`}>
+  <div className={`text-${color} ${className} flex items-center`}>
     <svg
       role="status"
       className="inline mr-3 w-4 h-4 animate-spin"

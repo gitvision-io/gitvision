@@ -1,19 +1,21 @@
-import { Issue } from "../../../common/types";
+import { Issue, RepositoryStatistics } from "../../../common/types";
 import Tabs from "../../common/Tabs";
 import IssuesTable from "./Table";
 import IssuesHistory from "./History";
 
 const Issues = ({
   issues,
+  repositories,
   filters,
 }: {
   issues: Issue[];
+  repositories: RepositoryStatistics[];
   filters: Record<string, any>;
 }) => {
   const tabs = [
     {
       label: "Current",
-      component: <IssuesTable issues={issues} />,
+      component: <IssuesTable repositories={repositories} issues={issues} />,
     },
     {
       label: "History",

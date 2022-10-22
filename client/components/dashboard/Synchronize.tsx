@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { User } from "../../common/types";
 import { getInstance } from "../../services/api";
 import Button from "../common/Button";
 
@@ -10,6 +11,7 @@ function Synchronize() {
   const [runningJob, setRunningJob] = useState<{ finishedOn: number } | null>(
     null
   );
+  const [user, setUser] = useState<User | null>(null);
 
   const onClickSynchronize = () => {
     setIsLoadingSynchronize(true);
@@ -32,25 +34,40 @@ function Synchronize() {
           setRunningJob(res.data);
           if (res.data.finishedOn) {
             self.clearInterval(timer);
+            refreshUser();
           }
         });
     }, 2000);
   };
 
+  const refreshUser = () => {
+    getInstance()
+      .get("/api/users/me")
+      .then((res) => setUser(res.data));
+  };
+
+  useEffect(refreshUser, []);
+
   return (
-    <Button
-      size="sm"
-      className="w-35"
-      onClick={onClickSynchronize}
-      isLoading={
-        isLoadingSynchronize || Boolean(runningJob && !runningJob?.finishedOn)
-      }
-      isDisabled={
-        isSynchronizedDisabled || Boolean(runningJob && !runningJob?.finishedOn)
-      }
-    >
-      Synchronize
-    </Button>
+    <div className="flex items-center">
+      <Button
+        size="sm"
+        className="w-35"
+        onClick={onClickSynchronize}
+        isLoading={
+          isLoadingSynchronize || Boolean(runningJob && !runningJob?.finishedOn)
+        }
+        isDisabled={
+          isSynchronizedDisabled ||
+          Boolean(runningJob && !runningJob?.finishedOn)
+        }
+      >
+        Synchronize
+      </Button>
+      <div className="text-sm italic ml-2 text-gray-700">
+        Synchronized at {user?.lastSynchronize}
+      </div>
+    </div>
   );
 }
 

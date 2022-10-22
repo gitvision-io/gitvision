@@ -1,6 +1,12 @@
-import { Issue } from "../../../common/types";
+import { Issue, RepositoryStatistics } from "../../../common/types";
 
-const IssuesTable = ({ issues }: { issues: Issue[] }) => {
+const IssuesTable = ({
+  issues,
+  repositories,
+}: {
+  issues: Issue[];
+  repositories: RepositoryStatistics[];
+}) => {
   return (
     <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
@@ -28,6 +34,7 @@ const IssuesTable = ({ issues }: { issues: Issue[] }) => {
         </thead>
         <tbody>
           {issues?.map((item) => {
+            const repo = repositories.find((r) => r.id === item.repoId);
             return (
               <tr
                 key={item.id}
@@ -39,7 +46,7 @@ const IssuesTable = ({ issues }: { issues: Issue[] }) => {
                 >
                   {item.id}
                 </th>
-                <td className="py-4 px-6">{item.repoId}</td>
+                <td className="py-4 px-6">{repo?.name}</td>
                 <td className="py-4 px-6">
                   {new Date(item.createdAt).toISOString()}
                 </td>

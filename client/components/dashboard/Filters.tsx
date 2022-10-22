@@ -122,7 +122,7 @@ function DashboardFilters({
             />
           )}
         </div>
-        <div>
+        <div className="col-span-2">
           <Synchronize />
         </div>
       </div>

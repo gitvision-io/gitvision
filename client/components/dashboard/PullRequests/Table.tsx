@@ -1,9 +1,11 @@
-import { PullRequest } from "../../../common/types";
+import { PullRequest, RepositoryStatistics } from "../../../common/types";
 
 const PullRequestsTable = ({
   pullRequests,
+  repositories,
 }: {
   pullRequests: PullRequest[];
+  repositories: RepositoryStatistics[];
 }) => {
   return (
     <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
@@ -32,6 +34,7 @@ const PullRequestsTable = ({
         </thead>
         <tbody>
           {pullRequests?.map((item) => {
+            const repo = repositories.find((r) => r.id === item.repoId);
             return (
               <tr
                 key={item.id}
@@ -43,7 +46,7 @@ const PullRequestsTable = ({
                 >
                   {item.id}
                 </th>
-                <td className="py-4 px-6">{item.repoId}</td>
+                <td className="py-4 px-6">{repo?.name}</td>
                 <td className="py-4 px-6">
                   {new Date(item.createdAt).toISOString()}
                 </td>

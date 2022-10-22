@@ -16,10 +16,12 @@ export class ConsumerService {
     const user = await this.usersService.findOne(job.data.userId);
     this.synchronizeService.auth(user.githubToken);
 
+    const now = new Date();
     const synchronizationDate = new Date(job.data.fromDate);
+
     await this.synchronizeService.synchronize(synchronizationDate);
     await this.usersService.update(user.id, {
-      lastSynchronize: synchronizationDate,
+      lastSynchronize: now,
     });
   }
 }

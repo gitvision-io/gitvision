@@ -9,17 +9,17 @@ const Tabs = ({
 }) => {
   return (
     <Tab.Group>
-      <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+      <Tab.List className="flex space-x-1 rounded-xl py-2">
         {tabs.map((t) => (
           <Tab
             key={t.label}
             className={({ selected }) =>
               classNames(
-                "w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700",
-                "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2",
+                "w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-gray-700",
+                "ring-white ring-opacity-60 ring-offset-2 ring-offset-gray-400 focus-visible:outline-none",
                 selected
-                  ? "bg-white shadow"
-                  : "text-blue-700 hover:bg-white/[0.12] hover:text-white"
+                  ? "bg-white shadow font-bold"
+                  : "text-gray-700 hover:bg-white/[0.6] hover:text-gray-900"
               )
             }
           >
@@ -29,7 +29,9 @@ const Tabs = ({
       </Tab.List>
       <Tab.Panels>
         {tabs.map((t) => (
-          <Tab.Panel key={t.label}>{t.component}</Tab.Panel>
+          <Tab.Panel key={t.label} className="bg-white rounded-lg">
+            {t.component}
+          </Tab.Panel>
         ))}
       </Tab.Panels>
     </Tab.Group>
