@@ -19,11 +19,6 @@ export interface Filters {
   branches?: string[];
 }
 
-export interface Repository {
-  id: string;
-  repoName: string;
-}
-
 function DashboardFilters({
   onChange,
 }: {
@@ -31,12 +26,11 @@ function DashboardFilters({
 }) {
   const [organizations, setOrganizations] = useState<
     {
-      id: string;
       login: string;
       isUser: boolean;
     }[]
   >([]);
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [repositories, setRepositories] = useState<string[]>([]);
   const [isLoadingRepos, setIsLoadingRepos] = useState(false);
   const [filters, setFilters] = useState<Filters>({});
 
@@ -67,16 +61,12 @@ function DashboardFilters({
       setIsLoadingRepos(true);
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
-        .get(
-          org?.isUser
-            ? "/api/github/repos"
-            : `/api/github/orgs/${filters.organization}/repos`
-        )
+        .get(`/api/orgs/${org?.isUser ? "user" : filters.organization}/repos`)
         .then((res) => {
           setRepositories(res.data);
           setFilters({
             ...filters,
-            repositories: res.data.map((r: { repoName: string }) => r.repoName),
+            repositories: res.data,
           });
           setIsLoadingRepos(false);
         });
@@ -85,7 +75,7 @@ function DashboardFilters({
 
   useEffect(() => {
     getInstance()
-      .get("/api/github/orgs")
+      .get("/api/orgs")
       .then((res) => setOrganizations(res.data));
   }, []);
 
@@ -120,8 +110,8 @@ function DashboardFilters({
             <Dropdown
               label={"Repositories"}
               items={repositories.map((r) => ({
-                label: r.repoName,
-                value: r.repoName,
+                label: r,
+                value: r,
               }))}
               value={filters.repositories}
               onChange={(v: DropdownValue) => {

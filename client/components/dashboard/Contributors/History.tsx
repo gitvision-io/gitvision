@@ -1,41 +1,8 @@
 import { useMemo } from "react";
 import dayjs from "dayjs";
-import { ResponsiveBump } from "@nivo/bump";
 import { RepositoryStatistics } from "../../../common/types";
-
-const getFirstDateInterval = (
-  time: string
-): { firstDate: Date; interval: "hour" | "day" | "week" | "month" } => {
-  const date = new Date();
-  let interval: "hour" | "day" | "week" | "month" = "day";
-  switch (time) {
-    case "last day":
-      date.setHours(date.getHours() - 24);
-      interval = "hour";
-      break;
-
-    case "last week":
-      date.setHours(date.getHours() - 168);
-      interval = "day";
-      break;
-
-    case "last month":
-      date.setMonth(date.getMonth() - 1);
-      interval = "week";
-      break;
-
-    case "last 3 months":
-      date.setMonth(date.getMonth() - 3);
-      interval = "week";
-      break;
-
-    case "last 6 months":
-      date.setMonth(date.getMonth() - 6);
-      interval = "month";
-      break;
-  }
-  return { firstDate: date, interval };
-};
+import { getFirstDateInterval } from "../../../common/utils";
+import Bump from "../../common/Charts/Bump";
 
 function groupBy<T extends Record<string, any>>(
   data: T[],
@@ -57,7 +24,6 @@ const ContributorsHistory = ({
 }) => {
   const commits = repositories.flatMap((r) => r.commits);
   const { firstDate, interval } = getFirstDateInterval(filters.time);
-  console.log({ firstDate, interval });
 
   const commitsByDay = useMemo(() => {
     let results: { id: string; data: { x: string; y: number }[] }[] = [];
@@ -73,13 +39,17 @@ const ContributorsHistory = ({
           });
           const allAuthorsCommits = groupBy(allCommitsDate, "author");
           const sorted = Object.entries(allAuthorsCommits)
-            .map(([a, commits]) => ({ author: a, nbCommits: commits.length }))
-            .sort((a, b) => {
-              if (a.nbCommits > b.nbCommits) {
-                return -1;
-              }
-              return 1;
-            });
+            .map(([a, commits]) => ({
+              author: a,
+              nbCommits: commits.length,
+              numberOfLineAdded: commits.reduce(
+                (acc, cur) => acc + cur.numberOfLineAdded,
+                0
+              ),
+            }))
+            .sort((a, b) =>
+              a.numberOfLineAdded > b.numberOfLineAdded ? -1 : 1
+            );
 
           const authorIndex = sorted.findIndex((s) => s.author === author);
           data.push({
@@ -88,6 +58,10 @@ const ContributorsHistory = ({
               authorIndex > -1
                 ? authorIndex + 1
                 : Object.keys(authorCommits).length,
+            nbLinesAdded: (allAuthorsCommits[author] || []).reduce(
+              (acc, cur) => acc + cur.numberOfLineAdded,
+              0
+            ),
           });
           currentDate = currentDate.add(1, interval);
         }
@@ -100,49 +74,35 @@ const ContributorsHistory = ({
     return results;
   }, [firstDate, interval, commits]);
 
-  console.log(commitsByDay);
   return (
-    <div className="overflow-x-auto relative shadow-md sm:rounded-lg h-96">
-      <ResponsiveBump
+    <div
+      className="overflow-x-auto relative shadow-md sm:rounded-lg my-4 py-8"
+      style={{ height: "500px" }}
+    >
+      <Bump
         data={commitsByDay}
-        colors={{ scheme: "spectral" }}
-        lineWidth={3}
-        activeLineWidth={6}
-        inactiveLineWidth={3}
-        inactiveOpacity={0.15}
-        pointSize={10}
-        activePointSize={16}
-        inactivePointSize={0}
-        pointColor={{ theme: "background" }}
-        pointBorderWidth={3}
-        activePointBorderWidth={3}
-        pointBorderColor={{ from: "serie.color" }}
-        axisTop={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: "",
-          legendPosition: "middle",
-          legendOffset: -36,
-        }}
-        axisBottom={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: "",
-          legendPosition: "middle",
-          legendOffset: 32,
-        }}
-        axisLeft={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: "ranking",
-          legendPosition: "middle",
-          legendOffset: -40,
-        }}
-        margin={{ top: 40, right: 100, bottom: 40, left: 60 }}
-        axisRight={null}
+        tooltip={(data) => (
+          <div className="p-2 bg-blue-50 rounded border border-blue-500">
+            Started at{" "}
+            {
+              (data.serie.data.data[0] as unknown as { nbLinesAdded: number })
+                .nbLinesAdded
+            }{" "}
+            lines added
+            <br />
+            Ended at{" "}
+            {
+              (
+                data.serie.data.data[
+                  data.serie.data.data.length - 1
+                ] as unknown as {
+                  nbLinesAdded: number;
+                }
+              ).nbLinesAdded
+            }{" "}
+            lines added
+          </div>
+        )}
       />
     </div>
   );

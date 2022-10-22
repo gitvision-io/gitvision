@@ -15,7 +15,7 @@ query GetAllIssuesOfAllRepoOfUserWithPagination(
           id
           name
           isInOrganization
-          issues(first: 100, states: [OPEN], after: $cursorIssue) {
+          issues(first: 100, after: $cursorIssue) {
             pageInfo {
               hasNextPage
               endCursor

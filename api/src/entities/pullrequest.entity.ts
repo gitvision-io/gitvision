@@ -10,7 +10,7 @@ export class PullRequest {
   repoId: string;
 
   @Column({ type: 'datetime', nullable: true })
-  createdAt: string;
+  createdAt: Date;
 
   @Column({
     type: 'datetime',

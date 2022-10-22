@@ -122,7 +122,7 @@ export class GithubService {
         .map((r: Record<string, any>) => {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
-          repo.repoName = r.node.name;
+          repo.name = r.node.name;
           repositories.push(repo);
         });
     } while (
@@ -155,7 +155,7 @@ export class GithubService {
         (r: Record<string, any>) => {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
-          repo.repoName = r.node.name;
+          repo.name = r.node.name;
           repo.organization = org;
 
           repositories.push(repo);

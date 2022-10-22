@@ -1,16 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Contributor, RepositoryStatistics } from "../common/types";
+import {
+  Contributor,
+  Issue,
+  KpiCategory,
+  PullRequest,
+  RepositoryStatistics,
+} from "../common/types";
+import ActiveRepositories from "../components/dashboard/ActiveRepositories/Index";
 import Contributors from "../components/dashboard/Contributors/Index";
 import DashboardFilters from "../components/dashboard/Filters";
+import Issues from "../components/dashboard/Issues/Index";
 import Kpis from "../components/dashboard/Kpis";
+import PullRequests from "../components/dashboard/PullRequests/Index";
 import { getInstance } from "../services/api";
 
 function Dashboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [repositories, setRepositories] = useState<RepositoryStatistics[]>([]);
-  const [openIssues, setOpenIssues] = useState(0);
-  const [pullRequests, setPullRequests] = useState(0);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [selectedKpi, setSelectedKpi] = useState<KpiCategory>(
+    KpiCategory.Contributors
+  );
 
   const onApplyFilters = (filters: Record<string, any>) => {
     if (filters.repositories) {
@@ -67,15 +79,9 @@ function Dashboard() {
     );
 
     setRepositories(resp.data);
-    setOpenIssues(
-      resp.data
-        .flatMap((r: Record<string, any>) => r.issues)
-        .filter((i: Record<string, any>) => i.state === "OPEN").length
-    );
+    setIssues(resp.data.flatMap((r: Record<string, any>) => r.issues));
     setPullRequests(
-      resp.data
-        .flatMap((r: Record<string, any>) => r.pullRequests)
-        .filter((p: Record<string, any>) => p.state === "OPEN").length
+      resp.data.flatMap((r: Record<string, any>) => r.pullRequests)
     );
     setContributors(
       groupByContributors(resp.data).sort(
@@ -97,17 +103,33 @@ function Dashboard() {
       />
 
       <Kpis
-        contributors={contributors}
+        contributors={contributors.length}
         activeRepositories={repositories.length}
-        pullRequests={pullRequests}
-        openIssues={openIssues}
+        pullRequests={pullRequests.length}
+        openIssues={issues.length}
+        onChangeSelected={(selected) => setSelectedKpi(selected)}
+        selected={selectedKpi}
       />
 
-      <Contributors
-        contributors={contributors}
-        repositories={repositories}
-        filters={filters}
-      />
+      {selectedKpi === KpiCategory.Contributors && (
+        <Contributors
+          contributors={contributors}
+          repositories={repositories}
+          filters={filters}
+        />
+      )}
+
+      {selectedKpi === KpiCategory.ActiveRepositories && (
+        <ActiveRepositories repositories={repositories} filters={filters} />
+      )}
+
+      {selectedKpi === KpiCategory.PullRequests && (
+        <PullRequests pullRequests={pullRequests} filters={filters} />
+      )}
+
+      {selectedKpi === KpiCategory.Issues && (
+        <Issues issues={issues} filters={filters} />
+      )}
     </>
   );
 }

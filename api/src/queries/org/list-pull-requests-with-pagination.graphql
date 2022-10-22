@@ -1,6 +1,6 @@
 query GetAllPullRequestsOfAllReposOfAllOrgWithPagination(
   $orgLogin: String!
-  $repoName: String!
+  $name: String!
   $cursorPullRequest: String
 ) {
   viewer {
@@ -8,10 +8,10 @@ query GetAllPullRequestsOfAllReposOfAllOrgWithPagination(
     organization(login: $orgLogin) {
       id
       login
-      repository(name: $repoName) {
+      repository(name: $name) {
         id
         name
-        pullRequests(first: 100, states: [OPEN], after: $cursorPullRequest) {
+        pullRequests(first: 100, after: $cursorPullRequest) {
           pageInfo {
             hasNextPage
             endCursor

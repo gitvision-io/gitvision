@@ -23,7 +23,7 @@ import {
   GetAllPullRequestsOfAllRepoOfUserWithPaginationQuery,
   GetAllPullRequestsOfAllRepoOfUserWithPagination,
 } from 'src/generated/graphql';
-import { In, MoreThanOrEqual, Repository } from 'typeorm';
+import { Equal, In, IsNull, Not, Repository } from 'typeorm';
 import { ApolloService } from '../apollo-client/apollo.service';
 import { PullRequest } from 'src/entities/pullrequest.entity';
 import { ApolloQueryResult } from '@apollo/client';
@@ -55,56 +55,43 @@ export class RepoService {
     this.apolloService = new ApolloService(token);
   }
 
-  findAll(): Promise<Repo[]> {
-    return this.repoRepository.find({
-      relations: {
-        commits: true,
-      },
-    });
+  async getAllOrganizations(userId: string): Promise<string[]> {
+    return (
+      await this.repoRepository
+        .createQueryBuilder('repo')
+        .innerJoin('repo.users', 'repoUsers', 'repoUsers.id = (:userId)', {
+          userId,
+        })
+        .where({ organization: Not(IsNull()) })
+        .select('organization')
+        .distinct()
+        .getRawMany()
+    ).map((r: { organization: string }) => r.organization);
   }
 
-  findIssuesByOrgByRepos(
+  async getRepositories(
     userId: string,
     organization: string | null,
-    repoNames: string[],
-  ): Promise<Repo[]> {
-    return this.repoRepository.find({
-      relations: {
-        issues: true,
-      },
-      where: {
-        repoName: In(Object.values(repoNames || {})),
-        organization,
-        users: {
-          id: userId,
-        },
-      },
-    });
-  }
-
-  findPullRequestsByOrgByRepos(
-    userId: string,
-    organization: string | null,
-    repoNames: string[],
-  ): Promise<Repo[]> {
-    return this.repoRepository.find({
-      relations: {
-        pullRequests: true,
-      },
-      where: {
-        repoName: In(Object.values(repoNames || {})),
-        organization,
-        users: {
-          id: userId,
-        },
-      },
-    });
+  ): Promise<string[]> {
+    return (
+      await this.repoRepository
+        .createQueryBuilder('repo')
+        .innerJoin('repo.users', 'repoUsers', 'repoUsers.id = (:userId)', {
+          userId,
+        })
+        .select('repo.name')
+        .where({
+          organization: organization === null ? IsNull() : Equal(organization),
+        })
+        .distinct()
+        .getRawMany()
+    ).map((r) => r.repo_name);
   }
 
   findByOrgByReposAndTime(
     userId: string,
     organization: string | null,
-    repoNames: string[],
+    names: string[],
     time: string,
   ): Promise<Repo[]> {
     const date = new Date();
@@ -129,21 +116,49 @@ export class RepoService {
         date.setMonth(date.getMonth() - 6);
         break;
     }
-    return this.repoRepository.find({
-      relations: {
-        commits: true,
-        issues: true,
-        pullRequests: true,
-      },
-      where: {
-        repoName: In(Object.values(repoNames || {})),
-        organization,
-        commits: { date: MoreThanOrEqual(date) },
-        users: {
-          id: userId,
+
+    return this.repoRepository
+      .createQueryBuilder('repo')
+      .innerJoinAndSelect('repo.commits', 'commits', 'commits.date >= :date', {
+        date,
+      })
+      .leftJoinAndSelect('repo.issues', 'issues', 'issues.createdAt >= :date', {
+        date,
+      })
+      .leftJoinAndSelect(
+        'repo.pullRequests',
+        'pullRequests',
+        'pullRequests.createdAt >= :date',
+        {
+          date,
         },
-      },
-    });
+      )
+      .innerJoinAndSelect('repo.users', 'users', 'users.id = :userId', {
+        userId,
+      })
+      .where({
+        name: In(Object.values(names || {})),
+        organization: organization === null ? IsNull() : organization,
+      })
+      .getMany();
+
+    // return this.repoRepository.find({
+    //   relations: {
+    //     commits: true,
+    //     issues: true,
+    //     pullRequests: true,
+    //   },
+    //   where: {
+    //     name: In(Object.values(names || {})),
+    //     organization,
+    //     commits: [{ id: IsNull() }, { date: MoreThanOrEqual(date) }],
+    //     pullRequests: [{ id: IsNull() }, { createdAt: MoreThanOrEqual(date) }],
+    //     issues: [{ id: IsNull() }, { createdAt: MoreThanOrEqual(date) }],
+    //     users: {
+    //       id: userId,
+    //     },
+    //   },
+    // });
   }
 
   async upsert(id: string, repo: Repo): Promise<void> {
@@ -220,7 +235,7 @@ export class RepoService {
             (r: Record<string, any>) => {
               const repo: Repo = new Repo();
               repo.id = r.node.id;
-              repo.repoName = r.node.name;
+              repo.name = r.node.name;
               repo.organization = o.login;
 
               repositories.push(repo);
@@ -258,7 +273,7 @@ export class RepoService {
         .map((r: Record<string, any>) => {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
-          repo.repoName = r.node.name;
+          repo.name = r.node.name;
           repositories.push(repo);
         });
     } while (
@@ -280,7 +295,7 @@ export class RepoService {
             query: GetAllCommitsOfAllReposOfAllOrgWithPagination,
             variables: {
               orgLogin: r.organization,
-              repoName: r.repoName,
+              name: r.name,
               date,
             },
           });
@@ -337,7 +352,7 @@ export class RepoService {
         .map((r) => {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
-          repo.repoName = r.node.name;
+          repo.name = r.node.name;
 
           if (r.node.defaultBranchRef?.target.__typename === 'Commit') {
             const commits: Commit[] =
@@ -382,7 +397,7 @@ export class RepoService {
               query: GetAllIssuesOfAllReposOfAllOrgWithPagination,
               variables: {
                 orgLogin: r.organization,
-                repoName: r.repoName,
+                name: r.name,
                 cursorIssue: issueEndCursor,
               },
             });
@@ -439,7 +454,7 @@ export class RepoService {
         .map((r) => {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
-          repo.repoName = r.node.name;
+          repo.name = r.node.name;
           let issuesList: Issue[] = [];
 
           do {
@@ -481,7 +496,7 @@ export class RepoService {
               query: GetAllPullRequestsOfAllReposOfAllOrgWithPagination,
               variables: {
                 orgLogin: r.organization,
-                repoName: r.repoName,
+                name: r.name,
                 cursorPullRequest: pullRequestEndCursor,
               },
             });
@@ -539,7 +554,7 @@ export class RepoService {
         .map((r) => {
           const repo: Repo = new Repo();
           repo.id = r.node.id;
-          repo.repoName = r.node.name;
+          repo.name = r.node.name;
           let pullRequestsList: PullRequest[] = [];
 
           do {
@@ -568,5 +583,3 @@ export class RepoService {
     );
   }
 }
-
-//ref(qualifiedName: "master")

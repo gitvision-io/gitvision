@@ -15,7 +15,7 @@ query GetAllPullRequestsOfAllRepoOfUserWithPagination(
           id
           name
           isInOrganization
-          pullRequests(first: 100, states: [OPEN], after: $cursorPullRequest) {
+          pullRequests(first: 100, after: $cursorPullRequest) {
             pageInfo {
               hasNextPage
               endCursor
