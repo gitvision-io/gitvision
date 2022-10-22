@@ -22,16 +22,31 @@ export interface Commit {
 export interface PullRequest {
   id: string;
   repoId: string;
+  createdAt: string;
+  closedAt?: string;
+  state: string;
+}
+
+export interface Issue {
+  id: string;
+  repoId: string;
   createdAt: Date;
-  closedAt?: any;
+  closedAt?: string;
   state: string;
 }
 
 export interface RepositoryStatistics {
   id: string;
-  repoName: string;
+  name: string;
   organization: string;
   commits: Commit[];
   issues: any[];
   pullRequests: PullRequest[];
+}
+
+export enum KpiCategory {
+  Contributors = "contributors",
+  ActiveRepositories = "activeRepositories",
+  PullRequests = "pullRequest",
+  Issues = "issues",
 }

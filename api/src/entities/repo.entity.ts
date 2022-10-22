@@ -13,7 +13,7 @@ export class Repo {
     type: String,
     nullable: true,
   })
-  repoName: string;
+  name: string;
 
   @Column({
     type: String,

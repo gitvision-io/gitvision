@@ -38616,13 +38616,13 @@ export type DirectiveResolvers<ContextType = any> = {
 
 
 export const GetAllCommitsOfAllReposOfAllOrgWithPagination = gql`
-    query GetAllCommitsOfAllReposOfAllOrgWithPagination($orgLogin: String!, $repoName: String!, $date: GitTimestamp) {
+    query GetAllCommitsOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $date: GitTimestamp) {
   viewer {
     login
     organization(login: $orgLogin) {
       id
       login
-      repository(name: $repoName) {
+      repository(name: $name) {
         id
         name
         defaultBranchRef {
@@ -38655,16 +38655,16 @@ export const GetAllCommitsOfAllReposOfAllOrgWithPagination = gql`
 }
     `;
 export const GetAllIssuesOfAllReposOfAllOrgWithPagination = gql`
-    query GetAllIssuesOfAllReposOfAllOrgWithPagination($orgLogin: String!, $repoName: String!, $cursorIssue: String) {
+    query GetAllIssuesOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $cursorIssue: String) {
   viewer {
     login
     organization(login: $orgLogin) {
       id
       login
-      repository(name: $repoName) {
+      repository(name: $name) {
         id
         name
-        issues(first: 100, states: [OPEN], after: $cursorIssue) {
+        issues(first: 100, after: $cursorIssue) {
           pageInfo {
             hasNextPage
             endCursor
@@ -38706,16 +38706,16 @@ export const GetAllOrgsWithPagination = gql`
 }
     `;
 export const GetAllPullRequestsOfAllReposOfAllOrgWithPagination = gql`
-    query GetAllPullRequestsOfAllReposOfAllOrgWithPagination($orgLogin: String!, $repoName: String!, $cursorPullRequest: String) {
+    query GetAllPullRequestsOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $cursorPullRequest: String) {
   viewer {
     login
     organization(login: $orgLogin) {
       id
       login
-      repository(name: $repoName) {
+      repository(name: $name) {
         id
         name
-        pullRequests(first: 100, states: [OPEN], after: $cursorPullRequest) {
+        pullRequests(first: 100, after: $cursorPullRequest) {
           pageInfo {
             hasNextPage
             endCursor
@@ -38817,7 +38817,7 @@ export const GetAllIssuesOfAllRepoOfUserWithPagination = gql`
           id
           name
           isInOrganization
-          issues(first: 100, states: [OPEN], after: $cursorIssue) {
+          issues(first: 100, after: $cursorIssue) {
             pageInfo {
               hasNextPage
               endCursor
@@ -38853,7 +38853,7 @@ export const GetAllPullRequestsOfAllRepoOfUserWithPagination = gql`
           id
           name
           isInOrganization
-          pullRequests(first: 100, states: [OPEN], after: $cursorPullRequest) {
+          pullRequests(first: 100, after: $cursorPullRequest) {
             pageInfo {
               hasNextPage
               endCursor
@@ -38897,7 +38897,7 @@ export const GetAllReposOfUserWithPagination = gql`
     `;
 export type GetAllCommitsOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
   orgLogin: Scalars['String'];
-  repoName: Scalars['String'];
+  name: Scalars['String'];
   date?: InputMaybe<Scalars['GitTimestamp']>;
 }>;
 
@@ -38906,7 +38906,7 @@ export type GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery = { __typename?: 
 
 export type GetAllIssuesOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
   orgLogin: Scalars['String'];
-  repoName: Scalars['String'];
+  name: Scalars['String'];
   cursorIssue?: InputMaybe<Scalars['String']>;
 }>;
 
@@ -38922,7 +38922,7 @@ export type GetAllOrgsWithPaginationQuery = { __typename?: 'Query', viewer: { __
 
 export type GetAllPullRequestsOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
   orgLogin: Scalars['String'];
-  repoName: Scalars['String'];
+  name: Scalars['String'];
   cursorPullRequest?: InputMaybe<Scalars['String']>;
 }>;
 

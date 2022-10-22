@@ -5,13 +5,8 @@ import { USER } from '../users/users.decorator';
 import { RepoService } from './repo.service';
 
 @Controller('/api/orgstats')
-export class RepoController {
+export class OrgstatsController {
   constructor(private readonly repoService: RepoService) {}
-
-  @Get('/')
-  async getAllRepoStat(): Promise<Repo[]> {
-    return await this.repoService.findAll();
-  }
 
   @Get(':org')
   async getRepoStat(

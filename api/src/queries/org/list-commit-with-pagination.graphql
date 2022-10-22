@@ -1,6 +1,6 @@
 query GetAllCommitsOfAllReposOfAllOrgWithPagination(
   $orgLogin: String!
-  $repoName: String!
+  $name: String!
   $date: GitTimestamp
 ) {
   viewer {
@@ -8,7 +8,7 @@ query GetAllCommitsOfAllReposOfAllOrgWithPagination(
     organization(login: $orgLogin) {
       id
       login
-      repository(name: $repoName) {
+      repository(name: $name) {
         id
         name
         defaultBranchRef {

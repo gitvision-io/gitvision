@@ -4,10 +4,11 @@ import { Issue } from 'src/entities/issue.entity';
 import { Repo } from 'src/entities/repo.entity';
 import { Commit } from 'src/entities/commit.entity';
 import { GithubModule } from '../github/github.module';
-import { RepoController } from './repo.controller';
 import { RepoService } from './repo.service';
 import { User } from 'src/entities/user.entity';
 import { PullRequest } from 'src/entities/pullrequest.entity';
+import { OrgsController } from './orgs.controller';
+import { OrgstatsController } from './orgstats.controller';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { PullRequest } from 'src/entities/pullrequest.entity';
   ],
   exports: [RepoService],
   providers: [RepoService],
-  controllers: [RepoController],
+  controllers: [OrgsController, OrgstatsController],
 })
 export class RepoModule {}

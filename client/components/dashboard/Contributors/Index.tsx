@@ -14,11 +14,11 @@ const Contributors = ({
 }) => {
   const tabs = [
     {
-      label: "Hall of fame",
+      label: "Ranking",
       component: <ContributorsTable contributors={contributors} />,
     },
     {
-      label: "History",
+      label: "Ranking history",
       component: (
         <ContributorsHistory repositories={repositories} filters={filters} />
       ),
