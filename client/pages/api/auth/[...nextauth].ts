@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
     sessionToken: {
       name: SESSION_COOKIE_NAME,
       options: {
-        domain: parsedURL.hostname.split(".").slice(-2).join("."),
+        domain: process.env.SESSION_COOKIE_DOMAIN || parsedURL.hostname,
         httpOnly: true,
         sameSite: "lax",
         path: "/",
