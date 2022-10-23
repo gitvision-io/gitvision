@@ -5,6 +5,7 @@ import { JWT, JWTDecodeParams, JWTEncodeParams } from "next-auth/jwt";
 import { getInstance, setToken } from "../../../services/api";
 import { SESSION_COOKIE_NAME } from "../../../common/constants";
 
+const parsedURL = new URL(process.env.NEXTAUTH_URL || "http://localhost:3000");
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
   providers: [
@@ -63,11 +64,11 @@ export const authOptions: NextAuthOptions = {
     sessionToken: {
       name: SESSION_COOKIE_NAME,
       options: {
-        domain: "localhost",
+        domain: parsedURL.hostname.split(".").slice(-2).join("."),
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: false,
+        secure: process.env.NEXTAUTH_URL?.startsWith("https://"),
       },
     },
   },

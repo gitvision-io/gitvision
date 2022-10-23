@@ -1,3 +1,10 @@
+export interface User {
+  id: string;
+  githubId: string;
+  email: string;
+  name: string;
+  lastSynchronize?: string;
+}
 export interface Contributor {
   author: string;
   numberOfCommits: number;

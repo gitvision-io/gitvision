@@ -2,17 +2,11 @@ import { GetServerSidePropsContext } from "next";
 import React, { FormEvent } from "react";
 import { useState } from "react";
 import { SESSION_COOKIE_NAME } from "../common/constants";
+import { User } from "../common/types";
 import Alert from "../components/common/Alert";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import { getInstance, setToken } from "../services/api";
-
-interface User {
-  id: string;
-  githubId: string;
-  email: string;
-  name: string;
-}
 
 const Profile = ({ user }: { user: User }) => {
   const [userState, setUserState] = useState(user);

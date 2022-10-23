@@ -124,11 +124,15 @@ function Dashboard() {
       )}
 
       {selectedKpi === KpiCategory.PullRequests && (
-        <PullRequests pullRequests={pullRequests} filters={filters} />
+        <PullRequests
+          pullRequests={pullRequests}
+          repositories={repositories}
+          filters={filters}
+        />
       )}
 
       {selectedKpi === KpiCategory.Issues && (
-        <Issues issues={issues} filters={filters} />
+        <Issues issues={issues} repositories={repositories} filters={filters} />
       )}
     </>
   );

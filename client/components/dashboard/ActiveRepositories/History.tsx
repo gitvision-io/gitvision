@@ -47,7 +47,7 @@ const ActiveRepositoriesHistory = ({
 
   return (
     <div
-      className="overflow-x-auto relative shadow-md sm:rounded-lg my-4 py-8"
+      className="overflow-x-auto relative shadow-md sm:rounded-lg py-8"
       style={{ height: "500px" }}
     >
       <LineChart data={activeReposByDate} />

@@ -1,6 +1,7 @@
 import { Contributor, RepositoryStatistics } from "../../../common/types";
 import Tabs from "../../common/Tabs";
 import ContributorsHistory from "./History";
+import ContributorsRankingHistory from "./RankingHistory";
 import ContributorsTable from "./Table";
 
 const Contributors = ({
@@ -20,7 +21,19 @@ const Contributors = ({
     {
       label: "Ranking history",
       component: (
-        <ContributorsHistory repositories={repositories} filters={filters} />
+        <ContributorsRankingHistory
+          repositories={repositories}
+          filters={filters}
+        />
+      ),
+    },
+    {
+      label: "History",
+      component: (
+        <ContributorsHistory
+          repositories={repositories}
+          filters={filters}
+        />
       ),
     },
   ];
