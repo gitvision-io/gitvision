@@ -4,13 +4,12 @@ services:
     build:
       context: api
       dockerfile: ../Dockerfile
+    image: ghcr.io/guillaumejacquart/git-dashboard_api:latest
     ports:
       - "3001:3001"
     environment:
       - REDIS_PORT=6379
       - REDIS_HOST=redis
-      - GITHUB_ID=f1487f8457bfdbb2a147
-      - GITHUB_SECRET=2052c20bb99679602aa16f526e13f827353adfcf
     depends_on:
       - redis
 
@@ -18,9 +17,8 @@ services:
     build:
       context: client
       dockerfile: ../Dockerfile
+    image: ghcr.io/guillaumejacquart/git-dashboard_client:latest
     environment:
-      GITHUB_ID: f1487f8457bfdbb2a147
-      GITHUB_SECRET: 2052c20bb99679602aa16f526e13f827353adfcf
       SERVER_API_URL: http://api:3001
     ports:
       - "3000:3000"
@@ -31,6 +29,7 @@ services:
     build:
       context: queue-admin
       dockerfile: ../Dockerfile
+    image: ghcr.io/guillaumejacquart/git-dashboard_queue_admin:latest
     environment:
       - REDIS_PORT=6379
       - REDIS_HOST=redis
