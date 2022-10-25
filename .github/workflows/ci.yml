@@ -16,7 +16,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ GITHUB.REPOSITORY_OWNER }}
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build Compose Images
