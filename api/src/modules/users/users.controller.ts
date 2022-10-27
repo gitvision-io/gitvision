@@ -59,10 +59,11 @@ export class UsersController {
     @USER() user: User,
     @Req() request: Request,
   ): Promise<{ status: string }> {
-    await this.githubService.revokeAccess(user.githubToken);
+    await this.githubService.revokeAccess(user.gitProviderToken);
     await this.usersService.update(request['token'].sub, {
-      githubId: null,
-      githubToken: null,
+      gitProviderId: null,
+      gitProviderToken: null,
+      gitProviderName: null,
     });
     return { status: 'ok' };
   }

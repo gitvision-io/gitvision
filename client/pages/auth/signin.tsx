@@ -26,12 +26,16 @@ export default function Signin({
                 <div className="flex gap-4 item-center" key={provider.id}>
                   <button
                     type="button"
-                    className="py-2 px-4 flex justify-center items-center  bg-gray-600 hover:bg-gray-800 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                    className={`my-2 py-2 px-4 flex justify-center items-center  ${
+                      provider.name == "GitHub"
+                        ? "bg-gray-600 hover:bg-gray-800"
+                        : "bg-orange-600 hover:bg-orange-800"
+                    } focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg`}
                     onClick={() =>
                       signIn(provider.id, { callbackUrl: "/dashboard" })
                     }
                   >
-                    Github
+                    {provider.name}
                   </button>
                 </div>
               ))}
