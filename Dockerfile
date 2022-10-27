@@ -12,4 +12,4 @@ RUN ls -a | grep env
 
 RUN npm run build
 
-CMD [ "npm", "run", "start:prod" ]
+CMD [ "npm", "run", "prod" ]
