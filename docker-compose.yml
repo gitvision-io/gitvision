@@ -3,7 +3,6 @@ services:
   api:
     build:
       context: api
-      dockerfile: ../Dockerfile
     image: ghcr.io/gitvision-io/git-dashboard_api:latest
     ports:
       - "3001:3001"
@@ -16,7 +15,6 @@ services:
   client:
     build:
       context: client
-      dockerfile: ../Dockerfile
     image: ghcr.io/gitvision-io/git-dashboard_client:latest
     environment:
       SERVER_API_URL: http://api:3001
@@ -28,7 +26,6 @@ services:
   queue_admin:
     build:
       context: queue-admin
-      dockerfile: ../Dockerfile
     image: ghcr.io/gitvision-io/git-dashboard_queue_admin:latest
     environment:
       - REDIS_PORT=6379
