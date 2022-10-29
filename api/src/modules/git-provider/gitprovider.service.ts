@@ -4,8 +4,8 @@ import { GithubService } from '../github/github.service';
 import { GitlabService } from '../gitlab/gitlab.service';
 
 export interface IGitProvider {
-  getAllOrganizations(): Promise<{ id: number; login: string }[]>;
   auth(token: string): void;
+  getAllOrganizations(): Promise<{ id: number; login: string }[]>;
   getProfile(): Promise<{ id: number; login: string }>;
   getRepositories(): Promise<Repo[]>;
   getOrgRepositories(org: string): Promise<Repo[]>;

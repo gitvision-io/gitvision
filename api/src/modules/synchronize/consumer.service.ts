@@ -14,7 +14,7 @@ export class ConsumerService {
   @Process()
   async transcode(job: Job<SynchronizeJob>): Promise<void> {
     const user = await this.usersService.findOne(job.data.userId);
-    this.synchronizeService.auth(user.gitProviderToken);
+    this.synchronizeService.auth(user.gitProviderName, user.gitProviderToken);
 
     const now = new Date();
     const synchronizationDate = new Date(job.data.fromDate);

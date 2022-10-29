@@ -34,7 +34,7 @@ export class AuthMiddleware implements NestMiddleware {
 
     if (user) {
       this.gitProviderService.auth(user.gitProviderName, user.gitProviderToken);
-      this.repoService.auth(user.gitProviderToken);
+      this.repoService.auth(user.gitProviderName, user.gitProviderToken);
     }
     next();
   }
