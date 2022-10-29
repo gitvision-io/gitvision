@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { User } from '@octokit/graphql-schema';
-import { GithubService } from '../github/github.service';
+import { User } from 'src/entities/user.entity';
+import { GitProviderService } from '../git-provider/gitprovider.service';
 import { USER } from '../users/users.decorator';
 import { RepoService } from './repo.service';
 
@@ -8,7 +8,7 @@ import { RepoService } from './repo.service';
 export class OrgsController {
   constructor(
     private readonly repoService: RepoService,
-    private readonly githubService: GithubService,
+    private readonly gitProviderService: GitProviderService,
   ) {}
 
   @Get('')
@@ -16,7 +16,8 @@ export class OrgsController {
     @USER() user: User,
   ): Promise<{ login: string; isUser: boolean }[]> {
     const orgs = await this.repoService.getAllOrganizations(user.id);
-    const profile = await this.githubService.getProfile();
+    const profile = await this.gitProviderService.getProfile();
+
     return [
       { ...profile, isUser: true },
       ...orgs.map((o) => ({ login: o, isUser: false })),
