@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repo } from 'src/entities/repo.entity';
 import { GithubService } from '../github/github.service';
 import { GitlabService } from '../gitlab/gitlab.service';
+import { HttpService } from '@nestjs/axios';
 
 export interface IGitProvider {
   auth(token: string): void;
@@ -16,13 +17,14 @@ export interface IGitProvider {
 export class GitProviderService {
   #gitProvider: IGitProvider;
   #token: string;
+  constructor(private readonly httpService: HttpService) {}
 
   auth(providerName: string, token: string): void {
     this.#token = token;
     if (providerName === 'github') {
       this.#gitProvider = new GithubService();
     } else if (providerName === 'gitlab') {
-      this.#gitProvider = new GitlabService();
+      this.#gitProvider = new GitlabService(this.httpService);
     }
     this.#gitProvider.auth(token);
   }

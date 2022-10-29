@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Octokit } from '@octokit/rest';
-import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 import { ApolloService } from '../apollo-client/apollo.service';
 import {
   GetAllReposOfOrgWithPaginationQuery,
@@ -9,6 +7,7 @@ import {
 import { ApolloQueryResult } from '@apollo/client';
 import { Repo } from 'src/entities/repo.entity';
 import { Gitlab } from '@gitbeaker/node';
+import { HttpService } from '@nestjs/axios';
 
 export type GithubIssue = {
   id: number;
@@ -28,6 +27,8 @@ export class GitlabService {
   apolloService: ApolloService;
   #token: string;
   #api: typeof defaultAPI;
+
+  constructor(private readonly httpService: HttpService) {}
 
   auth(token: string): void {
     this.#token = token;
@@ -96,7 +97,7 @@ export class GitlabService {
   }
 
   async revokeAccess(token: string): Promise<void> {
-    const appOctokit = new Octokit({
+    /* const appOctokit = new Octokit({
       authStrategy: createOAuthAppAuth,
       auth: {
         clientId: process.env.GITHUB_ID,
@@ -107,6 +108,11 @@ export class GitlabService {
     await appOctokit.rest.apps.deleteAuthorization({
       client_id: process.env.GITHUB_ID,
       access_token: token,
+    }); */
+    await this.httpService.post('https://gitlab.com/oauth/revoke', {
+      client_id: process.env.GITLAB_ID,
+      client_secret: process.env.GITLAB_SECRET,
+      token,
     });
   }
 }

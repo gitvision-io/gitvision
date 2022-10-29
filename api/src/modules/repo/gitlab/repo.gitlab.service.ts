@@ -42,7 +42,7 @@ export class RepoGitlabService {
   // Get all organisations
   async getAllOrgWithPagination(): Promise<Organization[]> {
     const organizations: Organization[] = [];
-    this.#api.Groups.all({ maxPages: 50000 });
+    console.log(this.#api.Groups.all({ maxPages: 50000 }));
     return organizations;
   }
 
