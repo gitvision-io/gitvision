@@ -33,8 +33,8 @@ export class GitlabService {
   auth(token: string): void {
     this.#token = token;
     this.#api = new Gitlab({
-      host: 'https://gitlab.com/api/v4',
-      token,
+      host: 'https://gitlab.com',
+      oauthToken: token,
     });
   }
 
@@ -42,20 +42,19 @@ export class GitlabService {
     return this.#token;
   }
 
-  async getAllOrganizations(): Promise<{ id: number; login: string }[]> {
-    //return await this.#api.Groups.all({ maxPages: 50000 });
-    return [{ id: 1, login: 'hi' }];
+  async getAllOrganizations(): Promise<string[]> {
+    const orgs = await this.#api.Groups.all({ maxPages: 50000 });
+    return orgs.flatMap((o) => o.name);
   }
 
   async getProfile(): Promise<{ id: number; login: string }> {
-    console.log(await this.#api.Users.current());
     const { id, username: login } = await this.#api.Users.current();
     return { id, login };
   }
 
   async getRepositories(): Promise<Repo[]> {
     const repositories: Repo[] = [];
-    console.log(await this.#api.Repositories);
+    //console.log(await this.#api.Repositories);
     return repositories;
   }
 
@@ -97,19 +96,7 @@ export class GitlabService {
   }
 
   async revokeAccess(token: string): Promise<void> {
-    /* const appOctokit = new Octokit({
-      authStrategy: createOAuthAppAuth,
-      auth: {
-        clientId: process.env.GITHUB_ID,
-        clientSecret: process.env.GITHUB_SECRET,
-      },
-    });
-
-    await appOctokit.rest.apps.deleteAuthorization({
-      client_id: process.env.GITHUB_ID,
-      access_token: token,
-    }); */
-    await this.httpService.post('https://gitlab.com/oauth/revoke', {
+    this.httpService.post('https://gitlab.com/oauth/revoke', {
       client_id: process.env.GITLAB_ID,
       client_secret: process.env.GITLAB_SECRET,
       token,

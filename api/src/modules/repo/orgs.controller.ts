@@ -12,10 +12,8 @@ export class OrgsController {
   ) {}
 
   @Get('')
-  async getOrgs(
-    @USER() user: User,
-  ): Promise<{ login: string; isUser: boolean }[]> {
-    const orgs = await this.repoService.getAllOrganizations(user.id);
+  async getOrgs(): Promise<{ login: string; isUser: boolean }[]> {
+    const orgs = await this.gitProviderService.getAllOrganizations();
     const profile = await this.gitProviderService.getProfile();
 
     return [

@@ -42,7 +42,7 @@ export class GithubService {
     return this.#token;
   }
 
-  async getAllOrganizations(): Promise<{ id: number; login: string }[]> {
+  async getAllOrganizations(): Promise<string[]> {
     const organizations: { id: number; login: string }[] = [];
     let orgEndCursor: string = null;
     let graphQLResultWithPagination: ApolloQueryResult<GetAllOrgsWithPaginationQuery>;
@@ -73,7 +73,7 @@ export class GithubService {
       graphQLResultWithPagination.data.viewer.organizations.pageInfo.hasNextPage
     );
 
-    return organizations;
+    return organizations.flatMap((o) => o.login);
   }
 
   async getProfile(): Promise<{ id: number; login: string }> {

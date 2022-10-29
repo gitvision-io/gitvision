@@ -6,7 +6,7 @@ import { HttpService } from '@nestjs/axios';
 
 export interface IGitProvider {
   auth(token: string): void;
-  getAllOrganizations(): Promise<{ id: number; login: string }[]>;
+  getAllOrganizations(): Promise<string[]>;
   getProfile(): Promise<{ id: number; login: string }>;
   getRepositories(): Promise<Repo[]>;
   getOrgRepositories(org: string): Promise<Repo[]>;
@@ -33,7 +33,7 @@ export class GitProviderService {
     return this.#token;
   }
 
-  async getAllOrganizations(): Promise<{ id: number; login: string }[]> {
+  async getAllOrganizations(): Promise<string[]> {
     return await this.#gitProvider.getAllOrganizations();
   }
 

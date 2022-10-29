@@ -24,8 +24,13 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     GitlabProvider({
-      clientId: process.env.GITLAB_CLIENT_ID!,
-      clientSecret: process.env.GITLAB_CLIENT_SECRET!,
+      clientId: process.env.GITLAB_ID!,
+      clientSecret: process.env.GITLAB_SECRET!,
+      authorization: {
+        params: {
+          scope: "read_user api read_repository write_repository",
+        },
+      },
       httpOptions: {
         timeout: 30000,
       },
