@@ -8,8 +8,6 @@ RUN npm install
 
 COPY . .
 
-RUN ls -a | grep env
-
 RUN npm run build
 
 CMD [ "npm", "run", "prod" ]
