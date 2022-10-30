@@ -1,5 +1,6 @@
 import { Menu, Transition } from "@headlessui/react";
 import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ForwardedRef, forwardRef, Fragment, useState } from "react";
@@ -72,29 +73,13 @@ export const Navbar = () => {
       <div className="relative flex items-center justify-between">
         <div className="flex items-center">
           <Link href="/">
-            <a
-              aria-label="Company"
-              title="Company"
-              className="inline-flex items-center mr-8"
-            >
-              <svg
-                className="w-8 text-deep-purple-accent-400"
-                viewBox="0 0 24 24"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeMiterlimit="10"
-                stroke="currentColor"
-                fill="none"
-              >
-                <rect x="3" y="1" width="7" height="12" />
-                <rect x="3" y="17" width="7" height="6" />
-                <rect x="14" y="1" width="7" height="6" />
-                <rect x="14" y="11" width="7" height="12" />
-              </svg>
-              <span className="ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase">
-                {SITE_INFOS.title}
-              </span>
+            <a className="mr-10 mt-1.5">
+              <Image
+                src="/logo.png"
+                alt={SITE_INFOS.title}
+                width={180}
+                height={62}
+              />
             </a>
           </Link>
           {status !== "loading" && (
