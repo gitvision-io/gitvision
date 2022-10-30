@@ -3,6 +3,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ForwardedRef, forwardRef, Fragment, useState } from "react";
+import { SITE_INFOS } from "../../common/constants";
 import { classNames } from "../../common/utils";
 import Button from "../common/Button";
 
@@ -42,20 +43,12 @@ export const Navbar = () => {
         ]
       : [
           {
-            label: "Product",
-            link: "/#product",
-          },
-          {
             label: "Features",
             link: "/#features",
           },
           {
             label: "Pricing",
             link: "/#pricing",
-          },
-          {
-            label: "About us",
-            link: "/#about-us",
           },
         ];
 
@@ -100,7 +93,7 @@ export const Navbar = () => {
                 <rect x="14" y="11" width="7" height="12" />
               </svg>
               <span className="ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase">
-                Git Dashboard
+                {SITE_INFOS.title}
               </span>
             </a>
           </Link>
