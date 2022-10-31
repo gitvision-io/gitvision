@@ -1,6 +1,7 @@
 export interface User {
   id: string;
-  githubId: string;
+  gitProviderId: string;
+  gitProviderName: string;
   email: string;
   name: string;
   lastSynchronize?: string;

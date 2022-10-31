@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Put, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { Repo } from 'src/entities/repo.entity';
 import { User } from 'src/entities/user.entity';
-import { GithubService } from '../github/github.service';
+import { GitProviderService } from '../git-provider/gitprovider.service';
 import { RepoService } from '../repo/repo.service';
 import { USER } from './users.decorator';
 import { UserDTO, UserProfileDTO } from './users.dto';
@@ -12,7 +12,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly githubService: GithubService,
+    private readonly gitProviderService: GitProviderService,
     private readonly repoService: RepoService,
   ) {}
 
@@ -48,15 +48,16 @@ export class UsersController {
     return { status: 'ok' };
   }
 
-  @Delete('me/github')
+  @Delete('me/gitProvider')
   async deleteGithubAccess(
     @USER() user: User,
     @Req() request: Request,
   ): Promise<{ status: string }> {
-    await this.githubService.revokeAccess(user.githubToken);
+    await this.gitProviderService.revokeAccess(user.gitProviderToken);
     await this.usersService.update(request['token'].sub, {
-      githubId: null,
-      githubToken: null,
+      gitProviderId: null,
+      gitProviderToken: null,
+      gitProviderName: null,
     });
     return { status: 'ok' };
   }

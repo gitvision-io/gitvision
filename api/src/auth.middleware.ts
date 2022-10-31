@@ -2,7 +2,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { verify } from 'jsonwebtoken';
 import { SESSION_COOKIE_NAME } from './common/constants';
-import { GithubService } from './modules/github/github.service';
+import { GitProviderService } from './modules/git-provider/gitprovider.service';
 import { RepoService } from './modules/repo/repo.service';
 import { UsersService } from './modules/users/users.service';
 
@@ -10,7 +10,7 @@ import { UsersService } from './modules/users/users.service';
 export class AuthMiddleware implements NestMiddleware {
   constructor(
     private readonly usersService: UsersService,
-    private readonly githubService: GithubService,
+    private readonly gitProviderService: GitProviderService,
     private readonly repoService: RepoService,
   ) {}
 
@@ -33,8 +33,8 @@ export class AuthMiddleware implements NestMiddleware {
     req['user'] = user;
 
     if (user) {
-      this.githubService.auth(user.githubToken);
-      this.repoService.auth(user.githubToken);
+      this.gitProviderService.auth(user.gitProviderName, user.gitProviderToken);
+      this.repoService.auth(user.gitProviderName, user.gitProviderToken);
     }
     next();
   }

@@ -2,8 +2,9 @@ export class UserDTO {
   email?: string;
   name?: string;
   avatarUrl?: string;
-  githubId?: string;
-  githubToken?: string;
+  gitProviderId?: string;
+  gitProviderToken?: string;
+  gitProviderName?: string;
   lastSynchronize?: Date;
 }
 

@@ -42,7 +42,7 @@ export class GithubService {
     return this.#token;
   }
 
-  async getAllOrganizations(): Promise<{ id: number; login: string }[]> {
+  async getAllOrganizations(): Promise<string[]> {
     const organizations: { id: number; login: string }[] = [];
     let orgEndCursor: string = null;
     let graphQLResultWithPagination: ApolloQueryResult<GetAllOrgsWithPaginationQuery>;
@@ -73,30 +73,11 @@ export class GithubService {
       graphQLResultWithPagination.data.viewer.organizations.pageInfo.hasNextPage
     );
 
-    return organizations;
+    return organizations.flatMap((o) => o.login);
   }
 
   async getProfile(): Promise<{ id: number; login: string }> {
     return (await this.#octokit.rest.users.getAuthenticated()).data;
-  }
-
-  async getOrgIssues(org: string, date: Date): Promise<GithubIssue[]> {
-    const res = await this.#octokit.paginate(
-      this.#octokit.search.issuesAndPullRequests,
-      {
-        q: `org:${org} created:>${date.toISOString().split('T')[0]}`,
-      },
-    );
-    return res.map((r) => ({ ...r, org }));
-  }
-
-  async getUserIssues(user: string, date: Date): Promise<GithubIssue[]> {
-    return await this.#octokit.paginate(
-      this.#octokit.search.issuesAndPullRequests,
-      {
-        q: `user:${user} created:>${date.toISOString().split('T')[0]}`,
-      },
-    );
   }
 
   async getRepositories(): Promise<Repo[]> {
