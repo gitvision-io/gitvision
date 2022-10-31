@@ -82,16 +82,6 @@ function DashboardFilters({
     loadOrganizations();
   }, []);
 
-  useEffect(() => {
-    getInstance()
-      .put("/api/users/me/repositories")
-      .then((res) => {
-        if (!organizations.length) {
-          loadOrganizations();
-        }
-      });
-  }, []);
-
   return (
     <>
       <div className="grid row-gap-8 sm:grid-cols-5 items-end">

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { getInstance } from "../../services/api";
-import { userState } from "../../services/state";
+import { asyncRefreshUser, userState } from "../../services/state";
 import Button from "../common/Button";
 
 function Synchronize() {
@@ -10,15 +10,8 @@ function Synchronize() {
   const [runningJob, setRunningJob] = useState<{ finishedOn: number } | null>(
     null
   );
-  const [user, setUser] = useAtom(userState);
-
-  const refreshUser = useCallback(() => {
-    getInstance()
-      .get("/api/users/me")
-      .then((res) => {
-        setUser(res.data);
-      });
-  }, [setUser]);
+  const [user] = useAtom(userState);
+  const [, refreshUser] = useAtom(asyncRefreshUser);
 
   const onClickSynchronize = useCallback(() => {
     const pollSynchronize = (jobId: string | number) => {
@@ -53,7 +46,9 @@ function Synchronize() {
     }
   }, [onClickSynchronize, user]);
 
-  useEffect(refreshUser, [refreshUser]);
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   return (
     <div className="flex items-center">
