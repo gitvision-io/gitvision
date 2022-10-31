@@ -1,4 +1,6 @@
+import { GetServerSidePropsContext } from "next";
 import React, { useState } from "react";
+import { SESSION_COOKIE_NAME } from "../common/constants";
 import {
   Contributor,
   Issue,
@@ -12,7 +14,7 @@ import DashboardFilters from "../components/dashboard/Filters";
 import Issues from "../components/dashboard/Issues/Index";
 import Kpis from "../components/dashboard/Kpis";
 import PullRequests from "../components/dashboard/PullRequests/Index";
-import { getInstance } from "../services/api";
+import { getInstance, setToken } from "../services/api";
 
 function Dashboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);

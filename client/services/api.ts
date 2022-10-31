@@ -24,9 +24,13 @@ const serverInstance = axios.create({
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response?.status === 401) {
+      if (
+        error.response?.status === 401 &&
+        location?.pathname !== "/auth/signin"
+      ) {
         if (typeof location !== "undefined") {
           location.href = "/auth/signin";
+          return;
         }
       }
       // Any status codes that falls outside the range of 2xx cause this function to trigger
