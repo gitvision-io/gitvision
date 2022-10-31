@@ -5,6 +5,7 @@ import { User } from 'src/entities/user.entity';
 import { RepoModule } from '../repo/repo.module';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
+import { QueueAdminController } from './admin.controller';
 import { ConsumerService } from './consumer.service';
 import { ProducerService } from './producer.service';
 import { SynchronizeController } from './synchronize.controller';
@@ -19,7 +20,7 @@ import { SynchronizeService } from './synchronize.service';
     UsersModule,
     RepoModule,
   ],
-  controllers: [SynchronizeController],
+  controllers: [SynchronizeController, QueueAdminController],
   exports: [ProducerService],
   providers: [
     ProducerService,
