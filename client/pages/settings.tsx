@@ -10,7 +10,7 @@ const Settings = () => {
   const revokeApplication = () => {
     setIsLoading(true);
     getInstance()
-      .delete("/api/users/me/github")
+      .delete("/api/users/me/gitProvider")
       .then(() => {
         setIsLoading(false);
         signOut({

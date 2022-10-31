@@ -5,8 +5,8 @@ import { RepoService } from '../repo/repo.service';
 export class SynchronizeService {
   constructor(private readonly repoService: RepoService) {}
 
-  auth(token: string): void {
-    this.repoService.auth(token);
+  auth(gitProviderName: string, token: string): void {
+    this.repoService.auth(gitProviderName, token);
   }
 
   async synchronize(date: Date) {

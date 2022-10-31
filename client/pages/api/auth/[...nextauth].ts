@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
+import GitlabProvider from "next-auth/providers/gitlab";
 import { sign, verify } from "jsonwebtoken";
 import { JWT, JWTDecodeParams, JWTEncodeParams } from "next-auth/jwt";
 import { getInstance, setToken } from "../../../services/api";
@@ -22,6 +23,18 @@ export const authOptions: NextAuthOptions = {
         timeout: 30000,
       },
     }),
+    GitlabProvider({
+      clientId: process.env.GITLAB_ID!,
+      clientSecret: process.env.GITLAB_SECRET!,
+      authorization: {
+        params: {
+          scope: "read_user api read_repository write_repository",
+        },
+      },
+      httpOptions: {
+        timeout: 30000,
+      },
+    }),
     // ...add more providers here
   ],
   callbacks: {
@@ -35,8 +48,9 @@ export const authOptions: NextAuthOptions = {
           avatarUrl: profile?.avatar_url,
           email: profile?.email,
           name: profile?.name,
-          githubToken: account.access_token,
-          githubId: profile?.id,
+          gitProviderToken: account.access_token,
+          gitProviderId: profile?.id,
+          gitProviderName: account.provider,
         });
       }
       return token;
@@ -64,7 +78,9 @@ export const authOptions: NextAuthOptions = {
     sessionToken: {
       name: SESSION_COOKIE_NAME,
       options: {
-        domain: process.env.SESSION_COOKIE_DOMAIN || parsedURL.hostname.split(".").slice(-2).join("."),
+        domain:
+          process.env.SESSION_COOKIE_DOMAIN ||
+          parsedURL.hostname.split(".").slice(-2).join("."),
         httpOnly: true,
         sameSite: "lax",
         path: "/",

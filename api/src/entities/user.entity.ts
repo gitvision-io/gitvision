@@ -34,13 +34,19 @@ export class User {
     type: String,
     nullable: true,
   })
-  githubId: string | null;
+  gitProviderId: string | null;
 
   @Column({
     type: String,
     nullable: true,
   })
-  githubToken: string | null;
+  gitProviderToken: string | null;
+
+  @Column({
+    type: String,
+    nullable: true,
+  })
+  gitProviderName: string | null;
 
   @Column({ default: true })
   isActive: boolean;
