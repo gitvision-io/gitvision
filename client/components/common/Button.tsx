@@ -12,6 +12,7 @@ interface ButtonProps {
   onClick?: React.MouseEventHandler<HTMLElement>;
   type?: "button" | "submit";
   isLoading?: boolean;
+  loadingText?: string;
   isDisabled?: boolean;
 }
 
@@ -39,10 +40,11 @@ const Button = ({
   className,
   onClick,
   isLoading,
+  loadingText,
   isDisabled,
   size,
 }: ButtonProps) => {
-  const computedChildren = isLoading ? <Loader /> : children;
+  const computedChildren = isLoading ? <Loader text={loadingText} /> : children;
 
   const computedClassName = `inline-flex items-center justify-center font-medium tracking-wide transition duration-200 rounded shadow-md focus:shadow-outline focus:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
   if (isLink) {
@@ -72,6 +74,7 @@ Button.defaultProps = {
   isLink: false,
   type: "button",
   isLoading: false,
+  loadingText: "Loading...",
   isDisabled: false,
 };
 

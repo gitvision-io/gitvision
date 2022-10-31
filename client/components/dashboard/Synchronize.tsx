@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { User } from "../../common/types";
+import React, { useCallback, useEffect, useState } from "react";
+import { useAtom } from "jotai";
 import { getInstance } from "../../services/api";
+import { userState } from "../../services/state";
 import Button from "../common/Button";
-
-let timer: number | undefined;
 
 function Synchronize() {
   const [isLoadingSynchronize, setIsLoadingSynchronize] = useState(false);
@@ -11,9 +10,31 @@ function Synchronize() {
   const [runningJob, setRunningJob] = useState<{ finishedOn: number } | null>(
     null
   );
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useAtom(userState);
 
-  const onClickSynchronize = () => {
+  const refreshUser = useCallback(() => {
+    getInstance()
+      .get("/api/users/me")
+      .then((res) => {
+        setUser(res.data);
+      });
+  }, [setUser]);
+
+  const onClickSynchronize = useCallback(() => {
+    const pollSynchronize = (jobId: string | number) => {
+      const timer = self.setInterval(() => {
+        getInstance()
+          .get(`/api/synchronize/jobs/${jobId}`)
+          .then((res) => {
+            setRunningJob(res.data);
+            if (res.data.finishedOn) {
+              self.clearInterval(timer);
+              refreshUser();
+            }
+          });
+      }, 2000);
+    };
+
     setIsLoadingSynchronize(true);
     setIsSynchronizedDisabled(true);
     getInstance()
@@ -24,29 +45,15 @@ function Synchronize() {
         setRunningJob(res.data);
         pollSynchronize(res.data.id);
       });
-  };
+  }, [refreshUser]);
 
-  const pollSynchronize = (jobId: string | number) => {
-    timer = self.setInterval(() => {
-      getInstance()
-        .get(`/api/synchronize/jobs/${jobId}`)
-        .then((res) => {
-          setRunningJob(res.data);
-          if (res.data.finishedOn) {
-            self.clearInterval(timer);
-            refreshUser();
-          }
-        });
-    }, 2000);
-  };
+  useEffect(() => {
+    if (user !== null && !user.lastSynchronize) {
+      onClickSynchronize();
+    }
+  }, [onClickSynchronize, user]);
 
-  const refreshUser = () => {
-    getInstance()
-      .get("/api/users/me")
-      .then((res) => setUser(res.data));
-  };
-
-  useEffect(refreshUser, []);
+  useEffect(refreshUser, [refreshUser]);
 
   return (
     <div className="flex items-center">
@@ -61,12 +68,15 @@ function Synchronize() {
           isSynchronizedDisabled ||
           Boolean(runningJob && !runningJob?.finishedOn)
         }
+        loadingText="Synchronizing..."
       >
         Synchronize
       </Button>
-      <div className="text-sm italic ml-2 text-gray-700">
-        Synchronized at {user?.lastSynchronize}
-      </div>
+      {user?.lastSynchronize && (
+        <div className="text-sm italic ml-2 text-gray-700">
+          Synchronized at {user?.lastSynchronize}
+        </div>
+      )}
     </div>
   );
 }

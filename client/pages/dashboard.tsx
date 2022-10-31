@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Contributor,
   Issue,
@@ -89,10 +89,6 @@ function Dashboard() {
       )
     );
   };
-
-  useEffect(() => {
-    getInstance().put("/api/users/me/repositories");
-  }, []);
 
   return (
     <>

@@ -45,7 +45,9 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToMany(() => Repo, (repo) => repo.users)
+  @ManyToMany(() => Repo, (repo) => repo.users, {
+    cascade: ['insert', 'update'],
+  })
   @JoinTable()
   repos: Repo[];
 }
