@@ -54,7 +54,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         // Synchronize initial repos and orgs for filters
-        await getInstance().put("/api/users/me/repositories");
+        await getInstance("server").put("/api/users/me/repositories");
       }
       return token;
     },
