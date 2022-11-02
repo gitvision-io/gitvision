@@ -56,6 +56,8 @@ export class RepoService {
       this.#repoGitProvider = new RepoGitlabService(
         this.repoRepository,
         this.commitRepository,
+        this.issueRepository,
+        this.pullRequestRepository,
       );
     }
     this.#repoGitProvider.auth(token);
