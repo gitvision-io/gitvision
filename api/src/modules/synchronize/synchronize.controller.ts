@@ -3,7 +3,7 @@ import { Job } from 'bull';
 import { User } from 'src/entities/user.entity';
 import {
   ProducerService,
-  SynchronizeJob,
+  UserSynchronizeJob,
 } from '../synchronize/producer.service';
 import { USER } from '../users/users.decorator';
 
@@ -12,14 +12,14 @@ export class SynchronizeController {
   constructor(private readonly synchronizeProducerService: ProducerService) {}
 
   @Get('jobs/:id')
-  async getAllRepoStat(@Param('id') id: string): Promise<Job<SynchronizeJob>> {
+  async getAllRepoStat(@Param('id') id: string): Promise<Job<UserSynchronizeJob>> {
     return await this.synchronizeProducerService.getJob(id);
   }
 
   @Post('jobs')
   async getAllRepoStatOfAllOrg(
     @USER() user: User,
-  ): Promise<Job<SynchronizeJob>> {
+  ): Promise<Job<UserSynchronizeJob>> {
     let date: Date;
     if (!user.lastSynchronize) {
       date = new Date();

@@ -1,10 +1,11 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 import { UsersService } from '../users/users.service';
-import { SynchronizeJob } from './producer.service';
+import { UserSynchronizeJob } from './producer.service';
+import { USER_SYNCHRONIZATION_QUEUE } from './synchronize.constants';
 import { SynchronizeService } from './synchronize.service';
 
-@Processor('sync-organization')
+@Processor(USER_SYNCHRONIZATION_QUEUE)
 export class ConsumerService {
   constructor(
     private readonly usersService: UsersService,
@@ -12,7 +13,7 @@ export class ConsumerService {
   ) {}
 
   @Process()
-  async transcode(job: Job<SynchronizeJob>): Promise<void> {
+  async transcode(job: Job<UserSynchronizeJob>): Promise<void> {
     const user = await this.usersService.findOne(job.data.userId);
     this.synchronizeService.auth(user.gitProviderName, user.gitProviderToken);
 

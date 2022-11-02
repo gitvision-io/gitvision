@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import Bull, { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
+import { USER_SYNCHRONIZATION_QUEUE } from './synchronize.constants';
 
-export interface SynchronizeJob {
+export interface UserSynchronizeJob {
   fromDate: string;
   userId: string;
 }
@@ -10,15 +11,15 @@ export interface SynchronizeJob {
 @Injectable()
 export class ProducerService {
   constructor(
-    @InjectQueue('sync-organization')
-    private synchronizationQueue: Queue<SynchronizeJob>,
+    @InjectQueue(USER_SYNCHRONIZATION_QUEUE)
+    private userSynchronizationQueue: Queue<UserSynchronizeJob>,
   ) {}
 
   async getJob(jobId: Bull.JobId) {
-    return await this.synchronizationQueue.getJob(jobId);
+    return await this.userSynchronizationQueue.getJob(jobId);
   }
 
-  async addJob(job: SynchronizeJob): Promise<Job<SynchronizeJob>> {
+  async addJob(job: UserSynchronizeJob): Promise<Job<UserSynchronizeJob>> {
     const now = new Date();
     const defaultFromDate = new Date(now.getTime());
     defaultFromDate.setMonth(now.getMonth() - 6);
@@ -27,8 +28,8 @@ export class ProducerService {
       fromDate: defaultFromDate.toISOString(),
     };
 
-    const actives = await this.synchronizationQueue.getActive();
-    const waitings = await this.synchronizationQueue.getWaiting();
+    const actives = await this.userSynchronizationQueue.getActive();
+    const waitings = await this.userSynchronizationQueue.getWaiting();
 
     if (
       [...actives, ...waitings].some(
@@ -38,7 +39,7 @@ export class ProducerService {
       console.log('has active, cancelling');
     }
 
-    const consolidatedJob: SynchronizeJob = { ...defaults, ...job };
-    return await this.synchronizationQueue.add(consolidatedJob);
+    const consolidatedJob: UserSynchronizeJob = { ...defaults, ...job };
+    return await this.userSynchronizationQueue.add(consolidatedJob);
   }
 }
