@@ -53,7 +53,10 @@ export class RepoService {
         this.pullRequestRepository,
       );
     } else if (providerName === 'gitlab') {
-      this.#repoGitProvider = new RepoGitlabService(this.repoRepository);
+      this.#repoGitProvider = new RepoGitlabService(
+        this.repoRepository,
+        this.commitRepository,
+      );
     }
     this.#repoGitProvider.auth(token);
   }
