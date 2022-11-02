@@ -5,6 +5,7 @@ import { Repo } from 'src/entities/repo.entity';
 import { Repository } from 'typeorm';
 import { Gitlab } from '@gitbeaker/node';
 import { ProjectSchema } from '@gitbeaker/core/dist/types/types';
+import { Commit } from 'src/entities/commit.entity';
 
 export interface Organization {
   id: string;
@@ -21,6 +22,9 @@ export class RepoGitlabService {
   constructor(
     @InjectRepository(Repo)
     private repoRepository: Repository<Repo>,
+
+    @InjectRepository(Commit)
+    private commitRepository: Repository<Commit>,
   ) {}
 
   auth(token: string): void {
@@ -56,13 +60,14 @@ export class RepoGitlabService {
           const projects: ProjectSchema[] = await this.#api.Groups.projects(
             o.id,
           );
+
           if (projects) {
             projects.map((p) => {
               if (p.id != null) {
                 const repo: Repo = new Repo();
                 repo.id = p.id.toString();
                 repo.name = p.name;
-                repo.organization = o.name;
+                repo.organization = o.full_path;
 
                 repositories.push(repo);
               }
@@ -82,7 +87,45 @@ export class RepoGitlabService {
 
   // Get all commits
   async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<void> {
-    return null;
+    const allRepos = await this.getAllRepoOfAllOrgWithPagination();
+    await Promise.all([
+      ...allRepos.map(async (r) => {
+        if (r.id != null) {
+          const commitsGitlab = await this.#api.Commits.all(r.id, {
+            maxPages: 5,
+            since: date,
+          });
+          const shaCommits = commitsGitlab.flatMap((c) => c.id);
+          const commits = await Promise.all([
+            ...shaCommits.map(async (i) => {
+              if (i != null) {
+                const commit = new Commit();
+                const commitsStatsGitlab = await this.#api.Commits.show(
+                  r.id,
+                  i.toString(),
+                );
+                commit.id = i;
+
+                commit.repoId = r.id.toString();
+                commit.date = commitsStatsGitlab.committed_date;
+                commit.author = commitsStatsGitlab.author_name;
+                commit.numberOfLineAdded = commitsStatsGitlab.stats.additions;
+                commit.numberOfLineRemoved = commitsStatsGitlab.stats.deletions;
+                commit.numberOfLineModified =
+                  commitsStatsGitlab.stats.additions -
+                  commitsStatsGitlab.stats.deletions;
+                return commit;
+              }
+            }),
+          ]);
+          this.commitRepository.save(commits);
+          r.commits = commits;
+        }
+
+        this.upsert(r.id, r);
+        return r;
+      }),
+    ]);
   }
 
   async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<void> {
