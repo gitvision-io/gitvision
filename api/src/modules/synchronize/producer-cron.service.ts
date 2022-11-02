@@ -11,16 +11,13 @@ export class ProducerCronService {
     @InjectQueue(CRON_SYNCHRONIZATION_QUEUE)
     cronSynchronizationQueue: Queue<CronSynchronizeJob>,
   ) {
-    cronSynchronizationQueue
-      .add(
-        {},
-        {
-          repeat: {
-            cron: '0 0 * * *',
-          },
+    cronSynchronizationQueue.add(
+      {},
+      {
+        repeat: {
+          cron: '0 0 * * *',
         },
-      )
-      .then(() => console.log('youpi'))
-      .catch((e) => console.log('aie : ', e));
+      },
+    );
   }
 }
