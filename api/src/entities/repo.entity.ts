@@ -21,13 +21,23 @@ export class Repo {
   })
   organization?: string;
 
-  @OneToMany(() => Commit, (commit) => commit.repo)
+  @OneToMany(() => Commit, (commit) => commit.repo, {
+    cascade: ['insert', 'update'],
+  })
   commits: Commit[];
 
-  @OneToMany(() => Issue, (issue: Issue) => issue.repo)
+  @OneToMany(() => Issue, (issue: Issue) => issue.repo, {
+    cascade: ['insert', 'update'],
+  })
   issues: Issue[];
 
-  @OneToMany(() => PullRequest, (pullRequest: PullRequest) => pullRequest.repo)
+  @OneToMany(
+    () => PullRequest,
+    (pullRequest: PullRequest) => pullRequest.repo,
+    {
+      cascade: ['insert', 'update'],
+    },
+  )
   pullRequests: PullRequest[];
 
   @ManyToMany(() => User, (user: User) => user.repos)
