@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { Gitlab } from '@gitbeaker/node';
 import {
   ProjectSchema,
-  CommitSchema,
+  CommitExtendedSchema,
   IssueSchema,
   MergeRequestSchema,
 } from '@gitbeaker/core/dist/types/types';
@@ -29,15 +29,6 @@ export class RepoGitlabService {
   constructor(
     @InjectRepository(Repo)
     private repoRepository: Repository<Repo>,
-
-    @InjectRepository(Commit)
-    private commitRepository: Repository<Commit>,
-
-    @InjectRepository(Issue)
-    private issueRepository: Repository<Issue>,
-
-    @InjectRepository(PullRequest)
-    private pullRequestRepository: Repository<PullRequest>,
   ) {}
 
   auth(token: string): void {
@@ -108,17 +99,13 @@ export class RepoGitlabService {
           const commitsGitlab = await this.#api.Commits.all(r.id, {
             maxPages: 50000,
             since: date,
+            with_stats: true,
           });
-          const shaCommits = commitsGitlab.flatMap((c: CommitSchema) => c.id);
-          const commits = await Promise.all([
-            ...shaCommits.map(async (i) => {
-              if (i != null) {
+          const commits = commitsGitlab.map(
+            (commitsStatsGitlab: CommitExtendedSchema) => {
+              if (commitsStatsGitlab.id != null) {
                 const commit = new Commit();
-                const commitsStatsGitlab = await this.#api.Commits.show(
-                  r.id,
-                  i.toString(),
-                );
-                commit.id = i;
+                commit.id = commitsStatsGitlab.id as string;
 
                 commit.repoId = r.id.toString();
                 commit.date = commitsStatsGitlab.committed_date;
@@ -130,9 +117,8 @@ export class RepoGitlabService {
                   commitsStatsGitlab.stats.deletions;
                 return commit;
               }
-            }),
-          ]);
-          this.commitRepository.save(commits);
+            },
+          );
           r.commits = commits;
         }
 
@@ -167,8 +153,6 @@ export class RepoGitlabService {
               return issue;
             }
           });
-
-          this.issueRepository.save(issues);
           r.issues = issues;
         }
 
@@ -207,7 +191,6 @@ export class RepoGitlabService {
               }
             },
           );
-          this.pullRequestRepository.save(pullRequests);
           r.pullRequests = pullRequests;
         }
 
