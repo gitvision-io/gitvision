@@ -77,10 +77,13 @@ function DashboardFilters({
     }
   }, [filters.organization, organizations]);
 
-  useEffect(() => {
+  const loadOrganizations = () =>
     getInstance()
       .get("/api/orgs")
       .then((res) => setOrganizations(res.data));
+
+  useEffect(() => {
+    loadOrganizations();
   }, []);
 
   return (

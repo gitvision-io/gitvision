@@ -52,6 +52,9 @@ export const authOptions: NextAuthOptions = {
           gitProviderId: profile?.id,
           gitProviderName: account.provider,
         });
+
+        // Synchronize initial repos and orgs for filters
+        await getInstance("server").put("/api/users/me/repositories");
       }
       return token;
     },

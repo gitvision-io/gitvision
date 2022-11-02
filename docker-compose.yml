@@ -23,18 +23,6 @@ services:
     depends_on:
       - api
 
-  queue_admin:
-    build:
-      context: queue-admin
-    image: ghcr.io/gitvision-io/git-dashboard_queue_admin:latest
-    environment:
-      - REDIS_PORT=6379
-      - REDIS_HOST=redis
-    ports:
-      - "3002:3002"
-    depends_on:
-      - redis
-
   redis:
     image: redis
     ports:

@@ -1,9 +1,11 @@
 const Loader = ({
   color,
   className,
+  text,
 }: {
   color?: string;
   className?: string;
+  text?: string;
 }) => (
   <div className={`text-${color} ${className} flex items-center`}>
     <svg
@@ -22,12 +24,13 @@ const Loader = ({
         fill="currentColor"
       />
     </svg>
-    Loading...
+    {text}
   </div>
 );
 
 Loader.defaultProps = {
   color: "white",
+  text: "Loading...",
 };
 
 export default Loader;

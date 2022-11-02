@@ -23,12 +23,13 @@ import { RepoModule } from './modules/repo/repo.module';
       database: './data.db',
       entities: [User, Repo, Commit, Issue, PullRequest],
       synchronize: true,
+      // logging: true,
     }),
     BullModule.forRoot({
       redis: {
-        host: '35.229.90.134',
-        port: 6379,
-        password: 'Pgr68UFuqCPcLx',
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
       },
     }),
     UsersModule,
