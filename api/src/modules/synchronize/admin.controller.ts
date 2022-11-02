@@ -4,6 +4,10 @@ import { BullAdapter } from '@bull-board/api/bullAdapter';
 import { All, Controller, Next, Request, Response } from '@nestjs/common';
 import * as Bull from 'bull';
 import express from 'express';
+import {
+  CRON_SYNCHRONIZATION_QUEUE,
+  USER_SYNCHRONIZATION_QUEUE,
+} from './synchronize.constants';
 
 const rootPath = '/api/bull/admin/';
 
@@ -17,16 +21,19 @@ export class QueueAdminController {
   ) {
     const serverAdapter = new ExpressAdapter();
     serverAdapter.setBasePath(rootPath);
-    const queue = new Bull('sync-organization', {
-      redis: {
-        port: parseInt(process.env.REDIS_PORT),
-        host: process.env.REDIS_HOST,
-        password: process.env.REDIS_PASSWORD,
-      },
-    });
+    const queues = [USER_SYNCHRONIZATION_QUEUE, CRON_SYNCHRONIZATION_QUEUE].map(
+      (queue) =>
+        new Bull(queue, {
+          redis: {
+            port: parseInt(process.env.REDIS_PORT),
+            host: process.env.REDIS_HOST,
+            password: process.env.REDIS_PASSWORD,
+          },
+        }),
+    );
     const router = serverAdapter.getRouter() as express.Express;
     createBullBoard({
-      queues: [new BullAdapter(queue)],
+      queues: [new BullAdapter(queues[0]), new BullAdapter(queues[1])],
       serverAdapter,
     });
     req.url = req.url.replace(rootPath, '/');

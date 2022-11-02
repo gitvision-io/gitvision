@@ -6,17 +6,28 @@ import { RepoModule } from '../repo/repo.module';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
 import { QueueAdminController } from './admin.controller';
+import { ConsumerCronService } from './consumer-cron.service';
 import { ConsumerService } from './consumer.service';
+import { ProducerCronService } from './producer-cron.service';
 import { ProducerService } from './producer.service';
+import {
+  CRON_SYNCHRONIZATION_QUEUE,
+  USER_SYNCHRONIZATION_QUEUE,
+} from './synchronize.constants';
 import { SynchronizeController } from './synchronize.controller';
 import { SynchronizeService } from './synchronize.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    BullModule.registerQueue({
-      name: 'sync-organization',
-    }),
+    BullModule.registerQueue(
+      {
+        name: USER_SYNCHRONIZATION_QUEUE,
+      },
+      {
+        name: CRON_SYNCHRONIZATION_QUEUE,
+      },
+    ),
     UsersModule,
     RepoModule,
   ],
@@ -24,7 +35,9 @@ import { SynchronizeService } from './synchronize.service';
   exports: [ProducerService],
   providers: [
     ProducerService,
+    ProducerCronService,
     ConsumerService,
+    ConsumerCronService,
     UsersService,
     SynchronizeService,
   ],

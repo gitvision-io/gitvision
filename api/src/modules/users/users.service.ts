@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repo } from 'src/entities/repo.entity';
 import { User } from 'src/entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindOperator, LessThan, Repository } from 'typeorm';
 import { UserDTO, UserProfileDTO } from './users.dto';
 
 @Injectable()
@@ -12,8 +12,14 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  findAll(maxSynchronizedDate?: Date): Promise<User[]> {
+    const where: { lastSynchronize?: Date | FindOperator<Date> } = {};
+    if (maxSynchronizedDate) {
+      where.lastSynchronize = LessThan(maxSynchronizedDate);
+    }
+    return this.usersRepository.find({
+      where,
+    });
   }
 
   async findOne(id: string): Promise<User> {
