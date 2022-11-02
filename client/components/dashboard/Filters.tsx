@@ -61,7 +61,11 @@ function DashboardFilters({
       setIsLoadingRepos(true);
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
-        .get(`/api/orgs/${org?.isUser ? "user" : filters.organization}/repos`)
+        .get(
+          `/api/orgs/${
+            org?.isUser ? "user" : encodeURIComponent(filters.organization)
+          }/repos`
+        )
         .then((res) => {
           setRepositories(res.data);
           setFilters({

@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repo } from 'src/entities/repo.entity';
-import { Issue } from 'src/entities/issue.entity';
-import { Commit } from 'src/entities/commit.entity';
 import { Equal, In, IsNull, Not, Repository } from 'typeorm';
-import { PullRequest } from 'src/entities/pullrequest.entity';
 import { RepoGithubService } from './github/repo.github.service';
 import { RepoGitlabService } from './gitlab/repo.gitlab.service';
 
@@ -33,25 +30,11 @@ export class RepoService {
   constructor(
     @InjectRepository(Repo)
     private repoRepository: Repository<Repo>,
-
-    @InjectRepository(Commit)
-    private commitRepository: Repository<Commit>,
-
-    @InjectRepository(Issue)
-    private issueRepository: Repository<Issue>,
-
-    @InjectRepository(PullRequest)
-    private pullRequestRepository: Repository<PullRequest>,
   ) {}
 
   auth(providerName: string, token: string): void {
     if (providerName === 'github') {
-      this.#repoGitProvider = new RepoGithubService(
-        this.repoRepository,
-        this.commitRepository,
-        this.issueRepository,
-        this.pullRequestRepository,
-      );
+      this.#repoGitProvider = new RepoGithubService(this.repoRepository);
     } else if (providerName === 'gitlab') {
       this.#repoGitProvider = new RepoGitlabService(this.repoRepository);
     }

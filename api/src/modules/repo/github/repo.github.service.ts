@@ -40,15 +40,6 @@ export class RepoGithubService {
   constructor(
     @InjectRepository(Repo)
     private repoRepository: Repository<Repo>,
-
-    @InjectRepository(Commit)
-    private commitRepository: Repository<Commit>,
-
-    @InjectRepository(Issue)
-    private issueRepository: Repository<Issue>,
-
-    @InjectRepository(PullRequest)
-    private pullRequestRepository: Repository<PullRequest>,
   ) {}
 
   auth(token: string): void {
@@ -213,7 +204,6 @@ export class RepoGithubService {
                 return commit;
               },
             );
-          this.commitRepository.save(commits);
           r.commits = commits;
         }
 
@@ -265,7 +255,6 @@ export class RepoGithubService {
                   return commit;
                 },
               );
-            this.commitRepository.save(commits);
             repo.commits = commits;
           }
           this.upsert(repo.id, repo);
@@ -312,7 +301,6 @@ export class RepoGithubService {
                 return issue;
               },
             );
-          this.issueRepository.save(issues);
           r.issues = issues;
         } while (
           graphQLResultWithPagination.data.viewer.organization.repository.issues
@@ -365,7 +353,6 @@ export class RepoGithubService {
             });
             issuesList = issuesList.concat(issues);
           } while (r.node.issues.pageInfo.hasNextPage);
-          this.issueRepository.save(issuesList);
           repo.issues = issuesList;
           this.upsert(repo.id, repo);
           return repo;
@@ -411,7 +398,6 @@ export class RepoGithubService {
                 return pullRequest;
               },
             );
-          this.pullRequestRepository.save(pullRequests);
           r.pullRequests = pullRequests;
         } while (
           graphQLResultWithPagination.data.viewer.organization.repository
@@ -467,7 +453,6 @@ export class RepoGithubService {
             );
             pullRequestsList = pullRequestsList.concat(pullRequests);
           } while (r.node.pullRequests.pageInfo.hasNextPage);
-          this.pullRequestRepository.save(pullRequestsList);
           repo.pullRequests = pullRequestsList;
           this.upsert(repo.id, repo);
           return repo;
