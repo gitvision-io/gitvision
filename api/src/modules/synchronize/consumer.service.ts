@@ -20,6 +20,7 @@ export class ConsumerService {
     const now = new Date();
     const synchronizationDate = new Date(job.data.fromDate);
 
+    console.log('youpi 1 : synchronizing');
     await this.synchronizeService.synchronize(synchronizationDate);
     await this.usersService.update(user.id, {
       lastSynchronize: now,
