@@ -70,7 +70,7 @@ function Dashboard() {
 
   const changeDashboard = async (filters: Record<string, any>) => {
     const resp = await getInstance().get(
-      `/api/orgstats/${filters.organization}`,
+      `/api/orgstats/${encodeURIComponent(filters.organization)}`,
       {
         params: {
           filters,
