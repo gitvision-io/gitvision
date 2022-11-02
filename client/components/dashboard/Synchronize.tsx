@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAtom } from "jotai";
 import { getInstance } from "../../services/api";
 import { asyncRefreshUser, userState } from "../../services/state";
@@ -12,6 +12,7 @@ function Synchronize() {
   );
   const [user] = useAtom(userState);
   const [, refreshUser] = useAtom(asyncRefreshUser);
+  const hasSynchronized = useRef(false);
 
   const onClickSynchronize = useCallback(() => {
     const pollSynchronize = (jobId: string | number) => {
@@ -41,7 +42,8 @@ function Synchronize() {
   }, [refreshUser]);
 
   useEffect(() => {
-    if (user !== null && !user.lastSynchronize) {
+    if (user !== null && !user.lastSynchronize && !hasSynchronized.current) {
+      hasSynchronized.current = true;
       onClickSynchronize();
     }
   }, [onClickSynchronize, user]);
