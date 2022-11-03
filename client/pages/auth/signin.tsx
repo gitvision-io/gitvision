@@ -44,7 +44,7 @@ export default function Signin({
 }: {
   providers: { name: string; id: string }[];
 }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const router = useRouter();
   const { redirectUrl } = router.query;
 
@@ -82,12 +82,15 @@ export default function Signin({
                       <div className="flex gap-4 item-center" key={provider.id}>
                         <Button
                           type="button"
-                          isLoading={isLoading}
+                          isLoading={isLoading[provider.name]}
                           className={`my-2 py-2 px-4 flex justify-center items-center ${
                             classes[provider.name]
                           } focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg`}
                           onClick={() => {
-                            setIsLoading(true);
+                            setIsLoading({
+                              ...isLoading,
+                              [provider.name]: true,
+                            });
                             signIn(provider.id, {
                               callbackUrl:
                                 (redirectUrl as string) || "/dashboard",
