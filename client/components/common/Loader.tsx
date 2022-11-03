@@ -2,15 +2,17 @@ const Loader = ({
   color,
   className,
   text,
+  size,
 }: {
   color?: string;
   className?: string;
   text?: string;
+  size: number;
 }) => (
   <div className={`text-${color} ${className} flex items-center`}>
     <svg
       role="status"
-      className="inline mr-3 w-4 h-4 animate-spin"
+      className={`inline mr-3 w-${size} h-${size} animate-spin`}
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -31,6 +33,7 @@ const Loader = ({
 Loader.defaultProps = {
   color: "white",
   text: "Loading...",
+  size: 4,
 };
 
 export default Loader;
