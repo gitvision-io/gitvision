@@ -26,7 +26,7 @@ export const Banner = () => {
       <div className="flex justify-center h-full overflow-hidden lg:w-2/3 xl:w-1/2 lg:absolute lg:justify-start lg:bottom-0 lg:right-0 lg:items-center">
         <img
           src="/screenshot.png"
-          className="object-cover object-top w-full h-64 max-w-xl -mb-16 rounded shadow-2xl lg:ml-64 xl:ml-8 lg:-mb-24 xl:-mb-28 lg:h-auto lg:max-w-screen-md"
+          className="w-full h-64 max-w-xl rounded shadow-lg lg:h-auto lg:max-w-screen-md"
           alt="Gitvision"
         />
       </div>
