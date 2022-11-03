@@ -5,7 +5,8 @@ import Button from "../../components/common/Button";
 
 const classes: Record<string, string> = {
   GitHub:
-    "text-white bg-[#24292F] hover:bg-[#24292F]/90 focus:ring-4 focus:outline-none focus:ring-[#24292F]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-500 dark:hover:bg-[#050708]/30 mb-2",
+    "text-white !bg-[#24292F] !hover:bg-[#24292F]/90 focus:ring-4 focus:outline-none !focus:ring-[#24292F]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center mb-2",
+  GitLab: "!bg-orange-600 !hover:bg-orange-800",
 };
 
 const icons: Record<string, JSX.Element> = {
@@ -27,7 +28,7 @@ const icons: Record<string, JSX.Element> = {
     </svg>
   ),
   GitLab: (
-    <svg className="mr-2 -ml-2 -mr-2 w-6 h-6" viewBox="0 0 380 380">
+    <svg className="mr-2 -ml-2 w-6 h-6" viewBox="0 0 380 380">
       <g id="LOGO">
         <path
           fill="currentColor"
@@ -82,9 +83,8 @@ export default function Signin({
                         <Button
                           type="button"
                           isLoading={isLoading}
-                          className={`my-2 py-2 px-4 flex justify-center items-center  ${
-                            classes[provider.name] ||
-                            "bg-orange-600 hover:bg-orange-800"
+                          className={`my-2 py-2 px-4 flex justify-center items-center ${
+                            classes[provider.name]
                           } focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg`}
                           onClick={() => {
                             setIsLoading(true);
