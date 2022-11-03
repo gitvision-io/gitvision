@@ -153,28 +153,30 @@ export class RepoGithubService {
   }
 
   // Get all commits
-  async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
+  async getCommitsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<Commit[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    return await Promise.all([
-      ...allRepos.map(async (r) => {
-        const graphQLResultWithPagination = await this.apolloService
-          .githubClient()
-          .query<GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery>({
-            query: GetAllCommitsOfAllReposOfAllOrgWithPagination,
-            variables: {
-              orgLogin: r.organization,
-              name: r.name,
-              date,
-            },
-          });
+    return (
+      await Promise.all([
+        ...allRepos.map(async (r) => {
+          const graphQLResultWithPagination = await this.apolloService
+            .githubClient()
+            .query<GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery>({
+              query: GetAllCommitsOfAllReposOfAllOrgWithPagination,
+              variables: {
+                orgLogin: r.organization,
+                name: r.name,
+                date,
+              },
+            });
 
-        if (
-          graphQLResultWithPagination.data.viewer.organization.repository
-            .defaultBranchRef?.target.__typename === 'Commit'
-        ) {
-          const commits: Commit[] =
-            graphQLResultWithPagination.data.viewer.organization.repository.defaultBranchRef.target.history.edges.map(
+          if (
+            graphQLResultWithPagination.data.viewer.organization.repository
+              .defaultBranchRef?.target.__typename === 'Commit'
+          ) {
+            return graphQLResultWithPagination.data.viewer.organization.repository.defaultBranchRef.target.history.edges.map(
               (c) => {
                 const commit = new Commit();
                 commit.id = c.node.id;
@@ -187,15 +189,15 @@ export class RepoGithubService {
                 return commit;
               },
             );
-          r.commits = commits;
-        }
-        return r;
-      }),
-    ]);
+          }
+          return [];
+        }),
+      ])
+    ).flatMap((c) => c);
   }
 
-  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
-    let repositories: Repo[] = [];
+  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Commit[]> {
+    let commits: Commit[] = [];
     let repoEndCursor: string = null;
     let graphQLResultWithPagination: ApolloQueryResult<GetAllCommitsOfAllReposOfUserWithPaginationQuery>;
 
@@ -213,14 +215,10 @@ export class RepoGithubService {
       repoEndCursor =
         graphQLResultWithPagination.data.viewer.repositories.pageInfo.endCursor;
 
-      repositories = repositories.concat(
+      commits = commits.concat(
         graphQLResultWithPagination.data.viewer.repositories.edges
           .filter((r) => !r.node.isInOrganization)
-          .map((r) => {
-            const repo: Repo = new Repo();
-            repo.id = r.node.id;
-            repo.name = r.node.name;
-
+          .flatMap((r) => {
             if (r.node.defaultBranchRef?.target.__typename === 'Commit') {
               const commits: Commit[] =
                 r.node.defaultBranchRef.target.history.edges.map(
@@ -238,16 +236,16 @@ export class RepoGithubService {
                     return commit;
                   },
                 );
-              repo.commits = commits;
+              return commits;
             }
-            return repo;
+            return [];
           }),
       );
     } while (
       graphQLResultWithPagination.data.viewer.repositories.pageInfo.hasNextPage
     );
 
-    return repositories;
+    return commits;
   }
 
   // Get all issues

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Commit } from 'src/entities/commit.entity';
 import { Repo } from 'src/entities/repo.entity';
 import { Equal, In, IsNull, Not, Repository } from 'typeorm';
 import { RepoGithubService } from './github/repo.github.service';
@@ -16,8 +17,8 @@ export interface IRepoGitProvider {
   getAllOrgWithPagination(): Promise<Organization[]>;
   getAllRepoOfAllOrgWithPagination(): Promise<Repo[]>;
   getAllRepoOfUserWithPagination(): Promise<Repo[]>;
-  getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]>;
-  getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]>;
+  getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Commit[]>;
+  getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Commit[]>;
   getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]>;
   getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]>;
   getPullRequestsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]>;
@@ -30,6 +31,8 @@ export class RepoService {
   constructor(
     @InjectRepository(Repo)
     private repoRepository: Repository<Repo>,
+    @InjectRepository(Commit)
+    private commitRepository: Repository<Commit>,
   ) {}
 
   auth(providerName: string, token: string): void {
@@ -155,17 +158,17 @@ export class RepoService {
 
   // Get all commits
   async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<void> {
-    const repos =
+    const commits =
       await this.#repoGitProvider.getCommitsOfAllRepoOfAllOrgWithPagination(
         date,
       );
-    this.repoRepository.save(repos);
+    await this.commitRepository.save(commits);
   }
 
   async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<void> {
-    const repos =
+    const commits =
       await this.#repoGitProvider.getCommitsOfAllRepoOfUserWithPagination(date);
-    this.repoRepository.save(repos);
+    this.commitRepository.save(commits);
   }
 
   // Get all issues

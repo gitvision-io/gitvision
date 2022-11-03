@@ -74,20 +74,24 @@ export class RepoGitlabService {
   }
 
   // Get all commits
-  async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
+  async getCommitsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<Commit[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    return await Promise.all([
-      ...allRepos.map(async (r) => {
-        if (r.id != null) {
-          const commitsGitlab = await this.#api.Commits.all(r.id, {
-            maxPages: 50000,
-            since: date,
-            with_stats: true,
-          });
-          const commits = commitsGitlab.map(
-            (commitsStatsGitlab: CommitExtendedSchema) => {
-              if (commitsStatsGitlab.id != null) {
+    return (
+      await Promise.all([
+        ...allRepos
+          .filter((r) => r.id)
+          .map(async (r) => {
+            const commitsGitlab = await this.#api.Commits.all(r.id, {
+              maxPages: 50000,
+              since: date,
+              with_stats: true,
+            });
+            return commitsGitlab
+              .filter((c) => c.id)
+              .map((commitsStatsGitlab: CommitExtendedSchema) => {
                 const commit = new Commit();
                 commit.id = commitsStatsGitlab.id as string;
 
@@ -98,18 +102,14 @@ export class RepoGitlabService {
                 commit.numberOfLineRemoved = commitsStatsGitlab.stats.deletions;
                 commit.totalNumberOfLine = commitsStatsGitlab.stats.total;
                 return commit;
-              }
-            },
-          );
-          r.commits = commits;
-        }
-        return r;
-      }),
-    ]);
+              });
+          }),
+      ])
+    ).flatMap((c) => c);
   }
 
-  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
-    const repositories: Repo[] = [];
+  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Commit[]> {
+    const repositories: Commit[] = [];
     return repositories;
   }
 
