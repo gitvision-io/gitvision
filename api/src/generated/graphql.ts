@@ -38655,7 +38655,7 @@ export const GetAllCommitsOfAllReposOfAllOrgWithPagination = gql`
 }
     `;
 export const GetAllIssuesOfAllReposOfAllOrgWithPagination = gql`
-    query GetAllIssuesOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $cursorIssue: String) {
+    query GetAllIssuesOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $cursorIssue: String, $date: DateTime) {
   viewer {
     login
     organization(login: $orgLogin) {
@@ -38664,7 +38664,7 @@ export const GetAllIssuesOfAllReposOfAllOrgWithPagination = gql`
       repository(name: $name) {
         id
         name
-        issues(first: 100, after: $cursorIssue) {
+        issues(first: 100, after: $cursorIssue, filterBy: {since: $date}) {
           pageInfo {
             hasNextPage
             endCursor
@@ -38803,7 +38803,7 @@ export const GetAllCommitsOfAllReposOfUserWithPagination = gql`
 }
     `;
 export const GetAllIssuesOfAllRepoOfUserWithPagination = gql`
-    query GetAllIssuesOfAllRepoOfUserWithPagination($cursorRepo: String, $cursorIssue: String) {
+    query GetAllIssuesOfAllRepoOfUserWithPagination($cursorRepo: String, $cursorIssue: String, $date: DateTime) {
   viewer {
     login
     repositories(first: 100, after: $cursorRepo) {
@@ -38817,7 +38817,7 @@ export const GetAllIssuesOfAllRepoOfUserWithPagination = gql`
           id
           name
           isInOrganization
-          issues(first: 100, after: $cursorIssue) {
+          issues(first: 100, after: $cursorIssue, filterBy: {since: $date}) {
             pageInfo {
               hasNextPage
               endCursor
@@ -38908,6 +38908,7 @@ export type GetAllIssuesOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
   orgLogin: Scalars['String'];
   name: Scalars['String'];
   cursorIssue?: InputMaybe<Scalars['String']>;
+  date?: InputMaybe<Scalars['DateTime']>;
 }>;
 
 
@@ -38948,6 +38949,7 @@ export type GetAllCommitsOfAllReposOfUserWithPaginationQuery = { __typename?: 'Q
 export type GetAllIssuesOfAllRepoOfUserWithPaginationQueryVariables = Exact<{
   cursorRepo?: InputMaybe<Scalars['String']>;
   cursorIssue?: InputMaybe<Scalars['String']>;
+  date?: InputMaybe<Scalars['DateTime']>;
 }>;
 
 

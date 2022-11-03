@@ -154,10 +154,9 @@ export class RepoGithubService {
 
   // Get all commits
   async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
-    let repositories: Repo[] = [];
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    repositories = await Promise.all([
+    return await Promise.all([
       ...allRepos.map(async (r) => {
         const graphQLResultWithPagination = await this.apolloService
           .githubClient()
@@ -194,7 +193,6 @@ export class RepoGithubService {
         return r;
       }),
     ]);
-    return repositories;
   }
 
   async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
@@ -254,13 +252,12 @@ export class RepoGithubService {
   }
 
   // Get all issues
-  async getIssuesOfAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
     let issueEndCursor: string = null;
-    let repositories: Repo[] = [];
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
     let graphQLResultWithPagination: ApolloQueryResult<GetAllIssuesOfAllReposOfAllOrgWithPaginationQuery>;
 
-    repositories = await Promise.all([
+    return await Promise.all([
       ...allRepos.map(async (r) => {
         do {
           graphQLResultWithPagination = await this.apolloService
@@ -271,6 +268,7 @@ export class RepoGithubService {
                 orgLogin: r.organization,
                 name: r.name,
                 cursorIssue: issueEndCursor,
+                date,
               },
             });
 
@@ -298,10 +296,9 @@ export class RepoGithubService {
         return r;
       }),
     ]);
-    return repositories;
   }
 
-  async getIssuesOfAllRepoOfUserWithPagination(): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
     let repoEndCursor: string = null;
     let issueEndCursor: string = null;
     let repositories: Repo[] = [];
@@ -315,6 +312,7 @@ export class RepoGithubService {
           variables: {
             cursorRepo: repoEndCursor,
             cursorIssue: issueEndCursor,
+            date,
           },
         });
 
@@ -355,13 +353,14 @@ export class RepoGithubService {
   }
 
   // Get all pull requests
-  async getPullRequestsOfAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
+  async getPullRequestsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<Repo[]> {
     let pullRequestEndCursor: string = null;
-    let repositories: Repo[] = [];
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
     let graphQLResultWithPagination: ApolloQueryResult<GetAllPullRequestsOfAllReposOfAllOrgWithPaginationQuery>;
 
-    repositories = await Promise.all([
+    return await Promise.all([
       ...allRepos.map(async (r) => {
         do {
           graphQLResultWithPagination = await this.apolloService
@@ -399,10 +398,11 @@ export class RepoGithubService {
         return r;
       }),
     ]);
-    return repositories;
   }
 
-  async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<Repo[]> {
+  async getPullRequestsOfAllRepoOfUserWithPagination(
+    date: Date,
+  ): Promise<Repo[]> {
     let repoEndCursor: string = null;
     let pullRequestEndCursor: string = null;
     let repositories: Repo[] = [];

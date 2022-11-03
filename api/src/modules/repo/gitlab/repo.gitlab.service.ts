@@ -41,6 +41,7 @@ export class RepoGitlabService {
   async getAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
     const repositories: Repo[] = [];
     const orgs = await this.#api.Groups.all({ maxPages: 50000 });
+
     await Promise.all([
       ...orgs.map(async (o) => {
         if (o.id) {
@@ -75,9 +76,8 @@ export class RepoGitlabService {
   // Get all commits
   async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
-    let repositories: Repo[] = [];
 
-    repositories = await Promise.all([
+    return await Promise.all([
       ...allRepos.map(async (r) => {
         if (r.id != null) {
           const commitsGitlab = await this.#api.Commits.all(r.id, {
@@ -96,9 +96,7 @@ export class RepoGitlabService {
                 commit.author = commitsStatsGitlab.author_name;
                 commit.numberOfLineAdded = commitsStatsGitlab.stats.additions;
                 commit.numberOfLineRemoved = commitsStatsGitlab.stats.deletions;
-                commit.numberOfLineModified =
-                  commitsStatsGitlab.stats.additions -
-                  commitsStatsGitlab.stats.deletions;
+                commit.numberOfLineModified = commitsStatsGitlab.stats.total;
                 return commit;
               }
             },
@@ -108,8 +106,6 @@ export class RepoGitlabService {
         return r;
       }),
     ]);
-
-    return repositories;
   }
 
   async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
@@ -118,14 +114,16 @@ export class RepoGitlabService {
   }
 
   // Get all issues
-  async getIssuesOfAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
-    let repositories: Repo[] = [];
 
-    repositories = await Promise.all([
+    return await Promise.all([
       ...allRepos.map(async (r) => {
         if (r.id != null) {
-          const issuesGitlab = await this.#api.Issues.all({ projectId: r.id });
+          const issuesGitlab = await this.#api.Issues.all({
+            projectId: r.id,
+            since: date,
+          });
 
           const issues: Issue[] = issuesGitlab.map((i: IssueSchema) => {
             if (i.id != null) {
@@ -145,24 +143,25 @@ export class RepoGitlabService {
         return r;
       }),
     ]);
-    return repositories;
   }
 
-  async getIssuesOfAllRepoOfUserWithPagination(): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
     const repositories: Repo[] = [];
     return repositories;
   }
 
   // Get all pull requests
-  async getPullRequestsOfAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
+  async getPullRequestsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<Repo[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
-    let repositories: Repo[] = [];
 
-    repositories = await Promise.all([
+    return await Promise.all([
       ...allRepos.map(async (r) => {
         if (r.id != null) {
           const mergeRequestsGitlab = await this.#api.MergeRequests.all({
             projectId: r.id,
+            since: date,
           });
 
           const pullRequests: PullRequest[] = mergeRequestsGitlab.map(
@@ -185,7 +184,6 @@ export class RepoGitlabService {
         return r;
       }),
     ]);
-    return repositories;
   }
 
   async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<Repo[]> {

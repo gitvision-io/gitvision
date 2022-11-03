@@ -15,11 +15,11 @@ export class SynchronizeService {
     await this.repoService.getCommitsOfAllRepoOfUserWithPagination(date);
 
     // Get Issues
-    await this.repoService.getIssuesOfAllRepoOfAllOrgWithPagination();
-    await this.repoService.getIssuesOfAllRepoOfUserWithPagination();
+    await this.repoService.getIssuesOfAllRepoOfAllOrgWithPagination(date);
+    await this.repoService.getIssuesOfAllRepoOfUserWithPagination(date);
 
     // Get Pull Requests
-    await this.repoService.getPullRequestsOfAllRepoOfAllOrgWithPagination();
-    await this.repoService.getPullRequestsOfAllRepoOfUserWithPagination();
+    await this.repoService.getPullRequestsOfAllRepoOfAllOrgWithPagination(date);
+    await this.repoService.getPullRequestsOfAllRepoOfUserWithPagination(date);
   }
 }
