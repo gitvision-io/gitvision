@@ -183,8 +183,7 @@ export class RepoGithubService {
                 commit.date = c.node.committedDate;
                 commit.numberOfLineAdded = c.node.additions;
                 commit.numberOfLineRemoved = c.node.deletions;
-                commit.numberOfLineModified =
-                  c.node.additions - c.node.deletions;
+                commit.totalNumberOfLine = c.node.additions + c.node.deletions;
                 return commit;
               },
             );
@@ -233,8 +232,8 @@ export class RepoGithubService {
                     commit.date = c.node.committedDate;
                     commit.numberOfLineAdded = c.node.additions;
                     commit.numberOfLineRemoved = c.node.deletions;
-                    commit.numberOfLineModified =
-                      c.node.additions - c.node.deletions;
+                    commit.totalNumberOfLine =
+                      c.node.additions + c.node.deletions;
 
                     return commit;
                   },

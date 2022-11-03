@@ -49,7 +49,7 @@ const ContributorsTable = ({
                 <td className="py-4 px-6">{item.numberOfCommits}</td>
                 <td className="py-4 px-6">{item.numberOfLineAdded}</td>
                 <td className="py-4 px-6">{item.numberOfLineRemoved}</td>
-                <td className="py-4 px-6">{item.numberOfLineModified}</td>
+                <td className="py-4 px-6">{item.totalNumberOfLine}</td>
                 <td className="py-4 px-6">{item.commitActivity}</td>
               </tr>
             );

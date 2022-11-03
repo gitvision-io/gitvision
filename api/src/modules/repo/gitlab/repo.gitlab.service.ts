@@ -96,7 +96,7 @@ export class RepoGitlabService {
                 commit.author = commitsStatsGitlab.author_name;
                 commit.numberOfLineAdded = commitsStatsGitlab.stats.additions;
                 commit.numberOfLineRemoved = commitsStatsGitlab.stats.deletions;
-                commit.numberOfLineModified = commitsStatsGitlab.stats.total;
+                commit.totalNumberOfLine = commitsStatsGitlab.stats.total;
                 return commit;
               }
             },
