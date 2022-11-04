@@ -58,7 +58,7 @@ function Dashboard() {
           res[value.author] = {
             author: value.author,
             numberOfLineRemoved: 0,
-            numberOfLineModified: 0,
+            totalNumberOfLine: 0,
             numberOfLineAdded: 0,
             numberOfCommits: 0,
             commitActivity: 0,
@@ -68,7 +68,7 @@ function Dashboard() {
         res[value.author].numberOfLineAdded += value.numberOfLineAdded;
         res[value.author].numberOfCommits += value.numberOfCommits;
         res[value.author].numberOfLineRemoved += value.numberOfLineRemoved;
-        res[value.author].numberOfLineModified += value.numberOfLineModified;
+        res[value.author].totalNumberOfLine += value.totalNumberOfLine;
         res[value.author].commitActivity += value.commitActivity;
         return res;
       }, {} as Record<string, Contributor>);

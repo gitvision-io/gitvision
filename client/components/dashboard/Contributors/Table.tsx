@@ -26,7 +26,7 @@ const ContributorsTable = ({
               Number of line deleted
             </th>
             <th scope="col" className="py-3 px-6">
-              Number of line modified
+              Total number of line
             </th>
             <th scope="col" className="py-3 px-6">
               Commit activity
@@ -49,7 +49,7 @@ const ContributorsTable = ({
                 <td className="py-4 px-6">{item.numberOfCommits}</td>
                 <td className="py-4 px-6">{item.numberOfLineAdded}</td>
                 <td className="py-4 px-6">{item.numberOfLineRemoved}</td>
-                <td className="py-4 px-6">{item.numberOfLineModified}</td>
+                <td className="py-4 px-6">{item.totalNumberOfLine}</td>
                 <td className="py-4 px-6">{item.commitActivity}</td>
               </tr>
             );

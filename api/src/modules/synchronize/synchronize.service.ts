@@ -18,15 +18,15 @@ export class SynchronizeService {
     await job?.progress(40);
 
     // Get Issues
-    await this.repoService.getIssuesOfAllRepoOfAllOrgWithPagination();
+    await this.repoService.getIssuesOfAllRepoOfAllOrgWithPagination(date);
     await job?.progress(60);
-    await this.repoService.getIssuesOfAllRepoOfUserWithPagination();
+    await this.repoService.getIssuesOfAllRepoOfUserWithPagination(date);
     await job?.progress(70);
 
     // Get Pull Requests
-    await this.repoService.getPullRequestsOfAllRepoOfAllOrgWithPagination();
+    await this.repoService.getPullRequestsOfAllRepoOfAllOrgWithPagination(date);
     await job?.progress(80);
-    await this.repoService.getPullRequestsOfAllRepoOfUserWithPagination();
+    await this.repoService.getPullRequestsOfAllRepoOfUserWithPagination(date);
     await job?.progress(90);
   }
 }
