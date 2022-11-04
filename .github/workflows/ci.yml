@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "main"
+      - "feature/hooks"
 
 jobs:
   docker:
@@ -12,15 +13,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v2
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ GITHUB.REPOSITORY_OWNER }}
+      #     password: ${{ secrets.GHCR_TOKEN }}
+
+      # - name: Build Compose Images
+      #   run: docker-compose build
+
+      # - name: Push Images
+      #   run: docker-compose push
+
+      - name: Pushes to cloud repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.PUSH_TOKEN }}
         with:
-          registry: ghcr.io
-          username: ${{ GITHUB.REPOSITORY_OWNER }}
-          password: ${{ secrets.GHCR_TOKEN }}
-
-      - name: Build Compose Images
-        run: docker-compose build
-
-      - name: Push Images
-        run: docker-compose push
+          source-directory: "./"
+          destination-github-username: "gitvision-io"
+          destination-repository-name: "gitvision-cloud"
+          target-branch: main-public
