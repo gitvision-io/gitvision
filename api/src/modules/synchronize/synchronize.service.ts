@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Job } from 'bull';
 import { RepoService } from '../repo/repo.service';
 
 @Injectable()
@@ -9,17 +10,23 @@ export class SynchronizeService {
     this.repoService.auth(gitProviderName, token);
   }
 
-  async synchronize(date: Date) {
+  async synchronize(date: Date, job?: Job) {
     // Get Commits
     await this.repoService.getCommitsOfAllRepoOfAllOrgWithPagination(date);
+    await job?.progress(30);
     await this.repoService.getCommitsOfAllRepoOfUserWithPagination(date);
+    await job?.progress(40);
 
     // Get Issues
     await this.repoService.getIssuesOfAllRepoOfAllOrgWithPagination(date);
+    await job?.progress(60);
     await this.repoService.getIssuesOfAllRepoOfUserWithPagination(date);
+    await job?.progress(70);
 
     // Get Pull Requests
     await this.repoService.getPullRequestsOfAllRepoOfAllOrgWithPagination(date);
+    await job?.progress(80);
     await this.repoService.getPullRequestsOfAllRepoOfUserWithPagination(date);
+    await job?.progress(90);
   }
 }

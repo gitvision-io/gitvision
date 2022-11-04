@@ -20,7 +20,10 @@ export class ConsumerService {
     const now = new Date();
     const synchronizationDate = new Date(job.data.fromDate);
 
-    await this.synchronizeService.synchronize(synchronizationDate);
+    await job.progress(5);
+    await this.synchronizeService.synchronize(synchronizationDate, job);
+
+    await job.progress(95);
     await this.usersService.update(user.id, {
       lastSynchronize: now,
     });

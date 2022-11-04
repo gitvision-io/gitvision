@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useAtom } from "jotai";
+import React, { useEffect, useState } from "react";
 import {
   Contributor,
   Issue,
@@ -6,13 +7,17 @@ import {
   PullRequest,
   RepositoryStatistics,
 } from "../common/types";
+import Loader from "../components/common/Loader";
+import Progress from "../components/common/Progress";
 import ActiveRepositories from "../components/dashboard/ActiveRepositories/Index";
 import Contributors from "../components/dashboard/Contributors/Index";
 import DashboardFilters from "../components/dashboard/Filters";
+import useSynchronize from "../components/dashboard/hooks/useSynchronize";
 import Issues from "../components/dashboard/Issues/Index";
 import Kpis from "../components/dashboard/Kpis";
 import PullRequests from "../components/dashboard/PullRequests/Index";
 import { getInstance } from "../services/api";
+import { asyncRefreshUser } from "../services/state";
 
 function Dashboard() {
   const [contributors, setContributors] = useState<Contributor[]>([]);
@@ -23,6 +28,8 @@ function Dashboard() {
   const [selectedKpi, setSelectedKpi] = useState<KpiCategory>(
     KpiCategory.Contributors
   );
+  const [, refreshUser] = useAtom(asyncRefreshUser);
+  const { isSynchronizing, runningJob } = useSynchronize();
 
   const onApplyFilters = (filters: Record<string, any>) => {
     if (filters.repositories) {
@@ -90,6 +97,10 @@ function Dashboard() {
     );
   };
 
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
   return (
     <>
       <DashboardFilters
@@ -98,37 +109,59 @@ function Dashboard() {
         }}
       />
 
-      <Kpis
-        contributors={contributors.length}
-        activeRepositories={repositories.length}
-        pullRequests={pullRequests.length}
-        openIssues={issues.length}
-        onChangeSelected={(selected) => setSelectedKpi(selected)}
-        selected={selectedKpi}
-      />
-
-      {selectedKpi === KpiCategory.Contributors && (
-        <Contributors
-          contributors={contributors}
-          repositories={repositories}
-          filters={filters}
-        />
+      {isSynchronizing && (
+        <div className="text-center my-20">
+          <div className="text-base font-medium text-blue-700 dark:text-white mb-2">
+            Synchronizing with your git provider ...
+          </div>
+          <div className="m-auto max-w-lg flex items-center">
+            <Loader text={""} color="gray-800" size={6} />
+            <div className="flex-1">
+              <Progress percent={runningJob?.progress || 5} />
+            </div>
+          </div>
+        </div>
       )}
 
-      {selectedKpi === KpiCategory.ActiveRepositories && (
-        <ActiveRepositories repositories={repositories} filters={filters} />
-      )}
+      {!isSynchronizing && (
+        <>
+          <Kpis
+            contributors={contributors.length}
+            activeRepositories={repositories.length}
+            pullRequests={pullRequests.length}
+            openIssues={issues.length}
+            onChangeSelected={(selected) => setSelectedKpi(selected)}
+            selected={selectedKpi}
+          />
 
-      {selectedKpi === KpiCategory.PullRequests && (
-        <PullRequests
-          pullRequests={pullRequests}
-          repositories={repositories}
-          filters={filters}
-        />
-      )}
+          {selectedKpi === KpiCategory.Contributors && (
+            <Contributors
+              contributors={contributors}
+              repositories={repositories}
+              filters={filters}
+            />
+          )}
 
-      {selectedKpi === KpiCategory.Issues && (
-        <Issues issues={issues} repositories={repositories} filters={filters} />
+          {selectedKpi === KpiCategory.ActiveRepositories && (
+            <ActiveRepositories repositories={repositories} filters={filters} />
+          )}
+
+          {selectedKpi === KpiCategory.PullRequests && (
+            <PullRequests
+              pullRequests={pullRequests}
+              repositories={repositories}
+              filters={filters}
+            />
+          )}
+
+          {selectedKpi === KpiCategory.Issues && (
+            <Issues
+              issues={issues}
+              repositories={repositories}
+              filters={filters}
+            />
+          )}
+        </>
       )}
     </>
   );
