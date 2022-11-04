@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { getInstance } from "../../services/api";
 import Dropdown, { DropdownValue } from "../common/Dropdown";
 import Loader from "../common/Loader";
-import Synchronize from "./Synchronize";
 
 const times = [
   { label: "last day" },
