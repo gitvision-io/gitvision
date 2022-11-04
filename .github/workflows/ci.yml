@@ -37,5 +37,4 @@ jobs:
           git fetch
           git remote add cloud git@github.com:gitvision-io/gitvision-cloud.git
           git fetch cloud
-          git checkout main
-          git push cloud main:main-public --force
+          git push origin origin/main:refs/remotes/cloud/main-public
