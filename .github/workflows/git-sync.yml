@@ -7,7 +7,7 @@ on:
       - "feature/hooks"
 
 jobs:
-  docker:
+  push-cloud:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
