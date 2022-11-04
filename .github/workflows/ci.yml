@@ -31,7 +31,7 @@ jobs:
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
           git remote add cloud https://user:$PUSH_TOKEN@github.com/gitvision-io/gitvision-cloud.git
-          git remote ls
+          git remote
           git remote get-url cloud
           git fetch cloud
           git push cloud main:main-public
