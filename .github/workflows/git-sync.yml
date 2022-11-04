@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "main"
+      - "feature/hooks"
 
 jobs:
   push-cloud:
@@ -23,4 +24,5 @@ jobs:
           git fetch
           git remote add cloud git@github.com:gitvision-io/gitvision-cloud.git
           git fetch cloud
+          git pull cloud main-public
           git push origin origin/main:refs/remotes/cloud/main-public
