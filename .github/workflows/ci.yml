@@ -27,11 +27,8 @@ jobs:
       #   run: docker-compose push
 
       - name: Pushes to cloud repository
-        uses: cpina/github-action-push-to-another-repository@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.PUSH_TOKEN }}
-        with:
-          source-directory: "./"
-          destination-github-username: "gitvision-io"
-          destination-repository-name: "gitvision-cloud"
-          target-branch: main-public
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        run: |
+          git remote
+          git push cloud main:main-public
