@@ -33,9 +33,8 @@ jobs:
           private-key: ${{ secrets.SSH_KEY }}
 
       - name: Pushes to cloud repository
-        env:
-          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
+          git fetch
           git remote add cloud git@github.com:gitvision-io/gitvision-cloud.git
           git fetch cloud
           git push cloud main:main-public
