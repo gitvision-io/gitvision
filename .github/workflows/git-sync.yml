@@ -21,6 +21,7 @@ jobs:
 
       - name: Pushes to cloud repository
         run: |
+          git config pull.rebase false
           git fetch
           git remote add cloud git@github.com:gitvision-io/gitvision-cloud.git
           git fetch cloud
