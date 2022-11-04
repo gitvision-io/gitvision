@@ -74,20 +74,24 @@ export class RepoGitlabService {
   }
 
   // Get all commits
-  async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
+  async getCommitsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<Commit[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    return await Promise.all([
-      ...allRepos.map(async (r) => {
-        if (r.id != null) {
-          const commitsGitlab = await this.#api.Commits.all(r.id, {
-            maxPages: 50000,
-            since: date,
-            with_stats: true,
-          });
-          const commits = commitsGitlab.map(
-            (commitsStatsGitlab: CommitExtendedSchema) => {
-              if (commitsStatsGitlab.id != null) {
+    return (
+      await Promise.all([
+        ...allRepos
+          .filter((r) => r.id)
+          .map(async (r) => {
+            const commitsGitlab = await this.#api.Commits.all(r.id, {
+              maxPages: 50000,
+              since: date,
+              with_stats: true,
+            });
+            return commitsGitlab
+              .filter((c) => c.id)
+              .map((commitsStatsGitlab: CommitExtendedSchema) => {
                 const commit = new Commit();
                 commit.id = commitsStatsGitlab.id as string;
 
@@ -98,75 +102,72 @@ export class RepoGitlabService {
                 commit.numberOfLineRemoved = commitsStatsGitlab.stats.deletions;
                 commit.totalNumberOfLine = commitsStatsGitlab.stats.total;
                 return commit;
-              }
-            },
-          );
-          r.commits = commits;
-        }
-        return r;
-      }),
-    ]);
+              });
+          }),
+      ])
+    ).flatMap((c) => c);
   }
 
-  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
-    const repositories: Repo[] = [];
+  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Commit[]> {
+    const repositories: Commit[] = [];
     return repositories;
   }
 
   // Get all issues
-  async getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Repo[]> {
+  async getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Issue[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    return await Promise.all([
-      ...allRepos.map(async (r) => {
-        if (r.id != null) {
-          const issuesGitlab = await this.#api.Issues.all({
-            projectId: r.id,
-            since: date,
-          });
+    return (
+      await Promise.all([
+        ...allRepos
+          .filter((r) => r.id)
+          .map(async (r) => {
+            const issuesGitlab = await this.#api.Issues.all({
+              projectId: r.id,
+              since: date,
+            });
 
-          const issues: Issue[] = issuesGitlab.map((i: IssueSchema) => {
-            if (i.id != null) {
-              const issue = new Issue();
-              issue.id = i.id.toString();
-              issue.repoId = r.id;
-              issue.state = i.state;
-              issue.createdAt = new Date(i.created_at);
-              issue.closedAt = i.closed_at;
+            return issuesGitlab
+              .filter((i) => i.id)
+              .map((i: IssueSchema) => {
+                const issue = new Issue();
+                issue.id = i.id.toString();
+                issue.repoId = r.id;
+                issue.state = i.state;
+                issue.createdAt = new Date(i.created_at);
+                issue.closedAt = i.closed_at;
 
-              return issue;
-            }
-          });
-          r.issues = issues;
-        }
-
-        return r;
-      }),
-    ]);
+                return issue;
+              });
+          }),
+      ])
+    ).flatMap((i) => i);
   }
 
-  async getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Repo[]> {
-    const repositories: Repo[] = [];
-    return repositories;
+  async getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Issue[]> {
+    const issues: Issue[] = [];
+    return issues;
   }
 
   // Get all pull requests
   async getPullRequestsOfAllRepoOfAllOrgWithPagination(
     date: Date,
-  ): Promise<Repo[]> {
+  ): Promise<PullRequest[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    return await Promise.all([
-      ...allRepos.map(async (r) => {
-        if (r.id != null) {
-          const mergeRequestsGitlab = await this.#api.MergeRequests.all({
-            projectId: r.id,
-            since: date,
-          });
+    return (
+      await Promise.all([
+        ...allRepos
+          .filter((r) => r.id)
+          .map(async (r) => {
+            const mergeRequestsGitlab = await this.#api.MergeRequests.all({
+              projectId: r.id,
+              since: date,
+            });
 
-          const pullRequests: PullRequest[] = mergeRequestsGitlab.map(
-            (m: MergeRequestSchema) => {
-              if (m.id != null) {
+            return mergeRequestsGitlab
+              .filter((mr) => mr.id)
+              .map((m: MergeRequestSchema) => {
                 const mergeRequest = new PullRequest();
                 mergeRequest.id = m.id.toString();
                 mergeRequest.repoId = r.id;
@@ -175,19 +176,14 @@ export class RepoGitlabService {
                 mergeRequest.closedAt = m.closed_at;
 
                 return mergeRequest;
-              }
-            },
-          );
-          r.pullRequests = pullRequests;
-        }
-
-        return r;
-      }),
-    ]);
+              });
+          }),
+      ])
+    ).flatMap((pr) => pr);
   }
 
-  async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<Repo[]> {
-    const repositories: Repo[] = [];
-    return repositories;
+  async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<PullRequest[]> {
+    const pullRequests: PullRequest[] = [];
+    return pullRequests;
   }
 }
