@@ -43,6 +43,7 @@ const Button = ({
   loadingText,
   isDisabled,
   size,
+  type,
 }: ButtonProps) => {
   const computedChildren = isLoading ? <Loader text={loadingText} /> : children;
 
@@ -62,6 +63,7 @@ const Button = ({
       className={computedClassName}
       onClick={onClick}
       disabled={isDisabled}
+      type={type}
     >
       {computedChildren}
     </button>
