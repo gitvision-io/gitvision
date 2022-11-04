@@ -12,7 +12,9 @@ export class SynchronizeController {
   constructor(private readonly synchronizeProducerService: ProducerService) {}
 
   @Get('jobs/:id')
-  async getAllRepoStat(@Param('id') id: string): Promise<Job<UserSynchronizeJob>> {
+  async getAllRepoStat(
+    @Param('id') id: string,
+  ): Promise<Job<UserSynchronizeJob>> {
     return await this.synchronizeProducerService.getJob(id);
   }
 

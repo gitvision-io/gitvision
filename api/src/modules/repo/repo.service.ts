@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Commit } from 'src/entities/commit.entity';
+import { Issue } from 'src/entities/issue.entity';
+import { PullRequest } from 'src/entities/pullrequest.entity';
 import { Repo } from 'src/entities/repo.entity';
 import { Equal, In, IsNull, Not, Repository } from 'typeorm';
 import { RepoGithubService } from './github/repo.github.service';
@@ -16,12 +19,16 @@ export interface IRepoGitProvider {
   getAllOrgWithPagination(): Promise<Organization[]>;
   getAllRepoOfAllOrgWithPagination(): Promise<Repo[]>;
   getAllRepoOfUserWithPagination(): Promise<Repo[]>;
-  getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<void>;
-  getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<void>;
-  getIssuesOfAllRepoOfAllOrgWithPagination(): Promise<void>;
-  getIssuesOfAllRepoOfUserWithPagination(): Promise<void>;
-  getPullRequestsOfAllRepoOfAllOrgWithPagination(): Promise<void>;
-  getPullRequestsOfAllRepoOfUserWithPagination(): Promise<void>;
+  getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Commit[]>;
+  getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Commit[]>;
+  getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Issue[]>;
+  getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Issue[]>;
+  getPullRequestsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<PullRequest[]>;
+  getPullRequestsOfAllRepoOfUserWithPagination(
+    date: Date,
+  ): Promise<PullRequest[]>;
 }
 
 @Injectable()
@@ -30,13 +37,19 @@ export class RepoService {
   constructor(
     @InjectRepository(Repo)
     private repoRepository: Repository<Repo>,
+    @InjectRepository(Commit)
+    private commitRepository: Repository<Commit>,
+    @InjectRepository(Issue)
+    private issueRepository: Repository<Issue>,
+    @InjectRepository(PullRequest)
+    private pullRequestRepository: Repository<PullRequest>,
   ) {}
 
   auth(providerName: string, token: string): void {
     if (providerName === 'github') {
-      this.#repoGitProvider = new RepoGithubService(this.repoRepository);
+      this.#repoGitProvider = new RepoGithubService();
     } else if (providerName === 'gitlab') {
-      this.#repoGitProvider = new RepoGitlabService(this.repoRepository);
+      this.#repoGitProvider = new RepoGitlabService();
     }
     this.#repoGitProvider.auth(token);
   }
@@ -155,32 +168,52 @@ export class RepoService {
 
   // Get all commits
   async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<void> {
-    return await this.#repoGitProvider.getCommitsOfAllRepoOfAllOrgWithPagination(
-      date,
-    );
+    const commits =
+      await this.#repoGitProvider.getCommitsOfAllRepoOfAllOrgWithPagination(
+        date,
+      );
+    await this.commitRepository.save(commits);
   }
 
   async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<void> {
-    return await this.#repoGitProvider.getCommitsOfAllRepoOfUserWithPagination(
-      date,
-    );
+    const commits =
+      await this.#repoGitProvider.getCommitsOfAllRepoOfUserWithPagination(date);
+    this.commitRepository.save(commits);
   }
 
   // Get all issues
-  async getIssuesOfAllRepoOfAllOrgWithPagination(): Promise<void> {
-    return await this.#repoGitProvider.getIssuesOfAllRepoOfAllOrgWithPagination();
+  async getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<void> {
+    const issues =
+      await this.#repoGitProvider.getIssuesOfAllRepoOfAllOrgWithPagination(
+        date,
+      );
+    this.issueRepository.save(issues);
   }
 
-  async getIssuesOfAllRepoOfUserWithPagination(): Promise<void> {
-    return await this.#repoGitProvider.getIssuesOfAllRepoOfUserWithPagination();
+  async getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<void> {
+    const issues =
+      await this.#repoGitProvider.getIssuesOfAllRepoOfUserWithPagination(date);
+    this.issueRepository.save(issues);
   }
 
   // Get all pull requests
-  async getPullRequestsOfAllRepoOfAllOrgWithPagination(): Promise<void> {
-    return await this.#repoGitProvider.getPullRequestsOfAllRepoOfAllOrgWithPagination();
+  async getPullRequestsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<void> {
+    const pullRequests =
+      await this.#repoGitProvider.getPullRequestsOfAllRepoOfAllOrgWithPagination(
+        date,
+      );
+    this.pullRequestRepository.save(pullRequests);
   }
 
-  async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<void> {
-    return await this.#repoGitProvider.getPullRequestsOfAllRepoOfUserWithPagination();
+  async getPullRequestsOfAllRepoOfUserWithPagination(
+    date: Date,
+  ): Promise<void> {
+    const pullRequests =
+      await this.#repoGitProvider.getPullRequestsOfAllRepoOfUserWithPagination(
+        date,
+      );
+    this.pullRequestRepository.save(pullRequests);
   }
 }

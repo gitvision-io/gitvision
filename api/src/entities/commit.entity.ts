@@ -36,7 +36,7 @@ export class Commit {
     type: Number,
     nullable: true,
   })
-  numberOfLineModified: number;
+  totalNumberOfLine: number;
 
   @ManyToOne(() => Repo, (repo) => repo.commits)
   repo: Repo;

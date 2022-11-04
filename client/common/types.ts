@@ -13,7 +13,7 @@ export interface Contributor {
   commitActivity: number;
   numberOfLineAdded: number;
   numberOfLineRemoved: number;
-  numberOfLineModified: number;
+  totalNumberOfLine: number;
   date: Date;
 }
 
@@ -24,7 +24,7 @@ export interface Commit {
   repoId: string;
   numberOfLineAdded: number;
   numberOfLineRemoved: number;
-  numberOfLineModified: number;
+  totalNumberOfLine: number;
 }
 
 export interface PullRequest {

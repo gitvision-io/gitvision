@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repo } from 'src/entities/repo.entity';
 
-import { Repository } from 'typeorm';
 import { Gitlab } from '@gitbeaker/node';
 import {
   ProjectSchema,
@@ -26,26 +24,11 @@ const defaultAPI = new Gitlab(null);
 export class RepoGitlabService {
   #api: typeof defaultAPI;
 
-  constructor(
-    @InjectRepository(Repo)
-    private repoRepository: Repository<Repo>,
-  ) {}
-
   auth(token: string): void {
     this.#api = new Gitlab({
       host: 'https://gitlab.com',
       oauthToken: token,
     });
-  }
-
-  async upsert(id: string, repo: Repo): Promise<void> {
-    await this.repoRepository.upsert(
-      {
-        id,
-        ...repo,
-      },
-      ['id'],
-    );
   }
 
   // Get all organisations
@@ -58,6 +41,7 @@ export class RepoGitlabService {
   async getAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
     const repositories: Repo[] = [];
     const orgs = await this.#api.Groups.all({ maxPages: 50000 });
+
     await Promise.all([
       ...orgs.map(async (o) => {
         if (o.id) {
@@ -90,20 +74,24 @@ export class RepoGitlabService {
   }
 
   // Get all commits
-  async getCommitsOfAllRepoOfAllOrgWithPagination(date: Date): Promise<void> {
+  async getCommitsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<Commit[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    await Promise.all([
-      ...allRepos.map(async (r) => {
-        if (r.id != null) {
-          const commitsGitlab = await this.#api.Commits.all(r.id, {
-            maxPages: 50000,
-            since: date,
-            with_stats: true,
-          });
-          const commits = commitsGitlab.map(
-            (commitsStatsGitlab: CommitExtendedSchema) => {
-              if (commitsStatsGitlab.id != null) {
+    return (
+      await Promise.all([
+        ...allRepos
+          .filter((r) => r.id)
+          .map(async (r) => {
+            const commitsGitlab = await this.#api.Commits.all(r.id, {
+              maxPages: 50000,
+              since: date,
+              with_stats: true,
+            });
+            return commitsGitlab
+              .filter((c) => c.id)
+              .map((commitsStatsGitlab: CommitExtendedSchema) => {
                 const commit = new Commit();
                 commit.id = commitsStatsGitlab.id as string;
 
@@ -112,74 +100,74 @@ export class RepoGitlabService {
                 commit.author = commitsStatsGitlab.author_name;
                 commit.numberOfLineAdded = commitsStatsGitlab.stats.additions;
                 commit.numberOfLineRemoved = commitsStatsGitlab.stats.deletions;
-                commit.numberOfLineModified =
-                  commitsStatsGitlab.stats.additions -
-                  commitsStatsGitlab.stats.deletions;
+                commit.totalNumberOfLine = commitsStatsGitlab.stats.total;
                 return commit;
-              }
-            },
-          );
-          r.commits = commits;
-        }
-
-        this.upsert(r.id, r);
-        return r;
-      }),
-    ]);
+              });
+          }),
+      ])
+    ).flatMap((c) => c);
   }
 
-  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<void> {
-    return null;
+  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Commit[]> {
+    const repositories: Commit[] = [];
+    return repositories;
   }
 
   // Get all issues
-  async getIssuesOfAllRepoOfAllOrgWithPagination(): Promise<void> {
+  async getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Issue[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    await Promise.all([
-      ...allRepos.map(async (r) => {
-        if (r.id != null) {
-          const issuesGitlab = await this.#api.Issues.all({ projectId: r.id });
+    return (
+      await Promise.all([
+        ...allRepos
+          .filter((r) => r.id)
+          .map(async (r) => {
+            const issuesGitlab = await this.#api.Issues.all({
+              projectId: r.id,
+              since: date,
+            });
 
-          const issues: Issue[] = issuesGitlab.map((i: IssueSchema) => {
-            if (i.id != null) {
-              const issue = new Issue();
-              issue.id = i.id.toString();
-              issue.repoId = r.id;
-              issue.state = i.state;
-              issue.createdAt = new Date(i.created_at);
-              issue.closedAt = i.closed_at;
+            return issuesGitlab
+              .filter((i) => i.id)
+              .map((i: IssueSchema) => {
+                const issue = new Issue();
+                issue.id = i.id.toString();
+                issue.repoId = r.id;
+                issue.state = i.state;
+                issue.createdAt = new Date(i.created_at);
+                issue.closedAt = i.closed_at;
 
-              return issue;
-            }
-          });
-          r.issues = issues;
-        }
-
-        this.upsert(r.id, r);
-        return r;
-      }),
-    ]);
+                return issue;
+              });
+          }),
+      ])
+    ).flatMap((i) => i);
   }
 
-  async getIssuesOfAllRepoOfUserWithPagination(): Promise<void> {
-    return null;
+  async getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Issue[]> {
+    const issues: Issue[] = [];
+    return issues;
   }
 
   // Get all pull requests
-  async getPullRequestsOfAllRepoOfAllOrgWithPagination(): Promise<void> {
+  async getPullRequestsOfAllRepoOfAllOrgWithPagination(
+    date: Date,
+  ): Promise<PullRequest[]> {
     const allRepos = await this.getAllRepoOfAllOrgWithPagination();
 
-    await Promise.all([
-      ...allRepos.map(async (r) => {
-        if (r.id != null) {
-          const mergeRequestsGitlab = await this.#api.MergeRequests.all({
-            projectId: r.id,
-          });
+    return (
+      await Promise.all([
+        ...allRepos
+          .filter((r) => r.id)
+          .map(async (r) => {
+            const mergeRequestsGitlab = await this.#api.MergeRequests.all({
+              projectId: r.id,
+              since: date,
+            });
 
-          const pullRequests: PullRequest[] = mergeRequestsGitlab.map(
-            (m: MergeRequestSchema) => {
-              if (m.id != null) {
+            return mergeRequestsGitlab
+              .filter((mr) => mr.id)
+              .map((m: MergeRequestSchema) => {
                 const mergeRequest = new PullRequest();
                 mergeRequest.id = m.id.toString();
                 mergeRequest.repoId = r.id;
@@ -188,19 +176,14 @@ export class RepoGitlabService {
                 mergeRequest.closedAt = m.closed_at;
 
                 return mergeRequest;
-              }
-            },
-          );
-          r.pullRequests = pullRequests;
-        }
-
-        this.upsert(r.id, r);
-        return r;
-      }),
-    ]);
+              });
+          }),
+      ])
+    ).flatMap((pr) => pr);
   }
 
-  async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<void> {
-    return null;
+  async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<PullRequest[]> {
+    const pullRequests: PullRequest[] = [];
+    return pullRequests;
   }
 }
