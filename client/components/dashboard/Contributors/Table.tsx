@@ -26,7 +26,7 @@ const ContributorsTable = ({
               Number of line deleted
             </th>
             <th scope="col" className="py-3 px-6">
-              Number of line modified
+              Total number of line
             </th>
             <th scope="col" className="py-3 px-6">
               Commit activity
