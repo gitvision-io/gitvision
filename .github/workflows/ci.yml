@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - "main"
-      - "feature/hooks"
 
 jobs:
   docker:
@@ -13,28 +12,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # - name: Login to GitHub Container Registry
-      #   uses: docker/login-action@v2
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ GITHUB.REPOSITORY_OWNER }}
-      #     password: ${{ secrets.GHCR_TOKEN }}
-
-      # - name: Build Compose Images
-      #   run: docker-compose build
-
-      # - name: Push Images
-      #   run: docker-compose push
-
-      - name: Setup SSH
-        uses: MrSquaare/ssh-setup-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          host: github.com
-          private-key: ${{ secrets.SSH_KEY }}
+          registry: ghcr.io
+          username: ${{ GITHUB.REPOSITORY_OWNER }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Pushes to cloud repository
-        run: |
-          git fetch
-          git remote add cloud git@github.com:gitvision-io/gitvision-cloud.git
-          git fetch cloud
-          git push origin origin/main:refs/remotes/cloud/main-public
+      - name: Build Compose Images
+        run: docker-compose build
+
+      - name: Push Images
+        run: docker-compose push
