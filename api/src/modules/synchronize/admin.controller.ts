@@ -6,6 +6,7 @@ import * as Bull from 'bull';
 import express from 'express';
 import {
   CRON_SYNCHRONIZATION_QUEUE,
+  PUBLIC_SYNCHRONIZATION_QUEUE,
   USER_SYNCHRONIZATION_QUEUE,
 } from './synchronize.constants';
 
@@ -21,7 +22,11 @@ export class QueueAdminController {
   ) {
     const serverAdapter = new ExpressAdapter();
     serverAdapter.setBasePath(rootPath);
-    const queues = [USER_SYNCHRONIZATION_QUEUE, CRON_SYNCHRONIZATION_QUEUE].map(
+    const queues = [
+      USER_SYNCHRONIZATION_QUEUE,
+      CRON_SYNCHRONIZATION_QUEUE,
+      PUBLIC_SYNCHRONIZATION_QUEUE,
+    ].map(
       (queue) =>
         new Bull(queue, {
           redis: {
@@ -33,7 +38,7 @@ export class QueueAdminController {
     );
     const router = serverAdapter.getRouter() as express.Express;
     createBullBoard({
-      queues: [new BullAdapter(queues[0]), new BullAdapter(queues[1])],
+      queues: [...queues.map((q) => new BullAdapter(q))],
       serverAdapter,
     });
     req.url = req.url.replace(rootPath, '/');

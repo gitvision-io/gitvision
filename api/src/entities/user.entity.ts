@@ -1,8 +1,15 @@
-import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  ManyToMany,
+  JoinTable,
+  BaseEntity,
+} from 'typeorm';
 import { Repo } from './repo.entity';
 
 @Entity()
-export class User {
+export class User extends BaseEntity {
   @PrimaryColumn()
   id: string;
 
@@ -47,9 +54,6 @@ export class User {
     nullable: true,
   })
   gitProviderName: string | null;
-
-  @Column({ default: true })
-  isActive: boolean;
 
   @ManyToMany(() => Repo, (repo) => repo.users, {
     cascade: ['insert', 'update'],

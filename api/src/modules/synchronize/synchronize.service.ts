@@ -1,32 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { Job } from 'bull';
+import { GitProviderService } from '../git-provider/gitprovider.service';
 import { RepoService } from '../repo/repo.service';
+import { SynchronizeJob } from './producer.service';
 
 @Injectable()
 export class SynchronizeService {
-  constructor(private readonly repoService: RepoService) {}
+  constructor(
+    protected readonly gitProviderService: GitProviderService,
+    protected readonly repoService: RepoService,
+  ) {}
 
   auth(gitProviderName: string, token: string): void {
-    this.repoService.auth(gitProviderName, token);
+    this.gitProviderService.auth(gitProviderName, token);
   }
 
-  async synchronize(date: Date, job?: Job) {
+  async synchronize(date: Date, job?: Job<SynchronizeJob>) {
     // Get Commits
-    await this.repoService.getCommitsOfAllRepoOfAllOrgWithPagination(date);
-    await job?.progress(30);
-    await this.repoService.getCommitsOfAllRepoOfUserWithPagination(date);
+    await this.repoService.getCommitsOfRepos(job.data.repos, date);
     await job?.progress(40);
 
     // Get Issues
-    await this.repoService.getIssuesOfAllRepoOfAllOrgWithPagination(date);
-    await job?.progress(60);
-    await this.repoService.getIssuesOfAllRepoOfUserWithPagination(date);
+    await this.repoService.getIssuesOfRepos(job.data.repos, date);
     await job?.progress(70);
 
     // Get Pull Requests
-    await this.repoService.getPullRequestsOfAllRepoOfAllOrgWithPagination(date);
-    await job?.progress(80);
-    await this.repoService.getPullRequestsOfAllRepoOfUserWithPagination(date);
+    await this.repoService.getPullRequestsOfRepos(job.data.repos, date);
     await job?.progress(90);
   }
 }

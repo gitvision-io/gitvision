@@ -1,18 +1,24 @@
-query GetAllReposOfOrgWithPagination($orgLogin: String!, $cursorRepo: String) {
-  viewer {
-    login
-    organization(login: $orgLogin) {
-      repositories(first: 100, after: $cursorRepo) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        edges {
-          cursor
-          node {
-            id
-            name
-          }
+query GetAllReposOfOrgWithPagination(
+  $orgLogin: String!
+  $privacy: RepositoryPrivacy
+  $cursorRepo: String
+) {
+  organization(login: $orgLogin) {
+    repositories(
+      first: 100
+      after: $cursorRepo
+      privacy: $privacy
+      orderBy: { field: STARGAZERS, direction: DESC }
+    ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          name
         }
       }
     }

@@ -21,6 +21,12 @@ export class Repo {
   })
   organization?: string;
 
+  @Column({
+    type: String,
+    nullable: true,
+  })
+  owner: string;
+
   @OneToMany(() => Commit, (commit) => commit.repo, {
     cascade: ['insert', 'update'],
   })

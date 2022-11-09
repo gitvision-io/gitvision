@@ -1,25 +1,37 @@
-import { useAtom } from "jotai";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Contributor,
   Issue,
   KpiCategory,
   PullRequest,
   RepositoryStatistics,
-} from "../common/types";
-import Loader from "../components/common/Loader";
-import Progress from "../components/common/Progress";
-import ActiveRepositories from "../components/dashboard/ActiveRepositories/Index";
-import Contributors from "../components/dashboard/Contributors/Index";
-import DashboardFilters from "../components/dashboard/Filters";
-import useSynchronize from "../components/dashboard/hooks/useSynchronize";
-import Issues from "../components/dashboard/Issues/Index";
-import Kpis from "../components/dashboard/Kpis";
-import PullRequests from "../components/dashboard/PullRequests/Index";
-import { getInstance } from "../services/api";
-import { asyncRefreshUser } from "../services/state";
+} from "../../common/types";
+import DashboardFilters from "./Filters";
+import Issues from "./Issues/Index";
+import Kpis from "./Kpis";
+import PullRequests from "./PullRequests/Index";
+import { getInstance } from "../../services/api";
+import Contributors from "./Contributors/Index";
+import ActiveRepositories from "./ActiveRepositories/Index";
+import Loader from "../common/Loader";
+import Progress from "../common/Progress";
+import useSynchronize from "./hooks/useSynchronize";
 
-function Dashboard() {
+export interface DashboardComponentProps {
+  initialSynchronization: boolean;
+  initialOrganization?: string;
+  baseOrgStatsUrl: string;
+  baseOrgSearchUrl: string;
+  onFiltersApplied?: (filters: Record<string, unknown>) => void;
+}
+
+function DashboardComponent({
+  initialSynchronization,
+  initialOrganization,
+  baseOrgStatsUrl,
+  baseOrgSearchUrl,
+  onFiltersApplied,
+}: DashboardComponentProps) {
   const [contributors, setContributors] = useState<Contributor[]>([]);
   const [repositories, setRepositories] = useState<RepositoryStatistics[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -28,11 +40,14 @@ function Dashboard() {
   const [selectedKpi, setSelectedKpi] = useState<KpiCategory>(
     KpiCategory.Contributors
   );
-  const [, refreshUser] = useAtom(asyncRefreshUser);
-  const { isSynchronizing, runningJob } = useSynchronize();
+
+  const { isSynchronizing, runningJob } = useSynchronize({
+    initialSynchronization,
+  });
 
   const onApplyFilters = (filters: Record<string, any>) => {
-    if (filters.repositories) {
+    onFiltersApplied?.(filters);
+    if (filters.repositories && filters.time) {
       setFilters(filters);
       changeDashboard(filters);
     }
@@ -77,7 +92,7 @@ function Dashboard() {
 
   const changeDashboard = async (filters: Record<string, any>) => {
     const resp = await getInstance().get(
-      `/api/orgstats/${encodeURIComponent(filters.organization)}`,
+      `${baseOrgStatsUrl}/${encodeURIComponent(filters.organization)}`,
       {
         params: {
           filters,
@@ -97,16 +112,12 @@ function Dashboard() {
     );
   };
 
-  useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
-
   return (
     <>
       <DashboardFilters
-        onChange={(filters) => {
-          onApplyFilters(filters);
-        }}
+        onChange={onApplyFilters}
+        initialOrganization={initialOrganization}
+        baseOrgSearchUrl={baseOrgSearchUrl}
       />
 
       {isSynchronizing && (
@@ -167,4 +178,9 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+DashboardComponent.defaultProps = {
+  baseOrgStatsUrl: "/api/orgstats",
+  baseOrgSearchUrl: "/api/orgs",
+};
+
+export default DashboardComponent;

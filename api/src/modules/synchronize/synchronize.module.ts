@@ -1,7 +1,9 @@
+import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
+import { GitProviderModule } from '../git-provider/gitprovider.module';
 import { RepoModule } from '../repo/repo.module';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
@@ -30,6 +32,8 @@ import { SynchronizeService } from './synchronize.service';
     ),
     UsersModule,
     RepoModule,
+    GitProviderModule,
+    HttpModule,
   ],
   controllers: [SynchronizeController, QueueAdminController],
   exports: [ProducerService],

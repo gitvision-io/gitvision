@@ -2,24 +2,31 @@ import { Injectable } from '@nestjs/common';
 import Bull, { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { USER_SYNCHRONIZATION_QUEUE } from './synchronize.constants';
-
-export interface UserSynchronizeJob {
+import { Organization } from 'src/common/types';
+import { Repo } from 'src/entities/repo.entity';
+export interface SynchronizeJob {
   fromDate: string;
+  orgs: Organization[];
+  repos: Repo[];
+  gitProviderName: string;
+  gitProviderToken?: string;
+}
+export interface UserSynchronizeJob extends SynchronizeJob {
   userId: string;
 }
 
 @Injectable()
-export class ProducerService {
+export class ProducerService<T extends SynchronizeJob> {
   constructor(
     @InjectQueue(USER_SYNCHRONIZATION_QUEUE)
-    private userSynchronizationQueue: Queue<UserSynchronizeJob>,
+    protected readonly synchronizationQueue: Queue<T>,
   ) {}
 
   async getJob(jobId: Bull.JobId) {
-    return await this.userSynchronizationQueue.getJob(jobId);
+    return await this.synchronizationQueue.getJob(jobId);
   }
 
-  async addJob(job: UserSynchronizeJob): Promise<Job<UserSynchronizeJob>> {
+  async addJob(job: T): Promise<Job<T>> {
     const now = new Date();
     const defaultFromDate = new Date(now.getTime());
     defaultFromDate.setMonth(now.getMonth() - 6);
@@ -28,18 +35,18 @@ export class ProducerService {
       fromDate: defaultFromDate.toISOString(),
     };
 
-    const actives = await this.userSynchronizationQueue.getActive();
-    const waitings = await this.userSynchronizationQueue.getWaiting();
+    const actives = await this.synchronizationQueue.getActive();
+    const waitings = await this.synchronizationQueue.getWaiting();
 
-    if (
-      [...actives, ...waitings].some(
-        (j) => j.data.fromDate === job.fromDate && j.data.userId === job.userId,
-      )
-    ) {
+    const existingJob = [...actives, ...waitings].find((j) =>
+      Object.entries(j).every(([k, v]) => v === job[k]),
+    );
+    if (existingJob) {
       console.log('has active, cancelling');
+      return existingJob;
     }
 
-    const consolidatedJob: UserSynchronizeJob = { ...defaults, ...job };
-    return await this.userSynchronizationQueue.add(consolidatedJob);
+    const consolidatedJob: T = { ...defaults, ...job };
+    return await this.synchronizationQueue.add(consolidatedJob);
   }
 }

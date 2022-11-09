@@ -1,55 +1,75 @@
 import { Injectable } from '@nestjs/common';
 import { Repo } from 'src/entities/repo.entity';
-import { GithubService } from '../github/github.service';
-import { GitlabService } from '../gitlab/gitlab.service';
-import { HttpService } from '@nestjs/axios';
+import { GithubService } from './github.service';
+import { GitlabService } from './gitlab.service';
+import { Organization } from 'src/common/types';
+import { Commit } from 'src/entities/commit.entity';
+import { Issue } from 'src/entities/issue.entity';
+import { PullRequest } from 'src/entities/pullrequest.entity';
 
 export interface IGitProvider {
   auth(token: string): void;
-  getAllOrganizations(): Promise<string[]>;
   getProfile(): Promise<{ id: number; login: string }>;
-  getRepositories(): Promise<Repo[]>;
-  getOrgRepositories(org: string): Promise<Repo[]>;
-  revokeAccess(token: string): void;
+  getOrgRepositories(org: string, onlyPublic: boolean): Promise<Repo[]>;
+
+  getAllOrgs(): Promise<Organization[]>;
+  getAllReposOfOrgs(orgs: Organization[]): Promise<Repo[]>;
+  getAllReposOfUser(): Promise<Repo[]>;
+  getCommitsOfRepos(repos: Repo[], date: Date): Promise<Commit[]>;
+  getIssuesOfRepos(repos: Repo[], date: Date): Promise<Issue[]>;
+  getPullRequestsOfRepos(repos: Repo[], date: Date): Promise<PullRequest[]>;
 }
 
 @Injectable()
 export class GitProviderService {
   #gitProvider: IGitProvider;
-  #token: string;
-  constructor(private readonly httpService: HttpService) {}
+  constructor() {}
 
   auth(providerName: string, token: string): void {
-    this.#token = token;
     if (providerName === 'github') {
       this.#gitProvider = new GithubService();
     } else if (providerName === 'gitlab') {
-      this.#gitProvider = new GitlabService(this.httpService);
+      this.#gitProvider = new GitlabService();
     }
     this.#gitProvider.auth(token);
-  }
-
-  getToken() {
-    return this.#token;
-  }
-
-  async getAllOrganizations(): Promise<string[]> {
-    return await this.#gitProvider.getAllOrganizations();
   }
 
   async getProfile(): Promise<{ id: number; login: string }> {
     return await this.#gitProvider.getProfile();
   }
 
-  async getRepositories(): Promise<Repo[]> {
-    return await this.#gitProvider.getRepositories();
+  async getAllOrgs(): Promise<Organization[]> {
+    return await this.#gitProvider.getAllOrgs();
   }
 
-  async getOrgRepositories(org: string): Promise<Repo[]> {
-    return await this.#gitProvider.getOrgRepositories(org);
+  async getOrgRepositories(org: string, onlyPublic: boolean): Promise<Repo[]> {
+    return await this.#gitProvider.getOrgRepositories(org, onlyPublic);
   }
 
-  async revokeAccess(token: string): Promise<void> {
-    return this.#gitProvider.revokeAccess(token);
+  // Get all repositories
+  async getAllRepoOfOrgs(orgs: Organization[]): Promise<Repo[]> {
+    return await this.#gitProvider.getAllReposOfOrgs(orgs);
+  }
+
+  async getAllReposOfUser(): Promise<Repo[]> {
+    return await this.#gitProvider.getAllReposOfUser();
+  }
+
+  // Get all commits
+  async getCommitsOfRepos(repos: Repo[], date: Date): Promise<Commit[]> {
+    return await this.#gitProvider.getCommitsOfRepos(repos, date);
+  }
+
+  // Get all issues
+  async getIssuesOfRepos(repos: Repo[], date: Date): Promise<Issue[]> {
+    return await this.#gitProvider.getIssuesOfRepos(repos, date);
+  }
+
+  // Get all pull requests
+  async getPullRequestsOfRepos(
+    repos: Repo[],
+    date: Date,
+  ): Promise<PullRequest[]> {
+    return await this.#gitProvider.getPullRequestsOfRepos(repos, date);
   }
 }
