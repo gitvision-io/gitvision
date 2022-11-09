@@ -3,7 +3,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getInstance } from "../../../services/api";
 import { asyncRefreshUser, userState } from "../../../services/state";
 
-const useSynchronize = () => {
+const useSynchronize = ({
+  initialSynchronization,
+}: {
+  initialSynchronization: boolean;
+}) => {
   const [isSynchronizing, setIsSynchronizing] = useState(false);
   const [runningJob, setRunningJob] = useState<{
     finishedOn: number;
@@ -39,11 +43,22 @@ const useSynchronize = () => {
   }, [refreshUser]);
 
   useEffect(() => {
-    if (user !== null && !user.lastSynchronize && !hasSynchronized.current) {
+    if (
+      initialSynchronization &&
+      user !== null &&
+      !user.lastSynchronize &&
+      !hasSynchronized.current
+    ) {
       hasSynchronized.current = true;
       synchronize();
     }
-  }, [synchronize, user]);
+  }, [initialSynchronization, synchronize, user]);
+
+  useEffect(() => {
+    if (initialSynchronization) {
+      refreshUser();
+    }
+  }, [initialSynchronization, refreshUser]);
 
   return {
     isSynchronizing,

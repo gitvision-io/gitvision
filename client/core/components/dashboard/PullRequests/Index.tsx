@@ -14,7 +14,7 @@ const PullRequests = ({
 }) => {
   const tabs = [
     {
-      label: "Current",
+      label: "Count",
       component: (
         <PullRequestsTable
           pullRequests={pullRequests}

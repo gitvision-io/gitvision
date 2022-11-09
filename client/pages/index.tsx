@@ -1,16 +1,16 @@
-import type { NextPage } from "next";
-import Banner from "../components/index/Banner";
-import Features from "../components/index/Features";
-import Pricings from "../components/index/Pricings";
+import { useAtom } from "jotai";
+import React, { useEffect } from "react";
+import DashboardComponent from "../core/components/dashboard/Dashboard";
+import { asyncRefreshUser } from "../core/services/state";
 
-const Home: NextPage = () => {
-  return (
-    <>
-      <Banner />
-      <Features />
-      <Pricings />
-    </>
-  );
-};
+function Index() {
+  const [, refreshUser] = useAtom(asyncRefreshUser);
 
-export default Home;
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
+  return <DashboardComponent initialSynchronization />;
+}
+
+export default Index;

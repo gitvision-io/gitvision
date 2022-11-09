@@ -16,6 +16,5 @@ interface Node {
 
 type Organization implements Node {
   id: ID!
-  databaseId: Int
   login: String!
 }

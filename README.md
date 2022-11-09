@@ -34,17 +34,13 @@ Here is the list of environment variables:
 
 #### For the api
 
-- **GITHUB_ID** (required): the Github ID for the created Github OAuth App
-- **GITHUB_SECRET** (required): the Github Secret for the created Github OAuth App
+- **GIT_PROVIDER_NAME**: The name of the git provider to connect to (github or gitlab)
+- **GIT_PROVIDER_TOKEN**: The personal access token of the git provider to connect to
 - **REDIS_HOST** (required): the host for the Redis server
 - **REDIS_PORT** (required): the port for the Redis server
 - **REDIS_PASSWORD** (optional): the password for the Redis server
-- **JWT_SECRET** (required): the secret used to decrypt JWT tokens
 
 #### For the client
 
-- **GITHUB_ID** (required): the Github ID for the created Github OAuth App
-- **GITHUB_SECRET** (required): the Github Secret for the created Github OAuth App
 - **NEXT_PUBLIC_API_URL** (required): the public URL for the API
 - **SERVER_API_URL** (required): the private URL for the API for server to server calls
-- **NEXTAUTH_SECRET** (required): the secret used to encrypt JWT tokens (must be the same as the `JWT_SECRET` env variable for the api)

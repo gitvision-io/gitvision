@@ -12,6 +12,10 @@ query GetAllReposOfUserWithPagination($cursorRepo: String) {
           id
           name
           isInOrganization
+          owner {
+            id
+            login
+          }
         }
       }
     }

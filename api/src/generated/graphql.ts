@@ -38615,35 +38615,28 @@ export type DirectiveResolvers<ContextType = any> = {
 };
 
 
-export const GetAllCommitsOfAllReposOfAllOrgWithPagination = gql`
-    query GetAllCommitsOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $date: GitTimestamp) {
-  viewer {
-    login
-    organization(login: $orgLogin) {
-      id
-      login
-      repository(name: $name) {
-        id
-        name
-        defaultBranchRef {
-          target {
-            ... on Commit {
-              history(since: $date) {
-                edges {
-                  node {
-                    ... on Commit {
-                      author {
-                        date
-                        email
-                        name
-                      }
-                      id
-                      committedDate
-                      changedFilesIfAvailable
-                      additions
-                      deletions
-                    }
+export const GetAllCommitsOfRepository = gql`
+    query GetAllCommitsOfRepository($name: String!, $owner: String!, $date: GitTimestamp) {
+  repository(name: $name, owner: $owner) {
+    id
+    name
+    defaultBranchRef {
+      target {
+        ... on Commit {
+          history(since: $date) {
+            edges {
+              node {
+                ... on Commit {
+                  author {
+                    date
+                    email
+                    name
                   }
+                  id
+                  committedDate
+                  changedFilesIfAvailable
+                  additions
+                  deletions
                 }
               }
             }
@@ -38654,30 +38647,23 @@ export const GetAllCommitsOfAllReposOfAllOrgWithPagination = gql`
   }
 }
     `;
-export const GetAllIssuesOfAllReposOfAllOrgWithPagination = gql`
-    query GetAllIssuesOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $cursorIssue: String, $date: DateTime) {
-  viewer {
-    login
-    organization(login: $orgLogin) {
-      id
-      login
-      repository(name: $name) {
-        id
-        name
-        issues(first: 100, after: $cursorIssue, filterBy: {since: $date}) {
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
-          edges {
-            cursor
-            node {
-              id
-              state
-              closedAt
-              createdAt
-            }
-          }
+export const GetAllIssuesOfRepoWithPagination = gql`
+    query GetAllIssuesOfRepoWithPagination($owner: String!, $name: String!, $cursorIssue: String, $date: DateTime) {
+  repository(name: $name, owner: $owner) {
+    id
+    name
+    issues(first: 100, after: $cursorIssue, filterBy: {since: $date}) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          state
+          closedAt
+          createdAt
         }
       }
     }
@@ -38698,37 +38684,29 @@ export const GetAllOrgsWithPagination = gql`
         node {
           id
           login
-          databaseId
         }
       }
     }
   }
 }
     `;
-export const GetAllPullRequestsOfAllReposOfAllOrgWithPagination = gql`
-    query GetAllPullRequestsOfAllReposOfAllOrgWithPagination($orgLogin: String!, $name: String!, $cursorPullRequest: String) {
-  viewer {
-    login
-    organization(login: $orgLogin) {
-      id
-      login
-      repository(name: $name) {
-        id
-        name
-        pullRequests(first: 100, after: $cursorPullRequest) {
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
-          edges {
-            cursor
-            node {
-              id
-              state
-              closedAt
-              createdAt
-            }
-          }
+export const GetAllPullRequestsOfRepoWithPagination = gql`
+    query GetAllPullRequestsOfRepoWithPagination($owner: String!, $name: String!, $cursorPullRequest: String) {
+  repository(name: $name, owner: $owner) {
+    id
+    name
+    pullRequests(first: 100, after: $cursorPullRequest) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          state
+          closedAt
+          createdAt
         }
       }
     }
@@ -38736,21 +38714,18 @@ export const GetAllPullRequestsOfAllReposOfAllOrgWithPagination = gql`
 }
     `;
 export const GetAllReposOfOrgWithPagination = gql`
-    query GetAllReposOfOrgWithPagination($orgLogin: String!, $cursorRepo: String) {
-  viewer {
-    login
-    organization(login: $orgLogin) {
-      repositories(first: 100, after: $cursorRepo) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        edges {
-          cursor
-          node {
-            id
-            name
-          }
+    query GetAllReposOfOrgWithPagination($orgLogin: String!, $privacy: RepositoryPrivacy, $cursorRepo: String) {
+  organization(login: $orgLogin) {
+    repositories(first: 100, after: $cursorRepo, privacy: $privacy) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          name
         }
       }
     }
@@ -38889,54 +38864,59 @@ export const GetAllReposOfUserWithPagination = gql`
           id
           name
           isInOrganization
+          owner {
+            id
+            login
+          }
         }
       }
     }
   }
 }
     `;
-export type GetAllCommitsOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
-  orgLogin: Scalars['String'];
+export type GetAllCommitsOfRepositoryQueryVariables = Exact<{
   name: Scalars['String'];
+  owner: Scalars['String'];
   date?: InputMaybe<Scalars['GitTimestamp']>;
 }>;
 
 
-export type GetAllCommitsOfAllReposOfAllOrgWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organization?: { __typename?: 'Organization', id: string, login: string, repository?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null } | null } };
+export type GetAllCommitsOfRepositoryQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', id: string, name: string, defaultBranchRef?: { __typename?: 'Ref', target?: { __typename?: 'Blob' } | { __typename?: 'Commit', history: { __typename?: 'CommitHistoryConnection', edges?: Array<{ __typename?: 'CommitEdge', node?: { __typename?: 'Commit', id: string, committedDate: any, changedFilesIfAvailable?: number | null, additions: number, deletions: number, author?: { __typename?: 'GitActor', date?: any | null, email?: string | null, name?: string | null } | null } | null } | null> | null } } | { __typename?: 'Tag' } | { __typename?: 'Tree' } | null } | null } | null };
 
-export type GetAllIssuesOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
-  orgLogin: Scalars['String'];
+export type GetAllIssuesOfRepoWithPaginationQueryVariables = Exact<{
+  owner: Scalars['String'];
   name: Scalars['String'];
   cursorIssue?: InputMaybe<Scalars['String']>;
   date?: InputMaybe<Scalars['DateTime']>;
 }>;
 
 
-export type GetAllIssuesOfAllReposOfAllOrgWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organization?: { __typename?: 'Organization', id: string, login: string, repository?: { __typename?: 'Repository', id: string, name: string, issues: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', cursor: string, node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null } };
+export type GetAllIssuesOfRepoWithPaginationQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', id: string, name: string, issues: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', cursor: string, node?: { __typename?: 'Issue', id: string, state: IssueState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null };
 
 export type GetAllOrgsWithPaginationQueryVariables = Exact<{
   cursorOrgs?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type GetAllOrgsWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'OrganizationEdge', cursor: string, node?: { __typename?: 'Organization', id: string, login: string, databaseId?: number | null } | null } | null> | null } } };
+export type GetAllOrgsWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organizations: { __typename?: 'OrganizationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'OrganizationEdge', cursor: string, node?: { __typename?: 'Organization', id: string, login: string } | null } | null> | null } } };
 
-export type GetAllPullRequestsOfAllReposOfAllOrgWithPaginationQueryVariables = Exact<{
-  orgLogin: Scalars['String'];
+export type GetAllPullRequestsOfRepoWithPaginationQueryVariables = Exact<{
+  owner: Scalars['String'];
   name: Scalars['String'];
   cursorPullRequest?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type GetAllPullRequestsOfAllReposOfAllOrgWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organization?: { __typename?: 'Organization', id: string, login: string, repository?: { __typename?: 'Repository', id: string, name: string, pullRequests: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', cursor: string, node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null } | null } };
+export type GetAllPullRequestsOfRepoWithPaginationQuery = { __typename?: 'Query', repository?: { __typename?: 'Repository', id: string, name: string, pullRequests: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', cursor: string, node?: { __typename?: 'PullRequest', id: string, state: PullRequestState, closedAt?: any | null, createdAt: any } | null } | null> | null } } | null };
 
 export type GetAllReposOfOrgWithPaginationQueryVariables = Exact<{
   orgLogin: Scalars['String'];
+  privacy?: InputMaybe<RepositoryPrivacy>;
   cursorRepo?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type GetAllReposOfOrgWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RepositoryEdge', cursor: string, node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } | null } };
+export type GetAllReposOfOrgWithPaginationQuery = { __typename?: 'Query', organization?: { __typename?: 'Organization', repositories: { __typename?: 'RepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RepositoryEdge', cursor: string, node?: { __typename?: 'Repository', id: string, name: string } | null } | null> | null } } | null };
 
 export type GetAllCommitsOfAllReposOfUserWithPaginationQueryVariables = Exact<{
   cursorRepo?: InputMaybe<Scalars['String']>;
@@ -38968,4 +38948,4 @@ export type GetAllReposOfUserWithPaginationQueryVariables = Exact<{
 }>;
 
 
-export type GetAllReposOfUserWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RepositoryEdge', cursor: string, node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean } | null } | null> | null } } };
+export type GetAllReposOfUserWithPaginationQuery = { __typename?: 'Query', viewer: { __typename?: 'User', login: string, repositories: { __typename?: 'RepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RepositoryEdge', cursor: string, node?: { __typename?: 'Repository', id: string, name: string, isInOrganization: boolean, owner: { __typename?: 'Organization', id: string, login: string } | { __typename?: 'User', id: string, login: string } } | null } | null> | null } } };

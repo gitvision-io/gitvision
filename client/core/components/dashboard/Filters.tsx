@@ -18,11 +18,17 @@ export interface Filters {
   branches?: string[];
 }
 
+interface DashboardFiltersProps {
+  onChange: (filters: Filters) => void;
+  initialOrganization?: string;
+  baseOrgSearchUrl: string;
+}
+
 function DashboardFilters({
   onChange,
-}: {
-  onChange: (filters: Filters) => void;
-}) {
+  initialOrganization,
+  baseOrgSearchUrl,
+}: DashboardFiltersProps) {
   const [organizations, setOrganizations] = useState<
     {
       login: string;
@@ -46,12 +52,20 @@ function DashboardFilters({
   }, [JSON.stringify(filters)]);
 
   useEffect(() => {
+    const newFilters = {
+      ...filters,
+    };
+    let hasChanged = false;
     if (!filters.organization && organizations.length) {
-      setFilters({
-        ...filters,
-        organization: organizations[0].login,
-        time: times[2].label,
-      });
+      newFilters.organization = organizations[0].login;
+      hasChanged = true;
+    }
+    if (!filters.time) {
+      newFilters.time = times[2].label;
+      hasChanged = true;
+    }
+    if (hasChanged) {
+      setFilters(newFilters);
     }
   }, [filters, organizations]);
 
@@ -61,7 +75,7 @@ function DashboardFilters({
       const org = organizations.find((o) => o.login === filters.organization);
       getInstance()
         .get(
-          `/api/orgs/${
+          `${baseOrgSearchUrl}/${
             org?.isUser ? "user" : encodeURIComponent(filters.organization)
           }/repos`
         )
@@ -76,14 +90,16 @@ function DashboardFilters({
     }
   }, [filters.organization, organizations]);
 
-  const loadOrganizations = () =>
-    getInstance()
-      .get("/api/orgs")
-      .then((res) => setOrganizations(res.data));
-
   useEffect(() => {
-    loadOrganizations();
-  }, []);
+    if (initialOrganization) {
+      setOrganizations([{ login: initialOrganization, isUser: false }]);
+      setFilters({ organization: initialOrganization });
+      return;
+    }
+    getInstance()
+      .get(baseOrgSearchUrl)
+      .then((res) => setOrganizations(res.data));
+  }, [initialOrganization]);
 
   return (
     <>

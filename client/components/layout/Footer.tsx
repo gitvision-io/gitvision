@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SITE_INFOS } from "../../common/constants";
+import { SITE_INFOS } from "../../core/common/constants";
 
 const FooterLink = ({ label, href }: { label: string; href: string }) => (
   <Link href={href}>

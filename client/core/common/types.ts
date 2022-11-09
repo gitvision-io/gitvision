@@ -1,6 +1,5 @@
 export interface User {
   id: string;
-  gitProviderId: string;
   gitProviderName: string;
   email: string;
   name: string;

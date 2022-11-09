@@ -1,5 +1,3 @@
-export const SESSION_COOKIE_NAME = "next-auth.session-token";
-
 export const SITE_INFOS = {
   title: "Gitvision",
   subtitle: "Get actionable insights for your Git organization",

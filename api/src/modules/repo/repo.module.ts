@@ -9,21 +9,17 @@ import { OrgsController } from './orgs.controller';
 import { OrgstatsController } from './orgstats.controller';
 import { GitProviderModule } from '../git-provider/gitprovider.module';
 import { RepoService } from './repo.service';
-import { RepoGithubModule } from './github/repo.github.module';
-import { RepoGitlabModule } from './gitlab/repo.gitlab.module';
-import { RepoGithubService } from './github/repo.github.service';
-import { RepoGitlabService } from './gitlab/repo.gitlab.service';
+import { OrgsService } from './orgs.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Repo, Commit, Issue, PullRequest, User]),
     GitProviderModule,
-    RepoGithubModule,
-    RepoGitlabModule,
-    RepoModule,
+    HttpModule,
   ],
   exports: [RepoService],
-  providers: [RepoService, RepoGithubService, RepoGitlabService],
+  providers: [OrgsService, RepoService],
   controllers: [OrgsController, OrgstatsController],
 })
 export class RepoModule {}

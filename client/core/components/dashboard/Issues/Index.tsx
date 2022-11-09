@@ -14,7 +14,7 @@ const Issues = ({
 }) => {
   const tabs = [
     {
-      label: "Current",
+      label: "Count",
       component: <IssuesTable repositories={repositories} issues={issues} />,
     },
     {

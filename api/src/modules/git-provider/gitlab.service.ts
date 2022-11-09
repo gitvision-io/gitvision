@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { ApolloService } from '../apollo-client/apollo.service';
 import { Repo } from 'src/entities/repo.entity';
-
 import { Gitlab } from '@gitbeaker/node';
 import {
   ProjectSchema,
@@ -8,39 +8,57 @@ import {
   IssueSchema,
   MergeRequestSchema,
 } from '@gitbeaker/core/dist/types/types';
+import { PullRequest } from 'src/entities/pullrequest.entity';
 import { Commit } from 'src/entities/commit.entity';
 import { Issue } from 'src/entities/issue.entity';
-import { PullRequest } from 'src/entities/pullrequest.entity';
-
-export interface Organization {
-  id: string;
-  login: string;
-  databaseId: number;
-}
+import { Organization } from 'src/common/types';
 
 const defaultAPI = new Gitlab(null);
 
 @Injectable()
-export class RepoGitlabService {
+export class GitlabService {
+  apolloService: ApolloService;
+  #token: string;
   #api: typeof defaultAPI;
 
+  constructor() {}
+
   auth(token: string): void {
+    this.#token = token;
     this.#api = new Gitlab({
       host: 'https://gitlab.com',
       oauthToken: token,
     });
   }
 
+  getToken() {
+    return this.#token;
+  }
+
+  async getAllOrganizations(): Promise<string[]> {
+    const orgs = await this.#api.Groups.all({ maxPages: 50000 });
+    return orgs.flatMap((o) => o.full_path);
+  }
+
+  async getProfile(): Promise<{ id: number; login: string }> {
+    const { id, username: login } = await this.#api.Users.current();
+    return { id, login };
+  }
+
+  async getOrgRepositories(org: string): Promise<Repo[]> {
+    const repositories: Repo[] = [];
+    return repositories;
+  }
+
   // Get all organisations
-  async getAllOrgWithPagination(): Promise<Organization[]> {
+  async getAllOrgs(): Promise<Organization[]> {
     const organizations: Organization[] = [];
     return organizations;
   }
 
   // Get all repositories
-  async getAllRepoOfAllOrgWithPagination(): Promise<Repo[]> {
+  async getAllReposOfOrgs(orgs: Organization[]): Promise<Repo[]> {
     const repositories: Repo[] = [];
-    const orgs = await this.#api.Groups.all({ maxPages: 50000 });
 
     await Promise.all([
       ...orgs.map(async (o) => {
@@ -67,21 +85,17 @@ export class RepoGitlabService {
     return repositories;
   }
 
-  async getAllRepoOfUserWithPagination(): Promise<Repo[]> {
+  async getAllReposOfUser(): Promise<Repo[]> {
     const repositories: Repo[] = [];
 
     return repositories;
   }
 
   // Get all commits
-  async getCommitsOfAllRepoOfAllOrgWithPagination(
-    date: Date,
-  ): Promise<Commit[]> {
-    const allRepos = await this.getAllRepoOfAllOrgWithPagination();
-
+  async getCommitsOfRepos(repos: Repo[], date: Date): Promise<Commit[]> {
     return (
       await Promise.all([
-        ...allRepos
+        ...repos
           .filter((r) => r.id)
           .map(async (r) => {
             const commitsGitlab = await this.#api.Commits.all(r.id, {
@@ -108,18 +122,11 @@ export class RepoGitlabService {
     ).flatMap((c) => c);
   }
 
-  async getCommitsOfAllRepoOfUserWithPagination(date: Date): Promise<Commit[]> {
-    const repositories: Commit[] = [];
-    return repositories;
-  }
-
   // Get all issues
-  async getIssuesOfAllRepoOfAllOrgWithPagination(date: Date): Promise<Issue[]> {
-    const allRepos = await this.getAllRepoOfAllOrgWithPagination();
-
+  async getIssuesOfRepos(repos: Repo[], date: Date): Promise<Issue[]> {
     return (
       await Promise.all([
-        ...allRepos
+        ...repos
           .filter((r) => r.id)
           .map(async (r) => {
             const issuesGitlab = await this.#api.Issues.all({
@@ -144,20 +151,14 @@ export class RepoGitlabService {
     ).flatMap((i) => i);
   }
 
-  async getIssuesOfAllRepoOfUserWithPagination(date: Date): Promise<Issue[]> {
-    const issues: Issue[] = [];
-    return issues;
-  }
-
   // Get all pull requests
-  async getPullRequestsOfAllRepoOfAllOrgWithPagination(
+  async getPullRequestsOfRepos(
+    repos: Repo[],
     date: Date,
   ): Promise<PullRequest[]> {
-    const allRepos = await this.getAllRepoOfAllOrgWithPagination();
-
     return (
       await Promise.all([
-        ...allRepos
+        ...repos
           .filter((r) => r.id)
           .map(async (r) => {
             const mergeRequestsGitlab = await this.#api.MergeRequests.all({
@@ -180,10 +181,5 @@ export class RepoGitlabService {
           }),
       ])
     ).flatMap((pr) => pr);
-  }
-
-  async getPullRequestsOfAllRepoOfUserWithPagination(): Promise<PullRequest[]> {
-    const pullRequests: PullRequest[] = [];
-    return pullRequests;
   }
 }
